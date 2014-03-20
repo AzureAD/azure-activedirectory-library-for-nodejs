@@ -1,0 +1,336 @@
+/*
+ * @copyright
+ * Copyright © Microsoft Open Technologies, Inc.
+ *
+ * All Rights Reserved
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http: *www.apache.org/licenses/LICENSE-2.0
+ *
+ * THIS CODE IS PROVIDED *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS
+ * OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
+ * ANY IMPLIED WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A
+ * PARTICULAR PURPOSE, MERCHANTABILITY OR NON-INFRINGEMENT.
+ *
+ * See the Apache License, Version 2.0 for the specific language
+ * governing permissions and limitations under the License.
+ */
+
+'use strict';
+/* Directive tells jshint that suite and test are globals defined by mocha */
+/* global suite */
+/* global test */
+
+var assert = require('assert');
+var nock = require('nock');
+var url = require('url');
+
+var util = require('./util/util');
+var cp = util.commonParameters;
+var testRequire = util.testRequire;
+
+var adal = testRequire('adal');
+
+suite('authentication-parameters', function() {
+  function runTestCases(testData, testFunc) {
+    for(var i = 0; i < testData.length; i++) {
+      var parameters;
+      var error;
+      var testCase = testData[i];
+      var testInput = testCase[0];
+      var testParameters = testCase[1];
+
+      try {
+        parameters = testFunc(testInput);
+      } catch(err) {
+        error = err;
+      }
+
+      var assertPrefixMsg = 'Test case: ' + i + ' - ';
+      if (testParameters) {
+        var stack = !error || error.stack;
+        assert(!error, assertPrefixMsg + 'Parse failed but should have succeeded. ' + stack);
+        assert(parameters.authorizationUri === testParameters.authorizationUri, assertPrefixMsg + 'Parsed authorizationUri did not match expected value.: ' + parameters.authorizationUri);
+        assert(parameters.resource === testParameters.resource, assertPrefixMsg + 'Parsed resource  did not match expected value.: ' + parameters.resource);
+      } else {
+        assert(error, assertPrefixMsg + 'Parse succeeded but should have failed.');
+      }
+    }
+  }
+
+  test('create-from-header', function(done) {
+    var testData = [
+      [
+        'Bearer authorization_uri="foobar,lkfj,;l,", fruitcake="f",resource="clark, &^()- q32,shark" , f="foo"',
+        {
+          'authorizationUri' : 'foobar,lkfj,;l,',
+          'resource' : 'clark, &^()- q32,shark',
+        }
+      ],
+      [
+        'Bearer  resource="clark, &^()- q32,shark", authorization_uri="foobar,lkfj,;l,"',
+        {
+          'authorizationUri' : 'foobar,lkfj,;l,',
+          'resource' : 'clark, &^()- q32,shark',
+        }
+      ],
+      [
+        'Bearer authorization_uri="' + cp.authorityTenant + '", resource="' + cp.resource + '"',
+        {
+          'authorizationUri' : cp.authorityTenant,
+          'resource' : cp.resource,
+        }
+      ],
+      [
+        'Bearer authorization_uri="' + cp.authorizeUrl + '", resource="' + cp.resource + '"',
+        {
+          'authorizationUri' : cp.authorizeUrl,
+          'resource' : cp.resource,
+        }
+      ],
+      // Add second = sign on first pair.
+      [
+        'Bearer authorization_uri=="foobar,lkfj,;l,", resource="clark, &^()- q32,shark",fruitcake="f" , f="foo"',
+        null
+      ],
+      // Add second = sign on second pair.
+      [
+        'Bearer authorization_uri="foobar,lkfj,;l,", resource=="clark, &^()- q32,shark",fruitcake="f" , f="foo"',
+        null
+      ],
+      // Add second quote on first pair.
+      [
+        'Bearer authorization_uri=""foobar,lkfj,;l,", resource="clark, &^()- q32,shark",fruitcake="f" , f="foo"',
+        null
+      ],
+      // Add second quote on second pair.
+      [
+        'Bearer authorization_uri=foobar,lkfj,;l,", resource="clark, &^()- q32,shark"",fruitcake="f" , f="foo"',
+        null
+      ],
+      // Add trailing quote.
+      [
+        'Bearer authorization_uri=foobar,lkfj,;l,", resource="clark, &^()- q32,shark",fruitcake="f" , f="foo""',
+        null
+      ],
+      // Add trailing comma at end of string.
+      [
+        'Bearer authorization_uri=foobar,lkfj,;l,", resource="clark, &^()- q32,shark",fruitcake="f" , f="foo",',
+        null
+      ],
+      // Add second comma between 2 and 3 pairs.
+      [
+        'Bearer authorization_uri=foobar,lkfj,;l,", resource="clark, &^()- q32,shark",fruitcake="f" ,, f="foo"',
+        null
+      ],
+      // Add second comma between 1 and 2 pairs.
+      [
+        'Bearer authorization_uri=foobar,lkfj,;l,", , resource="clark, &^()- q32,shark",fruitcake="f" , f="foo"',
+        null
+      ],
+      // Add random letter between Bearer and first pair.
+      [
+        'Bearer  f authorization_uri=foobar,lkfj,;l,", resource="clark, &^()- q32,shark",fruitcake="f" , f="foo"',
+        null
+      ],
+      // Add random letter between 2 and 3 pair.
+      [
+        'Bearer  authorization_uri=foobar,lkfj,;l,", a resource="clark, &^()- q32,shark",fruitcake="f" , f="foo"',
+        null
+      ],
+      // Add random letter between 3 and 2 pair.
+      [
+        'Bearer  authorization_uri=foobar,lkfj,;l,", resource="clark, &^()- q32,shark",fruitcake="f" a, f="foo"',
+        null
+      ],
+      // Mispell Bearer
+      [
+        'Berer authorization_uri=foobar,lkfj,;l,", resource="clark, &^()- q32,shark",fruitcake="f" , f="foo"',
+        null
+      ],
+      // Missing resource.
+      [
+        'Bearer authorization_uri="foobar,lkfj,;l,"',
+        null
+      ],
+      // Missing authoritzation uri.
+      [
+        'Bearer resource="clark, &^()- q32,shark",fruitcake="f" , f="foo"',
+        null
+      ],
+      // Boris's test.
+      [
+        'Bearer foo="bar" ANYTHING HERE, ANYTHING PRESENT HERE, foo1="bar1"',
+        null
+      ],
+    ];
+
+    runTestCases(testData, adal.createAuthenticationParametersFromHeader);
+    done();
+  });
+
+  test('create-from-response', function(done) {
+    var testData = [
+      [
+        {
+          statusCode : 401,
+          headers : { 'www-authenticate' : 'Bearer authorization_uri="foobar,lkfj,;l,", fruitcake="f",resource="clark, &^()- q32,shark" , f="foo"' }
+        },
+        {
+          'authorizationUri' : 'foobar,lkfj,;l,',
+          'resource' : 'clark, &^()- q32,shark',
+        }
+      ],
+      [
+        {
+          statusCode : 200,
+          headers : { 'www-authenticate' : 'Bearer authorization_uri="foobar,lkfj,;l,", fruitcake="f",resource="clark, &^()- q32,shark" , f="foo"' }
+        },
+        null
+      ],
+      [
+        {
+          statusCode : 401
+        },
+        null
+      ],
+      [
+        {
+          statusCode : 401,
+          headers : { 'foo' : 'this is not the www-authenticate header' }
+        },
+        null
+      ],
+      [
+        {
+          statusCode : 401,
+          headers : { 'www-authenticate' : 'Berer authorization_uri=foobar,lkfj,;l,", resource="clark, &^()- q32,shark",fruitcake="f" , f="foo"' }
+        },
+        null
+      ],
+      [
+        {
+          statusCode : 401,
+          headers : { 'www-authenticate' : null }
+        },
+        null
+      ],
+      [
+        {
+          headers : { 'www-authenticate' : null }
+        },
+        null
+      ],
+      [
+        null,
+        null
+      ]
+    ];
+
+    runTestCases(testData, adal.createAuthenticationParametersFromResponse);
+    done();
+  });
+
+  var testHost = 'https://this.is.my.domain.com';
+  var testPath = '/path/to/resource';
+  var testQuery = 'a=query&string=really';
+  var testUrl = testHost + testPath + '?' + testQuery;
+
+  test('create-from-url-happy-path-string-url', function(done) {
+    var getResource = nock(testHost)
+                       .matchHeader('client-request-id', util.testCorrelationId)
+                       .filteringPath(function(path) {
+                          return util.removeQueryStringIfMatching(path, testQuery);
+                        })
+                       .get(testPath)
+                       .reply(401, 'foo',
+                         { 'www-authenticate' : 'Bearer authorization_uri="foobar,lkfj,;l,", fruitcake="f",resource="clark, &^()- q32,shark" , f="foo"' }
+                       );
+
+    adal.createAuthenticationParametersFromUrl(testUrl, function(err, parameters) {
+      if (!err) {
+        var testParameters = {
+          'authorizationUri' : 'foobar,lkfj,;l,',
+          'resource' : 'clark, &^()- q32,shark',
+        };
+        assert(parameters.authorizationUri === testParameters.authorizationUri, 'Parsed authorizationUri did not match expected value.: ' + parameters.authorizationUri);
+        assert(parameters.resource === testParameters.resource, 'Parsed resource  did not match expected value.: ' + parameters.resource);
+        getResource.done();
+      }
+      done(err);
+    });
+  });
+
+  test('create-from-url-happy-path-url-object', function(done) {
+    var getResource = nock(testHost)
+                       .matchHeader('client-request-id', util.testCorrelationId)
+                       .filteringPath(function(path) {
+                          return util.removeQueryStringIfMatching(path, testQuery);
+                        })
+                       .get(testPath)
+                       .reply(401, 'foo',
+                         { 'www-authenticate' : 'Bearer authorization_uri="foobar,lkfj,;l,", fruitcake="f",resource="clark, &^()- q32,shark" , f="foo"' }
+                       );
+
+    var urlObj = url.parse(testUrl);
+    adal.createAuthenticationParametersFromUrl(urlObj, function(err, parameters) {
+      getResource.done();
+      if (!err) {
+        var testParameters = {
+          'authorizationUri' : 'foobar,lkfj,;l,',
+          'resource' : 'clark, &^()- q32,shark',
+        };
+        assert(parameters.authorizationUri === testParameters.authorizationUri, 'Parsed authorizationUri did not match expected value.: ' + parameters.authorizationUri);
+        assert(parameters.resource === testParameters.resource, 'Parsed resource  did not match expected value.: ' + parameters.resource);
+      }
+      done(err);
+    });
+  });
+
+  test('create-from-url-bad-object', function(done) {
+    adal.createAuthenticationParametersFromUrl({}, function(err) {
+      assert(err, 'Did not receive expected error');
+      done();
+    });
+  });
+
+  test('create-from-url-not-passed', function(done) {
+    adal.createAuthenticationParametersFromUrl(null, function(err) {
+      assert(err, 'Did not receive expected error');
+      done();
+    });
+  });
+
+  test('create-from-url-no-header', function(done) {
+    var getResource = nock(testHost)
+                       .matchHeader('client-request-id', util.testCorrelationId)
+                       .filteringPath(function(path) {
+                          return util.removeQueryStringIfMatching(path, testQuery);
+                        })
+                       .get(testPath)
+                       .reply(401, 'foo');
+
+    adal.createAuthenticationParametersFromUrl(testUrl, function(err) {
+      getResource.done();
+      assert(err, 'Did not receive expected error');
+      assert(err.message.indexOf('header') >= 0, 'Error did not include message about missing header');
+      done();
+    });
+  });
+
+  // This tests enables actual network connections but then attempts a connection to
+  // a completely invalid address.  This causes a the node request to fail with
+  // an error rather than returning an HTTP error of some sort.
+  test('create-from-url-network-error', function(done) {
+    nock.enableNetConnect();
+    adal.createAuthenticationParametersFromUrl('https://0.0.0.0/foobar', function(err) {
+      assert(err, 'Did not receive expected error');
+      nock.disableNetConnect();
+      done();
+    });
+  });
+
+});
