@@ -8,17 +8,24 @@ The ADAL for node.js library makes it easy for node.js applications to authentic
 See the [website sample](https://github.com/MSOpenTech/azure-activedirectory-library-for-nodejs/blob/master/sample/website-sample.js) for a complete bare bones express based web site that makes use of the code below.
 
 ```javascript
-
 var AuthenticationContext = require('adal-node').AuthenticationContext;
 
 var clientId = 'yourClientIdHere';
+var clientSecret = 'youAADIssuedClientSecretHere'
 var redirectUri = 'yourRedirectUriHere';
 var authorityHostUrl = 'https://login.windows.net';
 var tenant = 'myTenant';
 var authorityUrl = authorityHostUrl + '/' + tenant;
 var redirectUri = 'http://localhost:3000/getAToken';
 var resource = '00000002-0000-0000-c000-000000000000';
-var templateAuthzUrl = 'https://login.windows.net/' + tenant + '/oauth2/authorize?response_type=code&client_id=' + clientId + '&redirect_uri=' + redirectUri + '&state=<state>&resource=' + resource;
+var templateAuthzUrl = 'https://login.windows.net/' + 
+                        tenant + 
+                        '/oauth2/authorize?response_type=code&client_id=' +
+                        clientId + 
+                        '&redirect_uri=' + 
+                        redirectUri + '
+                        &state=<state>&resource=' + 
+                        resource;
 
 function createAuthorizationUrl(state) {
   var authorizationUrl = templateAuthzUrl.replace('<client_id>', sampleParameters.clientId);
@@ -49,15 +56,24 @@ app.get('/getAToken', function(req, res) {
   if (req.cookies.authstate !== req.query.state) {
     res.send('error: state does not match');
   }
+
   var authenticationContext = new AuthenticationContext(authorityUrl);
-  authenticationContext.acquireTokenWithAuthorizationCode(req.query.code, redirectUri, resource, sampleParameters.clientId, sampleParameters.clientSecret, function(err, response) {
-    var errorMessage = '';
-    if (err) {
-      errorMessage = 'error: ' + err.message + '\n';
+  
+  authenticationContext.acquireTokenWithAuthorizationCode(
+    req.query.code,
+    redirectUri,
+    resource,
+    clientId, 
+    clientSecret,
+    function(err, response) {
+      var errorMessage = '';
+      if (err) {
+        errorMessage = 'error: ' + err.message + '\n';
+      }
+      errorMessage += 'response: ' + JSON.stringify(response);
+      res.send(errorMessage);
     }
-    errorMessage += 'response: ' + JSON.stringify(response);
-    res.send(errorMessage);
-  });
+  );
 });
 ```
 
@@ -66,17 +82,13 @@ app.get('/getAToken', function(req, res) {
 See the [client credentials sample](https://github.com/MSOpenTech/azure-activedirectory-library-for-nodejs/blob/master/sample/client-credentials-sample.js).
 
 ```javascript
-
 var adal = require('adal-node').AuthenticationContext;
 
 var tenant = 'myTenant';
 var authorityUrl = 'https://windows.login.net/' + tenant;
 var clientId = 'myClientId';
 var clientSecret = 'aadIssuedClientSecret';
-
 var resource = '00000002-0000-0000-c000-000000000000';
-
-turnOnLogging();
 
 var context = new AuthenticationContext(authorityUrl);
 
