@@ -55,7 +55,7 @@ suite('CacheDriver', function() {
   }
 
   /*
-   * Compares to lists of cache entries.  The lists will be sorted before comparison and the comparison will
+   * Compares two lists of cache entries.  The lists will be sorted before comparison and the comparison will
    * take in to account the different ways that MRRT is indicated when a cache entry is submitted to the cache
    * and once it is in the cache.
    */
@@ -401,15 +401,33 @@ suite('CacheDriver', function() {
       if (!err) {
         compareInputAndCache(responses, memCache, numMRRTTokens, finalMrrt);
 
+        responses.push(refreshedResponse.cachedResponse);
         var cacheDriver = new CacheDriver(fakeTokenRequest._callContext, authority, unknownResource, cp.clientId, memCache, refreshFunction);
         cacheDriver.find(null, function(err, entry) {
           if (!err) {
             assert(entry, 'Expected a matching entry, but none was returned.');
             assert(entry.resource === unknownResource, 'Unexpected resource returned:' + entry.resource);
             assert(refreshedRefreshToken === entry['refreshToken'], 'Returned refresh token did not match expected');
+            compareInputAndCache(responses, memCache, numMRRTTokens + 1, entry.refreshToken);
+
+            // Now ensure that the refreshed token can be successfully found in the cache.
+            var query = {
+              userId : entry.userId,
+              clientId : cp.clientId
+            };
+            cacheDriver.find(query, function(err, recentlyCachedEntry) {
+              if (!err) {
+                assert(recentlyCachedEntry, 'Expected a returned entry but none was returned.');
+                assertEntriesEqual(entry, recentlyCachedEntry, 'Token returned from cache was not the same as the one that was recently cached.');
+                compareInputAndCache(responses, memCache, numMRRTTokens + 1, entry.refreshToken);
+              }
+              done(err);
+              return;
+            });
+          } else {
+            done(err);
+            return;
           }
-          done(err);
-          return;
         });
       } else {
         done(err);
@@ -476,8 +494,7 @@ suite('CacheDriver', function() {
         compareInputAndCache(responses, memCache, numMRRTTokens, finalMrrt);
 
         responses = removeResponse(responses, expiredEntry);
-        responses.push(refreshedResponse.decodedResponse);
-
+        responses.push(refreshedResponse.cachedResponse);
         var cacheDriver = new CacheDriver(fakeTokenRequest._callContext, authority, expiredEntry.resource, cp.clientId, memCache, refreshFunction);
         cacheDriver.find(null, function(err, entry) {
           if (!err) {
@@ -485,9 +502,25 @@ suite('CacheDriver', function() {
             assert(entry.resource === expiredEntry.resource, 'Unexpected resource returned:' + entry.resource);
             assert(refreshedRefreshToken === entry['refreshToken'], 'Returned refresh token did not match expected');
             compareInputAndCache(responses, memCache, numMRRTTokens, finalMrrt);
+
+            // Now ensure that the refreshed token can be successfully found in the cache.
+            var query = {
+              userId : entry.userId,
+              clientId : cp.clientId
+            };
+            cacheDriver.find(query, function(err, recentlyCachedEntry) {
+              if (!err) {
+                assert(recentlyCachedEntry, 'Expected a returned entry but none was returned.');
+                assertEntriesEqual(entry, recentlyCachedEntry, 'Token returned from cache was not the same as the one that was recently cached.');
+                compareInputAndCache(responses, memCache, numMRRTTokens, finalMrrt);
+              }
+              done(err);
+              return;
+            });
+          } else {
+            done(err);
+            return;
           }
-          done(err);
-          return;
         });
       } else {
         done(err);
