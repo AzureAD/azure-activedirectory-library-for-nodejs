@@ -104,6 +104,9 @@ function createAuthorizationUrl(state) {
   return authorizationUrl;
 }
 
+// Clients get redirected here in order to create an OAuth authorize url and redirect them to AAD.
+// There they will authenticate and give their consent to allow this app access to
+// some resource they own.
 app.get('/auth', function(req, res) {
   crypto.randomBytes(48, function(ex, buf) {
     var token = buf.toString('base64').replace(/\//g,'_').replace(/\+/g,'-');
@@ -115,6 +118,9 @@ app.get('/auth', function(req, res) {
   });
 });
 
+// After consent is granted AAD redirects here.  The ADAL library is invoked via the
+// AuthenticationContext and retrieves an access token that can be used to access the
+// user owned resource.
 app.get('/getAToken', function(req, res) {
   if (req.cookies.authstate !== req.query.state) {
     res.send('error: state does not match');
