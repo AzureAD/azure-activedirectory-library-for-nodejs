@@ -158,5 +158,14 @@ suite('client-credential', function() {
       done();
     });
   });
+
+  test('no-cached-token-found-error', function(done) {
+    var context = new AuthenticationContext(cp.authUrl);
+    context.acquireToken(cp.resource, 'unknownUser', cp.clientId, function(err) {
+      assert(err, 'Expected an error and non was recieved.');
+      assert(-1 !== err.message.indexOf('not found'), 'Returned error did not contain expected message: ' + err.message);
+      done();
+    });
+  });
 });
 
