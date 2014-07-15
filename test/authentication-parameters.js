@@ -1,4 +1,4 @@
-/*
+﻿/*
  * @copyright
  * Copyright © Microsoft Open Technologies, Inc.
  *
@@ -38,7 +38,7 @@ suite('authentication-parameters', function() {
   function runTestCases(testData, testFunc) {
     for(var i = 0; i < testData.length; i++) {
       var parameters;
-      var error;
+      var error = null;
       var testCase = testData[i];
       var testInput = testCase[0];
       var testParameters = testCase[1];
@@ -164,6 +164,10 @@ suite('authentication-parameters', function() {
       // Boris's test.
       [
         'Bearer foo="bar" ANYTHING HERE, ANYTHING PRESENT HERE, foo1="bar1"',
+        null
+      ],
+      [
+        'Bearerauthorization_uri="authuri", resource="resourceHere"',
         null
       ],
     ];
