@@ -1,0 +1,5 @@
+Version 0.1.7
+--------------
+Release Date: 2 September 2014
+
+    * Add caching support to AuthenticationContext.acquireTokenWithClientCredentials
