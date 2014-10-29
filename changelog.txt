@@ -1,3 +1,10 @@
+Version 0.1.8
+--------------
+Release Date: 29 October 2014
+
+	* Update version of xpath.js dependency to 1.0.5
+	* Fix a bug in the regular expression used to parse a 401 challenge.
+
 Version 0.1.7
 --------------
 Release Date: 2 September 2014
