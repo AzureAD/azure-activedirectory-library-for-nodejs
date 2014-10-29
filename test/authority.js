@@ -72,7 +72,7 @@ suite('Authority', function() {
     var context = new AuthenticationContext(nonHardCodedAuthority);
     context.acquireTokenWithClientCredentials(response.resource, cp.clientId, cp.clientSecret, function (err, tokenResponse) {
       if (!err) {
-        assert(util.isMatchTokenResponse(response.decodedResponse, tokenResponse), 'The response does not match what was expected.: ' + JSON.stringify(tokenResponse));
+        assert(util.isMatchTokenResponse(response.cachedResponse, tokenResponse), 'The response does not match what was expected.: ' + JSON.stringify(tokenResponse));
         instanceDiscoveryRequest.done();
         tokenRequest.done();
       }
@@ -135,7 +135,7 @@ suite('Authority', function() {
     var context = new AuthenticationContext(cp.authorityTenant, false);
     context.acquireTokenWithClientCredentials(response.resource, cp.clientId, cp.clientSecret, function (err, tokenResponse) {
       if (!err) {
-        assert(util.isMatchTokenResponse(response.decodedResponse, tokenResponse), 'The response does not match what was expected.');
+        assert(util.isMatchTokenResponse(response.cachedResponse, tokenResponse), 'The response does not match what was expected.');
         tokenRequest.done();
       }
       done(err);

@@ -23,6 +23,8 @@
 /* Directive tells jshint that suite and test are globals defined by mocha */
 /* global suite */
 /* global test */
+/* global setup */
+/* global teardown */
 
 var _ = require('underscore');
 require('date-utils');
@@ -52,6 +54,16 @@ var WSTrustResponse = testRequire('wstrust-response');
  * @return {[type]} [description]
  */
 suite('username-password', function() {
+
+  setup(function() {
+    util.resetLogging();
+    util.clearStaticCache();
+  });
+
+  teardown(function() {
+    util.resetLogging();
+    util.clearStaticCache();
+  });
 
   function setupExpectedOAuthAssertionRequest(response) {
 
@@ -99,7 +111,6 @@ suite('username-password', function() {
 
     var context = new AuthenticationContext(response.authority);
     context.acquireTokenWithUsernamePassword(response.resource, cp.username, cp.password, cp.clientId, function(err, tokenResponse) {
-      util.clearStaticCache();
       if (!err) {
         preRequests.done();
         upRequest.done();
@@ -124,7 +135,6 @@ suite('username-password', function() {
 
         // Call again to make sure we get a cached entry.
         context.acquireTokenWithUsernamePassword(response.resource, cp.username, cp.password, cp.clientId, function(err, secondTokenResponse) {
-          util.clearStaticCache();
           if (!err) {
             assert(util.isMatchTokenResponse(response.cachedResponse, secondTokenResponse), 'Response did not match expected: ' + JSON.stringify(tokenResponse));
             done(err);
@@ -153,7 +163,6 @@ suite('username-password', function() {
 
         // Call again to make sure we get a cached entry.
         context.acquireTokenWithUsernamePassword(refreshResponse.resource, cp.username, cp.password, cp.clientId, function(err, secondTokenResponse) {
-          util.clearStaticCache();
           if (!err) {
             refreshRequest.done();
             assert(util.isMatchTokenResponse(refreshResponse.cachedResponse, secondTokenResponse), 'Response did not match expected: ' + JSON.stringify(tokenResponse));
@@ -183,7 +192,6 @@ suite('username-password', function() {
 
         // Call again to make sure we get a cached entry.
         context.acquireToken(refreshResponse.resource, cp.username, cp.clientId, function(err, secondTokenResponse) {
-          util.clearStaticCache();
           if (!err) {
             refreshRequest.done();
             assert(util.isMatchTokenResponse(refreshResponse.cachedResponse, secondTokenResponse), 'Response did not match expected: ' + JSON.stringify(tokenResponse));
@@ -218,7 +226,6 @@ suite('username-password', function() {
 
           // Call again to make sure we get a cached entry.
           context.acquireTokenWithUsernamePassword(refreshResponse.resource, cp.username, cp.password, cp.clientId, function(err2, secondTokenResponse) {
-            util.clearStaticCache();
             if (!err2) {
               refreshRequest.done();
               assert(util.isMatchTokenResponse(refreshResponse.cachedResponse, secondTokenResponse), 'Response did not match expected: ' + JSON.stringify(tokenResponse));
@@ -265,7 +272,6 @@ suite('username-password', function() {
 
         // Call again to make sure we get a cached entry and refresh it.
         context.acquireTokenWithUsernamePassword(refreshResponse.resource, cp.username, cp.password, cp.clientId, function(err, secondTokenResponse) {
-          util.clearStaticCache();
           if (!err) {
             refreshRequest.done();
             assert(util.isMatchTokenResponse(refreshResponse.cachedResponse, secondTokenResponse), 'Response did not match expected: ' + JSON.stringify(tokenResponse));
@@ -311,7 +317,6 @@ suite('username-password', function() {
     context.correlationId = correlationId;
     context.acquireTokenWithUsernamePassword(response.resource, cp.username, cp.password, response.clientId, function(err, tokenResponse) {
       adal.Logging.setLoggingOptions(oldOptions);
-      util.clearStaticCache();
       util.setCorrelationId();
       if (!err) {
         assert(util.isMatchTokenResponse(response.cachedResponse, tokenResponse), 'The response did not match what was expected');
@@ -342,7 +347,6 @@ suite('username-password', function() {
 
     var context = new AuthenticationContext(response.authority);
     context.acquireTokenWithUsernamePassword(response.resource, cp.username, cp.password, response.clientId, function(err, tokenResponse) {
-      util.clearStaticCache();
       if (!err) {
         preRequests.done();
         upRequest.done();
@@ -473,7 +477,6 @@ suite('username-password', function() {
     stubOutTokenRequestDependencies(tokenRequest, userRealm, mex, wstrustRequest, oauthClient);
 
     tokenRequest.getTokenWithUsernamePassword('username', 'password', function(err, tokenResponse) {
-      util.clearStaticCache();
       if (!err) {
         assert(util.isMatchTokenResponse(response.cachedResponse, tokenResponse), 'The response did not match what was expected');
       }
@@ -665,7 +668,6 @@ suite('username-password', function() {
 
     var context = new AuthenticationContext(response.authority);
     context.acquireTokenWithUsernamePassword(response.resource, cp.username, cp.password, cp.clientId, function(err) {
-      util.clearStaticCache();
       preRequests.done();
       upRequest.done();
       assert(err, 'Did not receive expected error about bad int parameter.');
@@ -691,8 +693,6 @@ suite('username-password', function() {
 
     var context = new AuthenticationContext(response.authority);
     context.acquireTokenWithUsernamePassword(response.resource, cp.username, cp.password, cp.clientId, function(err) {
-      util.resetLogging();
-      util.clearStaticCache();
       preRequests.done();
       upRequest.done();
       assert(!err, 'Should not have received error since the id_token is optional.');
@@ -711,8 +711,6 @@ suite('username-password', function() {
 
     var context = new AuthenticationContext(response.authority);
     context.acquireTokenWithUsernamePassword(response.resource, cp.username, cp.password, cp.clientId, function(err) {
-      util.resetLogging();
-      util.clearStaticCache();
       preRequests.done();
       upRequest.done();
       assert(err, 'Did not receive expected error about missing token_type');
@@ -730,8 +728,6 @@ suite('username-password', function() {
 
     var context = new AuthenticationContext(response.authority);
     context.acquireTokenWithUsernamePassword(response.resource, cp.username, cp.password, cp.clientId, function(err) {
-      util.resetLogging();
-      util.clearStaticCache();
       preRequests.done();
       upRequest.done();
       assert(err, 'Did not receive expected error about missing token_type');
