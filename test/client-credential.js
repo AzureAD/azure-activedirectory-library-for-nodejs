@@ -23,6 +23,8 @@
 /* Directive tells jshint that suite and test are globals defined by mocha */
 /* global suite */
 /* global test */
+/* global setup */
+/* global teardown */
 
 var _ = require('underscore');
 var assert = require('assert');
@@ -38,6 +40,17 @@ var AuthenticationContext = adal.AuthenticationContext;
  * Tests AuthenticationContext.acquireTokenWithClientCredentials
  */
 suite('client-credential', function() {
+
+  setup(function() {
+    util.resetLogging();
+    util.clearStaticCache();
+  });
+
+  teardown(function() {
+    util.resetLogging();
+    util.clearStaticCache();
+  });
+
   test('happy-path', function(done) {
     var responseOptions = { noRefresh : true };
     var response = util.createResponse(responseOptions);
@@ -46,10 +59,64 @@ suite('client-credential', function() {
     var context = new AuthenticationContext(cp.authUrl);
     context.acquireTokenWithClientCredentials(response.resource, cp.clientId, cp.clientSecret, function (err, tokenResponse) {
       if (!err) {
-        assert(util.isMatchTokenResponse(response.decodedResponse, tokenResponse), 'The response did not match what was expected');
+        assert(util.isMatchTokenResponse(response.cachedResponse, tokenResponse), 'The response did not match what was expected');
         tokenRequest.done();
       }
       done(err);
+    });
+  });
+
+  // Tests happy-path followed by an additional call to acquireTokenWithClientCredentials that should
+  // be served from the cache.
+  test('happy-path-cached-token', function(done) {
+    var responseOptions = { noRefresh : true };
+    var response = util.createResponse(responseOptions);
+    var tokenRequest = util.setupExpectedClientCredTokenRequestResponse(200, response.wireResponse);
+
+    var context = new AuthenticationContext(cp.authUrl);
+    context.acquireTokenWithClientCredentials(response.resource, cp.clientId, cp.clientSecret, function (err, tokenResponse) {
+      if (err) {
+        done(err);
+        return;
+      }
+
+      assert(util.isMatchTokenResponse(response.cachedResponse, tokenResponse), 'The response did not match what was expected');
+      tokenRequest.done();
+
+      context.acquireTokenWithClientCredentials(response.resource, cp.clientId, cp.clientSecret, function (err, tokenResponse) {
+        if (!err) {
+          assert(util.isMatchTokenResponse(response.cachedResponse, tokenResponse), 'The cached response did not match what was expected');
+        }
+        done(err);
+      });
+    });
+  });
+
+  // Tests happy path plus a call to the cache only function acquireToken which should find the token from the
+  // previous call to acquireTokenWithClientCredentials.
+  test('happy-path-cached-token2', function(done) {
+    var responseOptions = { noRefresh : true };
+    var response = util.createResponse(responseOptions);
+    var tokenRequest = util.setupExpectedClientCredTokenRequestResponse(200, response.wireResponse);
+
+    var context = new AuthenticationContext(cp.authUrl);
+    context.acquireTokenWithClientCredentials(response.resource, cp.clientId, cp.clientSecret, function (err, tokenResponse) {
+      if (err) {
+        done(err);
+        return;
+      }
+
+      assert(util.isMatchTokenResponse(response.cachedResponse, tokenResponse), 'The response did not match what was expected');
+      tokenRequest.done();
+
+      var nullUser = null;
+      var context2 = new AuthenticationContext(cp.authUrl);
+      context2.acquireToken(response.resource, nullUser, cp.clientId, function (err, tokenResponse) {
+        if (!err) {
+          assert(util.isMatchTokenResponse(response.cachedResponse, tokenResponse), 'The cached response did not match what was expected');
+        }
+        done(err);
+      });
     });
   });
 
