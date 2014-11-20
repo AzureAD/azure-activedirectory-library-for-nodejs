@@ -253,7 +253,7 @@ suite('username-password', function() {
 
     var refreshResponseOptions = { refreshedRefresh : true };
     var refreshResponse = util.createResponse(refreshResponseOptions);
-    var refreshRequest = util.setupExpectedRefreshTokenRequestResponse(200, refreshResponse.wireResponse, response.authority, refreshResponse.resource);
+    var refreshRequest = util.setupExpectedRefreshTokenRequestResponse(200, refreshResponse.wireResponse, response.authority, refreshResponse.resource, null);
 
     var memCache = new MemoryCache();
 

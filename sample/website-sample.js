@@ -21,16 +21,18 @@
 'use strict';
 
 var express = require('express');
+var logger = require('connect-logger');
+var cookieParser = require('cookie-parser');
+var session = require('cookie-session');
 var fs = require('fs');
 var crypto = require('crypto');
 
 var AuthenticationContext = require('adal-node').AuthenticationContext;
 
 var app = express();
-app.use(express.logger());
-app.use(express.bodyParser());
-app.use(express.cookieParser('a deep secret'));
-app.use(express.session({secret: '1234567890QWERTY'}));
+app.use(logger());
+app.use(cookieParser('a deep secret'));
+app.use(session({secret: '1234567890QWERTY'}));
 
 app.get('/', function(req, res) {
   res.redirect('login');
@@ -127,12 +129,26 @@ app.get('/getAToken', function(req, res) {
   }
   var authenticationContext = new AuthenticationContext(authorityUrl);
   authenticationContext.acquireTokenWithAuthorizationCode(req.query.code, redirectUri, resource, sampleParameters.clientId, sampleParameters.clientSecret, function(err, response) {
-    var errorMessage = '';
+    var message = '';
     if (err) {
-      errorMessage = 'error: ' + err.message + '\n';
+      message = 'error: ' + err.message + '\n';
     }
-    errorMessage += 'response: ' + JSON.stringify(response);
-    res.send(errorMessage);
+    message += 'response: ' + JSON.stringify(response);
+
+    if (err) {
+      res.send(message);
+      return;
+    }
+
+    // Later, if the access token is expired it can be refreshed.
+    authenticationContext.acquireTokenWithRefreshToken(response.refreshToken, sampleParameters.clientId, sampleParameters.clientSecret, resource, function(refreshErr, refreshResponse) {
+      if (refreshErr) {
+        message += 'refreshError: ' + refreshErr.message + '\n';
+      }
+      message += 'refreshResponse: ' + JSON.stringify(refreshResponse);
+
+      res.send(message); 
+    }); 
   });
 });
 
