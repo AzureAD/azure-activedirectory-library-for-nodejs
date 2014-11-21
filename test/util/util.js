@@ -417,12 +417,15 @@ util.setupExpectedMexWSTrustRequestCommon = function() {
   return { done : doneFunc };
 };
 
-util.setupExpectedRefreshTokenRequestResponse = function(httpCode, returnDoc, authorityEndpoint, resource) {
+util.setupExpectedRefreshTokenRequestResponse = function(httpCode, returnDoc, authorityEndpoint, resource, clientSecret) {
   var authEndpoint = authorityEndpoint || parameters.authority;
 
   var queryParameters = {};
   queryParameters['grant_type'] = 'refresh_token';
   queryParameters['client_id'] = parameters.clientId;
+  if (clientSecret) {
+    queryParameters['client_secret'] = clientSecret;
+  }
   if (resource) {
     queryParameters['resource'] = resource;
   }
