@@ -45,12 +45,14 @@ suite('UserRealm', function() {
     var query = 'api-version=1.0';
 
     var userRealmRequest = nock(authority)
-                            .matchHeader('client-request-id', util.testCorrelationId)
                             .filteringPath(function(path) {
                               return util.removeQueryStringIfMatching(path, query);
                             })
                             .get(userRealmPath)
                             .reply(200, doc);
+
+    util.matchStandardRequestHeaders(userRealmRequest);
+
     return userRealmRequest;
   }
 

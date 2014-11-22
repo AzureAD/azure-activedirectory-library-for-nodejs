@@ -42,7 +42,10 @@ suite('MEX', function() {
 
   function setupExpectedMexResponse(filename) {
     var mexDoc = fs.readFileSync(__dirname + '/mex/' + filename, 'utf8');
-    var mexRequest = nock(cp.adfsUrlNoPath).matchHeader('client-request-id', util.testCorrelationId).get(cp.adfsMexPath).reply('200', mexDoc);
+    var mexRequest = nock(cp.adfsUrlNoPath).get(cp.adfsMexPath).reply('200', mexDoc);
+
+    util.matchStandardRequestHeaders(mexRequest);
+
     return mexRequest;
   }
 

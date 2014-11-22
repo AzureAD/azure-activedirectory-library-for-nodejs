@@ -245,7 +245,6 @@ suite('authentication-parameters', function() {
 
   test('create-from-url-happy-path-string-url', function(done) {
     var getResource = nock(testHost)
-                       .matchHeader('client-request-id', util.testCorrelationId)
                        .filteringPath(function(path) {
                           return util.removeQueryStringIfMatching(path, testQuery);
                         })
@@ -253,6 +252,8 @@ suite('authentication-parameters', function() {
                        .reply(401, 'foo',
                          { 'www-authenticate' : 'Bearer authorization_uri="foobar,lkfj,;l,", fruitcake="f",resource="clark, &^()- q32,shark" , f="foo"' }
                        );
+
+    util.matchStandardRequestHeaders(getResource);                       
 
     adal.createAuthenticationParametersFromUrl(testUrl, function(err, parameters) {
       if (!err) {
@@ -270,7 +271,6 @@ suite('authentication-parameters', function() {
 
   test('create-from-url-happy-path-url-object', function(done) {
     var getResource = nock(testHost)
-                       .matchHeader('client-request-id', util.testCorrelationId)
                        .filteringPath(function(path) {
                           return util.removeQueryStringIfMatching(path, testQuery);
                         })
@@ -278,6 +278,8 @@ suite('authentication-parameters', function() {
                        .reply(401, 'foo',
                          { 'www-authenticate' : 'Bearer authorization_uri="foobar,lkfj,;l,", fruitcake="f",resource="clark, &^()- q32,shark" , f="foo"' }
                        );
+
+    util.matchStandardRequestHeaders(getResource);                       
 
     var urlObj = url.parse(testUrl);
     adal.createAuthenticationParametersFromUrl(urlObj, function(err, parameters) {
@@ -310,12 +312,13 @@ suite('authentication-parameters', function() {
 
   test('create-from-url-no-header', function(done) {
     var getResource = nock(testHost)
-                       .matchHeader('client-request-id', util.testCorrelationId)
                        .filteringPath(function(path) {
                           return util.removeQueryStringIfMatching(path, testQuery);
                         })
                        .get(testPath)
                        .reply(401, 'foo');
+
+    util.matchStandardRequestHeaders(getResource);                       
 
     adal.createAuthenticationParametersFromUrl(testUrl, function(err) {
       getResource.done();
