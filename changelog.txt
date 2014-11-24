@@ -1,3 +1,13 @@
+Version 0.1.9
+--------------
+Release Date: 24 November 2014
+
+	* Fixed issue #22 - ADAL needs a method that allows confidential clients
+	  to acquire a new token via a refresh token.  The acquireTokenWithRefreshToken
+	  function was updated to take an additional clientSecret argument.
+	  Passing this new argument is optional and the change should not break apps
+	  using this function before the additional argument was added.
+
 Version 0.1.8
 --------------
 Release Date: 29 October 2014
