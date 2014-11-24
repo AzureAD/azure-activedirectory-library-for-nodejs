@@ -93,12 +93,13 @@ suite('username-password', function() {
     var query = querystring.stringify(queryParameters);
 
     var tokenRequest = nock(authEndpoint)
-                            .matchHeader('client-request-id', util.testCorrelationId)
                             .filteringRequestBody(function(body) {
                               return util.filterQueryString(query, body);
                             })
                            .post(cp.tokenUrlPath, query)
                            .reply(httpCode, returnDoc);
+
+    util.matchStandardRequestHeaders(tokenRequest);
 
     return tokenRequest;
   }

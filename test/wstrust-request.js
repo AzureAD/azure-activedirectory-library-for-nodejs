@@ -80,7 +80,6 @@ suite('WSTrustRequest', function() {
 
   function setupUpOutgoingRSTCompare(rst) {
     var rstRequest = nock(wstrustEndpoint)
-     .matchHeader('client-request-id', util.testCorrelationId)
      .filteringRequestBody(function(body) {
       var messageId = getMessageIdFromRSTR(body);
       assert(messageId, 'Could not find message id in return RST');
@@ -96,6 +95,8 @@ suite('WSTrustRequest', function() {
       return 'OK';
     })
     .post('/', 'OK').reply(200, 'OK');
+
+    util.matchStandardRequestHeaders(rstRequest);
 
     return rstRequest;
   }
