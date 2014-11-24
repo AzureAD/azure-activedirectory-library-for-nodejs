@@ -283,16 +283,31 @@ util.removeQueryStringIfMatching = function(path, query) {
   return util.compareQueryStrings(pathUrl.query, query) ? pathUrl.pathname : path;
 };
 
+function valExists(val) {
+  return val;
+}
+
+util.matchStandardRequestHeaders = function(nockRequest) {
+  nockRequest.matchHeader('x-client-SKU', 'Node')
+             .matchHeader('x-client-Ver', function(ver) {
+              return (ver && ver.indexOf('0.') === 0);
+             })
+             .matchHeader('x-client-OS', valExists)
+             .matchHeader('x-client-CPU', valExists)
+             .matchHeader('client-request-id', util.testCorrelationId);
+};
+
 util.setupExpectedOAuthResponse = function(queryParameters, tokenPath, httpCode, returnDoc, authorityEndpoint) {
   var query = querystring.stringify(queryParameters);
 
   var tokenRequest = nock(authorityEndpoint)
-                         .matchHeader('client-request-id', util.testCorrelationId)
                          .filteringRequestBody(function(body) {
                             return util.filterQueryString(query, body);
                           })
                          .post(tokenPath, query)
                          .reply(httpCode, returnDoc, { 'client-request-id' : util.testCorrelationId });
+
+  util.matchStandardRequestHeaders(tokenRequest);
 
   return tokenRequest;
 };
@@ -323,9 +338,10 @@ util.setupExpectedInstanceDiscoveryRequest = function(httpCode, discoveryHost, r
   var instanceDiscoveryEndpoint = url.resolve(instanceDiscoveryUrl, '/');
 
   var discoveryRequest = nock(instanceDiscoveryEndpoint)
-                         .matchHeader('client-request-id', util.testCorrelationId)
                          .get(instanceDiscoveryUrl.path)
                          .reply(httpCode, returnDoc);
+
+  util.matchStandardRequestHeaders(discoveryRequest);
 
   return discoveryRequest;
 };
@@ -345,12 +361,14 @@ util.setupExpectedUserRealmResponse = function(httpCode, returnDoc, authority) {
   var query = 'api-version=1.0';
 
   var userRealmRequest = nock(userRealmAuthority)
-                         .matchHeader('client-request-id', util.testCorrelationId)
                          .filteringPath(function(path) {
                             return util.removeQueryStringIfMatching(path, query);
                           })
                           .get(userRealmPath)
                           .reply(200, returnDoc);
+
+  util.matchStandardRequestHeaders(userRealmRequest);
+
   return userRealmRequest;
 };
 
@@ -384,23 +402,30 @@ util.setupExpectedInstanceDiscoveryAndUserRealmRequest = function(federated) {
 };
 
 util.setupExpectedFailedMexCommon = function() {
-  var mexRequest = nock(parameters.adfsUrlNoPath).matchHeader('client-request-id', util.testCorrelationId).get(parameters.adfsMexPath).reply(500);
+  var mexRequest = nock(parameters.adfsUrlNoPath).get(parameters.adfsMexPath).reply(500);
+
+  util.matchStandardRequestHeaders(mexRequest);
+
   return mexRequest;
 };
 
 util.setupExpectedMexCommon = function() {
   var mexDoc = fs.readFileSync(parameters.MexFile, 'utf8');
-  var mexRequest = nock(parameters.adfsUrlNoPath).matchHeader('client-request-id', util.testCorrelationId).get(parameters.adfsMexPath).reply('200', mexDoc);
+  var mexRequest = nock(parameters.adfsUrlNoPath).get(parameters.adfsMexPath).reply('200', mexDoc);
+
+  util.matchStandardRequestHeaders(mexRequest);
+
   return mexRequest;
 };
 
 util.setupExpectedWSTrustRequestCommon = function() {
   var RSTRDoc = fs.readFileSync(parameters.RSTRFile, 'utf8');
   var wstrustRequest = nock(parameters.adfsUrlNoPath)
-                       .matchHeader('client-request-id', util.testCorrelationId)
                        .filteringRequestBody(function() {return '*';})
                        .post(parameters.adfsWsTrustPath, '*')
                        .reply(200, RSTRDoc);
+
+  util.matchStandardRequestHeaders(wstrustRequest);
 
   return wstrustRequest;
 };
@@ -417,12 +442,15 @@ util.setupExpectedMexWSTrustRequestCommon = function() {
   return { done : doneFunc };
 };
 
-util.setupExpectedRefreshTokenRequestResponse = function(httpCode, returnDoc, authorityEndpoint, resource) {
+util.setupExpectedRefreshTokenRequestResponse = function(httpCode, returnDoc, authorityEndpoint, resource, clientSecret) {
   var authEndpoint = authorityEndpoint || parameters.authority;
 
   var queryParameters = {};
   queryParameters['grant_type'] = 'refresh_token';
   queryParameters['client_id'] = parameters.clientId;
+  if (clientSecret) {
+    queryParameters['client_secret'] = clientSecret;
+  }
   if (resource) {
     queryParameters['resource'] = resource;
   }

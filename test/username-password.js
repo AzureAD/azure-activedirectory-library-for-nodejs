@@ -93,12 +93,13 @@ suite('username-password', function() {
     var query = querystring.stringify(queryParameters);
 
     var tokenRequest = nock(authEndpoint)
-                            .matchHeader('client-request-id', util.testCorrelationId)
                             .filteringRequestBody(function(body) {
                               return util.filterQueryString(query, body);
                             })
                            .post(cp.tokenUrlPath, query)
                            .reply(httpCode, returnDoc);
+
+    util.matchStandardRequestHeaders(tokenRequest);
 
     return tokenRequest;
   }
@@ -253,7 +254,7 @@ suite('username-password', function() {
 
     var refreshResponseOptions = { refreshedRefresh : true };
     var refreshResponse = util.createResponse(refreshResponseOptions);
-    var refreshRequest = util.setupExpectedRefreshTokenRequestResponse(200, refreshResponse.wireResponse, response.authority, refreshResponse.resource);
+    var refreshRequest = util.setupExpectedRefreshTokenRequestResponse(200, refreshResponse.wireResponse, response.authority, refreshResponse.resource, null);
 
     var memCache = new MemoryCache();
 
