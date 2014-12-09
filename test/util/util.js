@@ -578,5 +578,9 @@ util.clearStaticCache = function() {
   } while (entry);
 };
 
+util.getSelfSignedCert = function() {
+  var privatePem = fs.readFileSync(__dirname + '/self-signed-cert.pem', { encoding : 'utf8'});
+  return privatePem;
+};
 
 module.exports = util;
