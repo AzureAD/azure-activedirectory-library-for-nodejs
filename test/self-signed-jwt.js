@@ -33,8 +33,8 @@ var SelfSignedJwt = testRequire('self-signed-jwt').SelfSignedJwt;
 
 suite('self-signed-jwt', function() {
   test('create-jwt', function(done) {
-    var ssjwt = new SelfSignedJwt(cp.callContext, cp.authority, cp.clienId, util.getSelfSignedCert());
-    var jwt = ssjwt.create();
+    var ssjwt = new SelfSignedJwt(cp.callContext, cp.authority, cp.clienId);
+    var jwt = ssjwt.create(util.getSelfSignedCert(), cp.certHash);
     var err;
     if (!jwt) {
       err = new Error('Returned empty jwt');

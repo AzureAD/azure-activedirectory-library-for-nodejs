@@ -583,4 +583,6 @@ util.getSelfSignedCert = function() {
   return privatePem;
 };
 
+util.commonParameters.certHash = 'C1:5D:EA:86:56:AD:DF:67:BE:80:31:D8:5E:BD:DC:5A:D6:C4:36:E1';
+
 module.exports = util;
