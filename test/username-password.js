@@ -677,8 +677,6 @@ suite('username-password', function() {
   });
 
   test('bad-id-token-base64-in-response', function(done) {
-    console.log('HEY');
-    util.turnOnLogging();
     var foundWarning = false;
     var preRequests = util.setupExpectedUserRealmResponseCommon(false);
     var response = util.createResponse();
