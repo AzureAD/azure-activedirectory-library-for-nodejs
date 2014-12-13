@@ -300,7 +300,8 @@ util.matchStandardRequestHeaders = function(nockRequest) {
 util.setupExpectedOAuthResponse = function(queryParameters, tokenPath, httpCode, returnDoc, authorityEndpoint) {
   var query = querystring.stringify(queryParameters);
 
-  var tokenRequest = nock(authorityEndpoint)
+  var authEndpoint = this.getNockAuthorityHost(authorityEndpoint);
+  var tokenRequest = nock(authEndpoint)
                          .filteringRequestBody(function(body) {
                             return util.filterQueryString(query, body);
                           })
@@ -335,7 +336,7 @@ util.setupExpectedInstanceDiscoveryRequest = function(httpCode, discoveryHost, r
 
   instanceDiscoveryUrl = url.parse(url.format(instanceDiscoveryUrl));
 
-  var instanceDiscoveryEndpoint = url.resolve(instanceDiscoveryUrl, '/');
+  var instanceDiscoveryEndpoint = this.trimPathFromUrl(instanceDiscoveryUrl);
 
   var discoveryRequest = nock(instanceDiscoveryEndpoint)
                          .get(instanceDiscoveryUrl.path)
@@ -356,6 +357,7 @@ util.setupExpectedInstanceDiscoveryRequestCommon = function() {
 
 util.setupExpectedUserRealmResponse = function(httpCode, returnDoc, authority) {
   var userRealmAuthority = authority || parameters.authority;
+  userRealmAuthority = this.trimPathFromUrl(userRealmAuthority);
 
   var userRealmPath = parameters.userRealmPathTemplate.replace('<user>', encodeURIComponent(parameters.username));
   var query = 'api-version=1.0';
@@ -578,5 +580,14 @@ util.clearStaticCache = function() {
   } while (entry);
 };
 
+util.trimPathFromUrl = function(stringUrl) {
+  var u = url.parse(stringUrl);
+  return url.resolve(u, '/');
+};
+
+util.getNockAuthorityHost = function(authority) {
+    var authEndpoint = authority || this.commonParameters.evoEndpoint;
+    return this.trimPathFromUrl(authEndpoint);
+};
 
 module.exports = util;
