@@ -117,6 +117,4 @@ suite('self-signed-jwt', function() {
     assert(expectedErr, 'Did not recieve expected error');
     done();
   });
-
-
 });
