@@ -1,3 +1,9 @@
+Version 0.1.11
+--------------
+Release Date: 16 December 2014
+
+	* Added support for certificate authentication for confidential clients.
+
 Version 0.1.10
 --------------
 Release Date: 24 November 2014
