@@ -35,6 +35,7 @@ var cp = util.commonParameters;
 
 var adal = testRequire('adal');
 var AuthenticationContext = adal.AuthenticationContext;
+var SelfSignedJwt = testRequire('self-signed-jwt');
 
 /**
  * Tests AuthenticationContext.acquireTokenWithClientCredentials
@@ -231,6 +232,62 @@ suite('client-credential', function() {
     context.acquireToken(cp.resource, 'unknownUser', cp.clientId, function(err) {
       assert(err, 'Expected an error and non was recieved.');
       assert(-1 !== err.message.indexOf('not found'), 'Returned error did not contain expected message: ' + err.message);
+      done();
+    });
+  });
+
+  function updateSelfSignedJwtStubs() {
+    var savedProto = {};
+    savedProto._getDateNow = SelfSignedJwt.prototype._getDateNow;
+    savedProto._getNewJwtId = SelfSignedJwt.prototype._getNewJwtId;
+
+    SelfSignedJwt.prototype._getDateNow = function() { return cp.nowDate; };
+    SelfSignedJwt.prototype._getNewJwtId = function() { return cp.jwtId; };
+
+    return savedProto;
+  }
+
+  function resetSelfSignedJwtStubs(saveProto) {
+    _.extend(SelfSignedJwt.prototype, saveProto);
+  }
+
+  test('cert-happy-path', function(done) {
+    var saveProto = updateSelfSignedJwtStubs();
+
+    var responseOptions = { noRefresh : true };
+    var response = util.createResponse(responseOptions);
+    var tokenRequest = util.setupExpectedClientAssertionTokenRequestResponse(200, response.wireResponse, cp.authorityTenant);
+
+    var context = new AuthenticationContext(cp.authorityTenant);
+    context.acquireTokenWithClientCertificate(response.resource, cp.clientId, cp.cert, cp.certHash, function (err, tokenResponse) {
+      resetSelfSignedJwtStubs(saveProto);
+      tokenRequest.done();
+      if (!err) {
+        assert(util.isMatchTokenResponse(response.cachedResponse, tokenResponse), 'The response did not match what was expected');
+        tokenRequest.done();
+      }
+      done(err);
+    });
+  });
+
+  test('cert-bad-cert', function(done) {
+    var cert = 'gobbledy';
+
+    var context = new AuthenticationContext(cp.authorityTenant);
+    context.acquireTokenWithClientCertificate(cp.resource, cp.clientId, cert, cp.certHash, function (err) {
+      assert(err, 'Did not recieve expected error.');
+      assert(0 <= err.message.indexOf('Failed to sign JWT'), 'Unexpected error message' + err.message);
+      done();
+    });
+  });
+
+  test('cert-bad-thumbprint', function(done) {
+    var thumbprint = 'gobbledy';
+
+    var context = new AuthenticationContext(cp.authorityTenant);
+    context.acquireTokenWithClientCertificate(cp.resource, cp.clientId, cp.cert, thumbprint, function (err) {
+      assert(err, 'Did not recieve expected error.');
+      assert(0 <= err.message.indexOf('thumbprint does not match a known format'), 'Unexpected error message' + err.message);
       done();
     });
   });

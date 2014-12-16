@@ -80,7 +80,7 @@ suite('username-password', function() {
   }
 
   function setupExpectedUserNamePasswordRequestResponse(httpCode, returnDoc, authorityEndpoint) {
-    var authEndpoint = authorityEndpoint || cp.evoEndpoint;
+    var authEndpoint = util.getNockAuthorityHost(authorityEndpoint);
 
     var queryParameters = {};
     queryParameters['grant_type'] = 'password';
