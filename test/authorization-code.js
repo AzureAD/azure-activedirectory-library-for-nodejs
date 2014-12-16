@@ -43,7 +43,7 @@ suite('authorization-code', function() {
   var redirectUri = 'app_bundle:foo.bar.baz';
 
   function setupExpectedAuthCodeTokenRequestResponse(httpCode, returnDoc, authorityEndpoint) {
-    var authEndpoint = authorityEndpoint || cp.evoEndpoint;
+    var authEndpoint = util.getNockAuthorityHost(authorityEndpoint);
 
     var queryParameters = {};
     queryParameters['grant_type'] = 'authorization_code';
@@ -62,7 +62,7 @@ suite('authorization-code', function() {
                            .post(cp.tokenUrlPath, query)
                            .reply(httpCode, returnDoc);
 
-    util.matchStandardRequestHeaders(tokenRequest);                       
+    util.matchStandardRequestHeaders(tokenRequest);
 
     return tokenRequest;
   }

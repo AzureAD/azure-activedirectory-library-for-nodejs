@@ -18,6 +18,8 @@ nock.disableNetConnect();
 var adal = testRequire('adal');
 var log = testRequire('log');
 
+var util = {};
+
 var successResponse = {
   'access_token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Ik5HVEZ2ZEstZnl0aEV1THdqcHdBSk9NOW4tQSJ9.eyJhdWQiOiIwMDAwMDAwMi0wMDAwLTAwMDAtYzAwMC0wMDAwMDAwMDAwMDAiLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC82MmYwMzQ3MS02N2MxLTRjNTAtYjlkMS0xMzQ1MDc5ZDk3NzQvIiwiaWF0IjoxMzc4NjAxMTY4LCJuYmYiOjEzNzg2MDExNjgsImV4cCI6MTM3ODYyOTk2OCwidmVyIjoiMS4wIiwidGlkIjoiNjJmMDM0NzEtNjdjMS00YzUwLWI5ZDEtMTM0NTA3OWQ5Nzc0Iiwib2lkIjoiZjEzMDkzNDEtZDcyMy00YTc1LTk2YzktNGIyMTMzMzk0Mjg3Iiwic3ViIjoiZjEzMDkzNDEtZDcyMy00YTc1LTk2YzktNGIyMTMzMzk0Mjg3IiwiYXBwaWQiOiI1YzI1ZDFiZi1iMjMyLTQwMzUtYjZiOS0yYjdlN2U4MzQ2ZDYiLCJhcHBpZGFjciI6IjEifQ.qXM7f9TTiLApxVMwaSrISQQ6UAnfKvKhoIlN9rB0Eff2VXvIWKGRsclPkMQ5x42BQz2N6pSXEsN-LsNCZlQ76Rc3rVRONzeCYh7q_NXcCJG_d6SJTtV5GBfgqFlgT8UF5rblabbMdOiOrddvJm048hWt2Nm3qD3QjQdPBlD7Ksn-lUR1jEJPIqDaBjGom8RawrZTW6X1cy1Kr8mEYFkxcbU91k_RZUumONep9FTR8gfPkboeD8zyvOy64UeysEtcuaNCfhHSBFcwC8MwjUr5r_T7au7ywAcYDOVgoa7oF_dN1JNweiDoNNZ9tyUS-RY3sa3-gXk77gRxpA4CkpittQ',
   'token_type': 'Bearer',
@@ -133,7 +135,18 @@ parameters.AssertionFile = __dirname + '/../wstrust/common.base64.encoded.assert
 parameters.logContext = { correlationId : 'test-correlation-id-123456789' };
 parameters.callContext = { _logContext : parameters.logContext };
 
-var util = {};
+
+util.getSelfSignedCert = function() {
+  var privatePem = fs.readFileSync(__dirname + '/self-signed-cert.pem', { encoding : 'utf8'});
+  return privatePem;
+};
+
+parameters.certHash = 'C1:5D:EA:86:56:AD:DF:67:BE:80:31:D8:5E:BD:DC:5A:D6:C4:36:E1';
+parameters.nowDate = new Date(1418433646179);
+parameters.jwtId = '09841beb-a2c2-4777-a347-34ef055238a8';
+parameters.expectedJwt = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IndWM3FobGF0MzJlLWdESFlYcjNjV3RiRU51RSJ9.eyJhdWQiOiJodHRwczovL2xvZ2luLndpbmRvd3MubmV0L3JyYW5kYWxsYWFkMS5vbm1pY3Jvc29mdC5jb20vb2F1dGgyL3Rva2VuIiwiaXNzIjoiY2xpZW4mJj8_P3RJZCIsInN1YiI6ImNsaWVuJiY_Pz90SWQiLCJuYmYiOjE0MTg0MzM2NDYsImV4cCI6MTQxODQzNDI0NiwianRpIjoiMDk4NDFiZWItYTJjMi00Nzc3LWEzNDctMzRlZjA1NTIzOGE4In0.dgF0TRlcASgTMp_1dlm8vd7tudr6n40VeuOQGFnz566s3n76WR_jJDBBBKlYeqc9gwCPFOzrLVAJehVYZ3N7YPzVdulf47rLoQdAp8R_p4Q4hdBZuIzfgDWwXjnP9x_NlfzezEYE4r8KTS2g5BBzPmx538AfIdNM93hWIxQySZGWY5UAhTkT1qE1ce1Yjo1M2HqzEJhTg5TTyfrnDtNxFxmzYhSyA9B41lB5kBuJTXUWXPrr-6eG8cEUOS-iiH7YB1Tf4J7_9JQloevTiOrfv4pSp6xLLXm2ntNBg3gaKsGKdYd-3tsCG0mHn7BzL0b-QCLalkUr8KtgtLqkxuAiLQ';
+parameters.cert = util.getSelfSignedCert();
+
 
 util.commonParameters = parameters;
 
@@ -300,7 +313,8 @@ util.matchStandardRequestHeaders = function(nockRequest) {
 util.setupExpectedOAuthResponse = function(queryParameters, tokenPath, httpCode, returnDoc, authorityEndpoint) {
   var query = querystring.stringify(queryParameters);
 
-  var tokenRequest = nock(authorityEndpoint)
+  var authEndpoint = this.getNockAuthorityHost(authorityEndpoint);
+  var tokenRequest = nock(authEndpoint)
                          .filteringRequestBody(function(body) {
                             return util.filterQueryString(query, body);
                           })
@@ -335,7 +349,7 @@ util.setupExpectedInstanceDiscoveryRequest = function(httpCode, discoveryHost, r
 
   instanceDiscoveryUrl = url.parse(url.format(instanceDiscoveryUrl));
 
-  var instanceDiscoveryEndpoint = url.resolve(instanceDiscoveryUrl, '/');
+  var instanceDiscoveryEndpoint = this.trimPathFromUrl(instanceDiscoveryUrl);
 
   var discoveryRequest = nock(instanceDiscoveryEndpoint)
                          .get(instanceDiscoveryUrl.path)
@@ -356,6 +370,7 @@ util.setupExpectedInstanceDiscoveryRequestCommon = function() {
 
 util.setupExpectedUserRealmResponse = function(httpCode, returnDoc, authority) {
   var userRealmAuthority = authority || parameters.authority;
+  userRealmAuthority = this.trimPathFromUrl(userRealmAuthority);
 
   var userRealmPath = parameters.userRealmPathTemplate.replace('<user>', encodeURIComponent(parameters.username));
   var query = 'api-version=1.0';
@@ -459,6 +474,18 @@ util.setupExpectedRefreshTokenRequestResponse = function(httpCode, returnDoc, au
   return util.setupExpectedOAuthResponse(queryParameters, parameters.tokenUrlPath, httpCode, returnDoc, authEndpoint);
 };
 
+util.setupExpectedClientAssertionTokenRequestResponse = function(httpCode, returnDoc, authorityEndpoint) {
+  var authEndpoint = authorityEndpoint || parameters.authority;
+
+  var queryParameters = {};
+  queryParameters['grant_type'] = 'client_credentials';
+  queryParameters['client_assertion_type'] = 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer';
+  queryParameters['client_assertion'] = parameters.expectedJwt;
+  queryParameters['client_id'] = parameters.clientId;
+  queryParameters['resource'] = parameters.resource;
+
+  return util.setupExpectedOAuthResponse(queryParameters, parameters.tokenUrlPath, httpCode, returnDoc, authEndpoint);
+};
 
 function isDateWithinTolerance(date, expectedDate) {
   var expected = expectedDate || new Date();
@@ -578,5 +605,14 @@ util.clearStaticCache = function() {
   } while (entry);
 };
 
+util.trimPathFromUrl = function(stringUrl) {
+  var u = url.parse(stringUrl);
+  return url.resolve(u, '/');
+};
+
+util.getNockAuthorityHost = function(authority) {
+    var authEndpoint = authority || this.commonParameters.evoEndpoint;
+    return this.trimPathFromUrl(authEndpoint);
+};
 
 module.exports = util;
