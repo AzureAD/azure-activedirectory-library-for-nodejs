@@ -154,7 +154,9 @@ suite('authentication-parameters', function() {
       // Missing resource.
       [
         'Bearer authorization_uri="foobar,lkfj,;l,"',
-        null
+        {
+          'authorizationUri' : 'foobar,lkfj,;l,'
+        }
       ],
       // Missing authoritzation uri.
       [
@@ -253,7 +255,7 @@ suite('authentication-parameters', function() {
                          { 'www-authenticate' : 'Bearer authorization_uri="foobar,lkfj,;l,", fruitcake="f",resource="clark, &^()- q32,shark" , f="foo"' }
                        );
 
-    util.matchStandardRequestHeaders(getResource);                       
+    util.matchStandardRequestHeaders(getResource);
 
     adal.createAuthenticationParametersFromUrl(testUrl, function(err, parameters) {
       if (!err) {
@@ -279,7 +281,7 @@ suite('authentication-parameters', function() {
                          { 'www-authenticate' : 'Bearer authorization_uri="foobar,lkfj,;l,", fruitcake="f",resource="clark, &^()- q32,shark" , f="foo"' }
                        );
 
-    util.matchStandardRequestHeaders(getResource);                       
+    util.matchStandardRequestHeaders(getResource);
 
     var urlObj = url.parse(testUrl);
     adal.createAuthenticationParametersFromUrl(urlObj, function(err, parameters) {
@@ -318,7 +320,7 @@ suite('authentication-parameters', function() {
                        .get(testPath)
                        .reply(401, 'foo');
 
-    util.matchStandardRequestHeaders(getResource);                       
+    util.matchStandardRequestHeaders(getResource);
 
     adal.createAuthenticationParametersFromUrl(testUrl, function(err) {
       getResource.done();
