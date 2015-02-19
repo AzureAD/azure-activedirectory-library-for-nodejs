@@ -22,6 +22,8 @@
 /* Directive tells jshint that suite and test are globals defined by mocha */
 /* global suite */
 /* global test */
+/* global setup */
+/* global teardown */
 
 var assert = require('assert');
 
@@ -38,8 +40,19 @@ var Authority = testRequire('authority').Authority;
  */
 suite('Authority', function() {
 
+  setup(function() {
+    util.resetLogging();
+    util.clearStaticCache();
+  });
+
+  teardown(function() {
+    util.resetLogging();
+    util.clearStaticCache();
+  });
+
   // use this as authority to force dynamic as opposed to static instance discovery.
   var nonHardCodedAuthority = 'https://login.doesntexist.com/' + cp.tenant;
+  var nonHardCodedAuthorizeEndpoint = nonHardCodedAuthority + '/oauth2/authorize';
 
 
   function setupExpectedInstanceDiscoveryRequestRetries(requestParametersList, authority) {
@@ -59,7 +72,7 @@ suite('Authority', function() {
       {
         'tenant_discovery_endpoint' : 'http://foobar'
       },
-      nonHardCodedAuthority
+      nonHardCodedAuthorizeEndpoint
     );
 
     var responseOptions = {
@@ -80,6 +93,50 @@ suite('Authority', function() {
     });
   });
 
+  function performStaticInstanceDiscovery(authorityHost, callback) {
+    var hardCodedAuthority = 'https://' + authorityHost + '/' + cp.tenant;
+
+    var responseOptions = {
+      authority : hardCodedAuthority
+    };
+    var response = util.createResponse(responseOptions);
+    var wireResponse = response.wireResponse;
+    var tokenRequest = util.setupExpectedClientCredTokenRequestResponse(200, wireResponse, hardCodedAuthority);
+
+    var context = new AuthenticationContext(hardCodedAuthority);
+    context.acquireTokenWithClientCredentials(response.resource, cp.clientId, cp.clientSecret, function (err, tokenResponse) {
+      if (!err) {
+        assert(util.isMatchTokenResponse(response.cachedResponse, tokenResponse), 'The response does not match what was expected.: ' + JSON.stringify(tokenResponse));
+        tokenRequest.done();
+      }
+      callback(err);
+    });
+  }
+
+  test('success-static-instance-discovery', function(done) {
+    performStaticInstanceDiscovery('login.windows.net', function(err) {
+      if(err) {
+        done(err);
+        return;
+      }
+      performStaticInstanceDiscovery('login.microsoftonline.com', function(err2) {
+        if(err2) {
+          done(err2);
+          return;
+        }
+        performStaticInstanceDiscovery('login.chinacloudapi.cn', function(err3) {
+          if(err3) {
+            done(err3);
+            return;
+          }
+          performStaticInstanceDiscovery('login.cloudgovapi.us', function(err4) {
+              done(err4);
+          });
+        });
+      });
+    });
+  });
+
   test('http-error', function(done) {
     var expectedInstanceDiscoveryRequests = [
       {
@@ -89,7 +146,7 @@ suite('Authority', function() {
       }
     ];
 
-    var instanceDiscoveryRequests = setupExpectedInstanceDiscoveryRequestRetries(expectedInstanceDiscoveryRequests, nonHardCodedAuthority);
+    var instanceDiscoveryRequests = setupExpectedInstanceDiscoveryRequestRetries(expectedInstanceDiscoveryRequests, nonHardCodedAuthorizeEndpoint);
 
     var context = new AuthenticationContext(nonHardCodedAuthority);
     context.acquireTokenWithClientCredentials(cp.resource, cp.clientId, cp.clientSecret, function (err) {
@@ -112,7 +169,7 @@ suite('Authority', function() {
       }
     ];
 
-    var instanceDiscoveryRequests = setupExpectedInstanceDiscoveryRequestRetries(expectedInstanceDiscoveryRequests, nonHardCodedAuthority);
+    var instanceDiscoveryRequests = setupExpectedInstanceDiscoveryRequestRetries(expectedInstanceDiscoveryRequests, nonHardCodedAuthorizeEndpoint);
 
     var context = new AuthenticationContext(nonHardCodedAuthority);
     context.acquireTokenWithClientCredentials(cp.resource, cp.clientId, cp.clientSecret, function (err) {
@@ -183,7 +240,7 @@ suite('Authority', function() {
       {
         'tenant_discovery_endpoint' : 'http://foobar'
       },
-      nonHardCodedAuthority
+      nonHardCodedAuthorizeEndpoint
     );
 
     // add extra path and query string to end of the authority.  These should be stripped
