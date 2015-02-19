@@ -1,6 +1,11 @@
+Version 0.1.13
+--------------
+Release Date: 19 February 2015
+	* Version issue fix
+
 Version 0.1.12
 --------------
-Release Date: 18 February 2015
+Release Date: 19 February 2015
 	* Add login.microsoftonline.com to the static list of known authorities.
 	* Bug fixes. (#36)
 
