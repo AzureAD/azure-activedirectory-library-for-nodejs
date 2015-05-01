@@ -1,3 +1,9 @@
+Version 0.1.13
+--------------
+Release Date: 1 May 2015
+	* Scrub security sensitive data in WS-Trust exchange from log messages.
+	* Update the version of the jws dependency to the latest release.
+
 Version 0.1.12
 --------------
 Release Date: 19 February 2015
