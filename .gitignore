@@ -4,6 +4,9 @@ targets/*
 # Visual Studio #
 *.suo
 *.user
+/obj/
+/bin/
+.ntvs_analysis.dat
 
 # Node #
 test/recordings/
