@@ -8,19 +8,18 @@
   "licenses": [
     {
       "type": "Apache 2.0",
-      "url": "https://github.com/MSOpenTech/aal/raw/master/License.txt"
+      "url": "https://github.com/AzureAD/aal/raw/master/License.txt"
     }
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/MSOpenTech/azure-activedirectory-library-for-nodejs.git"
+    "url": "https://github.com/AzureAD/azure-activedirectory-library-for-nodejs.git"
   },
   "version": "0.1.14",
   "description": "Windows Azure Active Directory Client Library for node",
   "keywords": [ "node", "azure", "AAD", "adal", "adfs", "oauth" ],
   "main": "./lib/adal.js",
   "engines": { "node": ">= 0.6.15" },
-  "licenses": [ { "type": "Apache 2.0", "url": "http://www.apache.org/licenses/LICENSE-2.0" } ],
   "dependencies": {
     "date-utils": "*",
     "jws": "3.x.x",

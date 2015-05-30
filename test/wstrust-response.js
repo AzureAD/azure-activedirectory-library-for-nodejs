@@ -37,7 +37,7 @@ var WSTrustResponse = testRequire('wstrust-response');
  * Tests the WSTrustResponse class which parses a ws-trust RSTR.
  */
 suite('WSTrustResponse', function() {
-  test('parse-error-happey-path', function(done) {
+  test('parse-error-happy-path', function(done) {
     var errorResponse = '\
     <s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope" xmlns:a="http://www.w3.org/2005/08/addressing" xmlns:u="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">\
       <s:Header>\
@@ -75,7 +75,7 @@ suite('WSTrustResponse', function() {
     }
 
     assert(thrownError, 'Exppected an exception but none was thrown');
-    assert(wstrustResponse.errorCode === 'RequestFailed', 'wstrustRespone.ErrorCode does not match expected value: ' + wstrustResponse.errorCode);
+    assert(wstrustResponse.errorCode === 'RequestFailed', 'wstrustResponse.ErrorCode does not match expected value: ' + wstrustResponse.errorCode);
     assert(-1 !== wstrustResponse.faultMessage.indexOf('MSIS3127: The specified request failed.'), 'wstrustResponse.FaultMessage does not match expected value: ' + wstrustResponse.faultMessage);
 
     done();
