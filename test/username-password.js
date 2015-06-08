@@ -324,7 +324,7 @@ suite('username-password', function() {
         userRealm.done();
         mexWsTrust.done();
         assertion.done();
-        assert(logFunctionCalled, 'Logging was turned on but no messages were recieved.');
+        assert(logFunctionCalled, 'Logging was turned on but no messages were received.');
         assert(foundServerReturnedCorrelationId, 'Did not find any logs that indicated the server returned a correlationId');
       }
       done(err);
@@ -458,7 +458,7 @@ suite('username-password', function() {
     stubOutTokenRequestDependencies(tokenRequest, userRealm, mex);
 
     tokenRequest.getTokenWithUsernamePassword('username', 'password', function(err) {
-      assert(err, 'Did not recieve expected err.');
+      assert(err, 'Did not receive expected err.');
       assert(-1 !== err.message.indexOf('unknown AccountType'), 'Did not receive expected error message.');
       done();
     });
@@ -499,7 +499,7 @@ suite('username-password', function() {
     stubOutTokenRequestDependencies(tokenRequest, userRealm, mex, wstrustRequest, oauthClient);
 
     tokenRequest.getTokenWithUsernamePassword('username', 'password', function(err) {
-      assert(err, 'Did not recieve expected error.');
+      assert(err, 'Did not receive expected error.');
       assert(-1 !== err.message.indexOf('token type'), 'Error message did not contain \'token type\'.');
       done();
     });
@@ -519,7 +519,7 @@ suite('username-password', function() {
     stubOutTokenRequestDependencies(tokenRequest, userRealm, mex, wstrustRequest, oauthClient);
 
     tokenRequest.getTokenWithUsernamePassword('username', 'password', function(err) {
-      assert(err, 'Did not recieve expected error');
+      assert(err, 'Did not receive expected error');
       done();
     });
   });
@@ -538,7 +538,7 @@ suite('username-password', function() {
     stubOutTokenRequestDependencies(tokenRequest, userRealm, mex, wstrustRequest, oauthClient);
 
     tokenRequest.getTokenWithUsernamePassword('username', 'password', function(err) {
-      assert(err, 'Did not recieve expected error');
+      assert(err, 'Did not receive expected error');
       done();
     });
   });
@@ -557,7 +557,7 @@ suite('username-password', function() {
     stubOutTokenRequestDependencies(tokenRequest, userRealm, mex, wstrustRequest, oauthClient);
 
     tokenRequest.getTokenWithUsernamePassword('username', 'password', function(err) {
-      assert(err, 'Did not recieve expected error');
+      assert(err, 'Did not receive expected error');
       done();
     });
   });

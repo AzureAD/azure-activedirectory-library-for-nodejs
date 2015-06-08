@@ -62,7 +62,7 @@ suite('UserRealm', function() {
     var userRealm = new UserRealm(cp.callContext, user, authority);
     userRealm.discover(function(err) {
       userRealmRequest.done();
-      assert(err, 'Did not recieve expected error');
+      assert(err, 'Did not receive expected error');
       done();
     });
   }

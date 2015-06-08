@@ -230,7 +230,7 @@ suite('client-credential', function() {
   test('no-cached-token-found-error', function(done) {
     var context = new AuthenticationContext(cp.authUrl);
     context.acquireToken(cp.resource, 'unknownUser', cp.clientId, function(err) {
-      assert(err, 'Expected an error and non was recieved.');
+      assert(err, 'Expected an error and non was received.');
       assert(-1 !== err.message.indexOf('not found'), 'Returned error did not contain expected message: ' + err.message);
       done();
     });
@@ -275,7 +275,7 @@ suite('client-credential', function() {
 
     var context = new AuthenticationContext(cp.authorityTenant);
     context.acquireTokenWithClientCertificate(cp.resource, cp.clientId, cert, cp.certHash, function (err) {
-      assert(err, 'Did not recieve expected error.');
+      assert(err, 'Did not receive expected error.');
       assert(0 <= err.message.indexOf('Failed to sign JWT'), 'Unexpected error message' + err.message);
       done();
     });
@@ -286,7 +286,7 @@ suite('client-credential', function() {
 
     var context = new AuthenticationContext(cp.authorityTenant);
     context.acquireTokenWithClientCertificate(cp.resource, cp.clientId, cp.cert, thumbprint, function (err) {
-      assert(err, 'Did not recieve expected error.');
+      assert(err, 'Did not receive expected error.');
       assert(0 <= err.message.indexOf('thumbprint does not match a known format'), 'Unexpected error message' + err.message);
       done();
     });

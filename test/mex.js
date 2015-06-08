@@ -127,7 +127,7 @@ suite('MEX', function() {
 
     var mex = new Mex(cp.callContext, cp.adfsMex);
     mex.discover(function(err) {
-      assert(err, 'Did not recieve error as expected');
+      assert(err, 'Did not receive error as expected');
       mexRequest.done();
       done();
     });

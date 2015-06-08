@@ -48,7 +48,7 @@ suite('CacheDriver', function() {
       util.findDiffs(expected, received);
       console.log('Expected:');
       console.log(expected);
-      console.log('Recieved');
+      console.log('Received');
       console.log(received);
       assert(false, message);
     }
@@ -110,7 +110,7 @@ suite('CacheDriver', function() {
 
     cacheDriver.add(response.decodedResponse, function(err) {
       var stack = err ? err.stack : null;
-      assert(!err, 'Recieved unexpected error: ' + stack);
+      assert(!err, 'Received unexpected error: ' + stack);
       var length = memCache._entries.length;
       assert(length === 1, 'Cache after test has does not have the correct number of entries ' + length + ': ' + memCache._entries);
       assertEntriesEqual(expectedResponse, memCache._entries[0], 'The saved cache entry has been modified');
@@ -127,7 +127,7 @@ suite('CacheDriver', function() {
 
     cacheDriver.add(response.decodedResponse, function(err) {
       var stack = err ? err.stack : null;
-      assert(!err, 'Recieved unexpected error: ' + stack);
+      assert(!err, 'Received unexpected error: ' + stack);
       done();
     });
   });
@@ -145,7 +145,7 @@ suite('CacheDriver', function() {
 
     cacheDriver.add(response.decodedResponse, function(err) {
       var stack = err ? err.stack : null;
-      assert(!err, 'Recieved unexpected error: ' + stack);
+      assert(!err, 'Received unexpected error: ' + stack);
       var length = memCache._entries.length;
       assert(length === 1, 'Cache after test has does not have the correct number of entrie ' + length + ': ' + memCache._entries);
       assertEntriesEqual(expectedResponse, memCache._entries[0], 'The saved cache entry has been modified');
@@ -369,7 +369,7 @@ suite('CacheDriver', function() {
   function createRefreshFunction(expectedRefreshToken, response) {
     var refreshFunction = function(entry, resource, callback) {
       if (expectedRefreshToken !== entry['refreshToken']) {
-        console.log('RECIEVED:');
+        console.log('RECEIVED:');
         console.log(entry.refreshToken);
         console.log('EXPECTED');
         console.log(expectedRefreshToken);

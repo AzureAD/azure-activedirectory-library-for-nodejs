@@ -102,9 +102,9 @@ suite('WSTrustResponse', function() {
     }
 
     assert(thrownError, 'Did not receive expected exception');
-    assert(-1 !== thrownError.message.indexOf('empty'), 'Did not recieve expected error message: ' + thrownError);
-    assert(!wstrustResponse.errorCode, 'Recieved ErrorCode when none was expected: ' + wstrustResponse.errorCode);
-    assert(!wstrustResponse.faultMessage, 'Recieved FaultMessage when none was expected' + wstrustResponse.faultMessage);
+    assert(-1 !== thrownError.message.indexOf('empty'), 'Did not receive expected error message: ' + thrownError);
+    assert(!wstrustResponse.errorCode, 'Received ErrorCode when none was expected: ' + wstrustResponse.errorCode);
+    assert(!wstrustResponse.faultMessage, 'Received FaultMessage when none was expected' + wstrustResponse.faultMessage);
     done();
   });
 
@@ -118,9 +118,9 @@ suite('WSTrustResponse', function() {
     }
 
     assert(thrownError, 'Did not receive expected exception');
-    assert(-1 !== thrownError.message.indexOf('empty'), 'Did not recieve expected error message: ' + thrownError.stack);
-    assert(!wstrustResponse.errorCode, 'Recieved ErrorCode when none was expected: ' + wstrustResponse.errorCode);
-    assert(!wstrustResponse.faultMessage, 'Recieved FaultMessage when none was expected' + wstrustResponse.faultMessage);
+    assert(-1 !== thrownError.message.indexOf('empty'), 'Did not receive expected error message: ' + thrownError.stack);
+    assert(!wstrustResponse.errorCode, 'Received ErrorCode when none was expected: ' + wstrustResponse.errorCode);
+    assert(!wstrustResponse.faultMessage, 'Received FaultMessage when none was expected' + wstrustResponse.faultMessage);
     done();
   });
 
@@ -135,8 +135,8 @@ suite('WSTrustResponse', function() {
 
     assert(thrownError, 'Did not receive expected exception');
     assert(-1 !== thrownError.message.indexOf('Failed to parse'), 'Did not receive expected error message: ' + thrownError);
-    assert(!wstrustResponse.errorCode, 'Recieved ErrorCode when none was expected: ' + wstrustResponse.errorCode);
-    assert(!wstrustResponse.faultMessage, 'Recieved FaultMessage when none was expected' + wstrustResponse.faultMessage);
+    assert(!wstrustResponse.errorCode, 'Received ErrorCode when none was expected: ' + wstrustResponse.errorCode);
+    assert(!wstrustResponse.faultMessage, 'Received FaultMessage when none was expected' + wstrustResponse.faultMessage);
     done();
   });
 });

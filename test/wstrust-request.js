@@ -135,7 +135,7 @@ suite('WSTrustRequest', function() {
 
     request.acquireToken(username, password, function(err) {
       rstRequest.done();
-      assert(err, 'Did not recieve expected error.');
+      assert(err, 'Did not receive expected error.');
       done();
     });
   });
