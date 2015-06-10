@@ -28,7 +28,7 @@ See the [website sample](https://github.com/MSOpenTech/azure-activedirectory-lib
 var AuthenticationContext = require('adal-node').AuthenticationContext;
 
 var clientId = 'yourClientIdHere';
-var clientSecret = 'youAADIssuedClientSecretHere'
+var clientSecret = 'yourAADIssuedClientSecretHere'
 var redirectUri = 'yourRedirectUriHere';
 var authorityHostUrl = 'https://login.windows.net';
 var tenant = 'myTenant';
@@ -45,11 +45,7 @@ var templateAuthzUrl = 'https://login.windows.net/' +
                         resource;
 
 function createAuthorizationUrl(state) {
-  var authorizationUrl = templateAuthzUrl.replace('<client_id>', sampleParameters.clientId);
-  authorizationUrl = authorizationUrl.replace('<redirect_uri>',redirectUri);
-  authorizationUrl = authorizationUrl.replace('<state>', state);
-  authorizationUrl = authorizationUrl.replace('<resource>', resource);
-  return authorizationUrl;
+  return templateAuthzUrl.replace('<state>', state);
 }
 
 // Clients get redirected here in order to create an OAuth authorize url and redirect them to AAD.
@@ -101,10 +97,11 @@ See the [client credentials sample](https://github.com/MSOpenTech/azure-activedi
 ```javascript
 var adal = require('adal-node').AuthenticationContext;
 
+var authorityHostUrl = 'https://login.windows.net';
 var tenant = 'myTenant';
-var authorityUrl = 'https://windows.login.net/' + tenant;
-var clientId = 'myClientId';
-var clientSecret = 'aadIssuedClientSecret';
+var authorityUrl = authorityHostUrl + '/' + tenant;
+var clientId = 'yourClientIdHere';
+var clientSecret = 'yourAADIssuedClientSecretHere'
 var resource = '00000002-0000-0000-c000-000000000000';
 
 var context = new AuthenticationContext(authorityUrl);
