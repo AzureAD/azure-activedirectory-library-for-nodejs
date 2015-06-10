@@ -31,7 +31,7 @@ var util = require('./util/util');
 var cp = util.commonParameters;
 var testRequire = util.testRequire;
 
-var WSTrustResponse = testRequire('wstrust-response');
+var WSTrustResponse = testRequire('../lib/wstrust-response');
 
 /**
  * Tests the WSTrustResponse class which parses a ws-trust RSTR.

@@ -25,7 +25,8 @@ var successResponse = {
   'token_type': 'Bearer',
   'expires_in': 28800,
   'resource': '00000002-0000-0000-c000-000000000000',
-};
+  'scope': ['00000002-0000-0000-c000-000000000000/openid', '00000002-0000-0000-c000-000000000000/mail.read']
+}; 
 
 var refreshToken = 'AwABAAAAvPM1KaPlrEqdFSBzjqfTGCDeE7YHWD9jkU2WWYKLjxu928QAbkoFyWpgJLFcp65DcbBqOSYVq5Ty_60YICIdFw61SG4-eT1nWHNOPdzsL2ZzloUsp2DpqlIr1s5Z3953oQBi7dOqiHk37NXQqmNEJ7MfmDp6w3EOa29EPARvjGIHFgtICW1-Y82npw1v1g8Ittb02pksNU2XzH2X0E3l3TuSZWsX5lpl-kfPOc8zppU6bwvT-VOPHZVVLQedDIQZyOiFst9HLUjbiIvBgV7tNwbB4H5yF56QQscz49Nrb3g0ibuNDo7efFawLzNoVHzoTrOTcCGSG1pt8Z-npByrEe7vg1o4nNFjspuxlyMGdnYRAnaZfvgzqROP_m7ZqSd6IAA';
 var successResponseWithRefresh = _.clone(successResponse);
@@ -92,7 +93,8 @@ parameters.tenant = 'rrandallaad1.onmicrosoft.com';
 parameters.clientId = 'clien&&???tId';
 parameters.clientSecret = 'clientSecret*&^(?&';
 parameters.resource = '00000002-0000-0000-c000-000000000000';
-parameters.evoEndpoint = 'https://login.windows.net';
+parameters.scope = ['00000002-0000-0000-c000-000000000000/openid', '00000002-0000-0000-c000-000000000000/mail.read'];
+parameters.evoEndpoint = 'https://login.microsoftonline.com';
 parameters.username = 'rrandall@' + parameters.tenant;
 parameters.password = 'Atestpass!@#$';
 parameters.authorityHosts = {
@@ -115,9 +117,10 @@ parameters.adfsWsTrust = parameters.adfsUrlNoPath + parameters.adfsWsTrustPath;
 parameters.successResponse = successResponse;
 parameters.successResponseWithRefresh = successResponseWithRefresh;
 parameters.authUrl = url.parse(parameters.evoEndpoint + '/' + parameters.tenant);
-parameters.tokenPath = '/oauth2/token';
-parameters.tokenUrlPath = parameters.authUrl.pathname + parameters.tokenPath;
-parameters.authorizePath = '/oauth/authorize';
+parameters.tokenPath = '/oauth2/v2.0/token';
+parameters.tokenPathSearch = '?slice=testslice&msaproxy=true&api-version=1.0';
+parameters.tokenUrlPath = parameters.authUrl.pathname + parameters.tokenPath + parameters.tokenPathSearch;
+parameters.authorizePath = '/oauth/v2.0/authorize';
 parameters.authorizeUrlPath = parameters.authUrl.pathname + parameters.authorizePath;
 parameters.authorizeUrl = parameters.authUrl.href + parameters.authorizePath;
 parameters.instanceDiscoverySuccessResponse = {
@@ -190,7 +193,7 @@ TOKEN_RESPONSE_MAP['expires_on'] = 'expiresOn';
 TOKEN_RESPONSE_MAP['expires_in'] = 'expiresIn';
 TOKEN_RESPONSE_MAP['error'] = 'error';
 TOKEN_RESPONSE_MAP['error_description'] = 'errorDescription';
-TOKEN_RESPONSE_MAP['resource'] = 'resource';
+TOKEN_RESPONSE_MAP['scope'] = 'scope';
 
 function mapFields(inObj, outObj, map) {
   for (var key in inObj) {
@@ -211,10 +214,11 @@ util.createResponse = function(options, iteration) {
     'expires_in': 28800
   };
 
-  var resource = options.resource || parameters.resource;
+  var scope = options.scope || parameters.scope;
+
   var iterated = {
     'access_token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Ik5HVEZ2ZEstZnl0aEV1THdqcHdBSk9NOW4tQSJ9.eyJhdWQiOiIwMDAwMDAwMi0wMDAwLTAwMDAtYzAwMC0wMDAwMDAwMDAwMDAiLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC82MmYwMzQ3MS02N2MxLTRjNTAtYjlkMS0xMzQ1MDc5ZDk3NzQvIiwiaWF0IjoxMzc4NjAxMTY4LCJuYmYiOjEzNzg2MDExNjgsImV4cCI6MTM3ODYyOTk2OCwidmVyIjoiMS4wIiwidGlkIjoiNjJmMDM0NzEtNjdjMS00YzUwLWI5ZDEtMTM0NTA3OWQ5Nzc0Iiwib2lkIjoiZjEzMDkzNDEtZDcyMy00YTc1LTk2YzktNGIyMTMzMzk0Mjg3Iiwic3ViIjoiZjEzMDkzNDEtZDcyMy00YTc1LTk2YzktNGIyMTMzMzk0Mjg3IiwiYXBwaWQiOiI1YzI1ZDFiZi1iMjMyLTQwMzUtYjZiOS0yYjdlN2U4MzQ2ZDYiLCJhcHBpZGFjciI6IjEifQ.qXM7f9TTiLApxVMwaSrISQQ6UAnfKvKhoIlN9rB0Eff2VXvIWKGRsclPkMQ5x42BQz2N6pSXEsN-LsNCZlQ76Rc3rVRONzeCYh7q_NXcCJG_d6SJTtV5GBfgqFlgT8UF5rblabbMdOiOrddvJm048hWt2Nm3qD3QjQdPBlD7Ksn-lUR1jEJPIqDaBjGom8RawrZTW6X1cy1Kr8mEYFkxcbU91k_RZUumONep9FTR8gfPkboeD8zyvOy64UeysEtcuaNCfhHSBFcwC8MwjUr5r_T7au7ywAcYDOVgoa7oF_dN1JNweiDoNNZ9tyUS-RY3sa3-gXk77gRxpA4CkpittQ',
-    'resource' : resource
+    'scope' : scope
   };
 
   if (!options.noRefresh) {
@@ -234,9 +238,10 @@ util.createResponse = function(options, iteration) {
   }
 
   _.extend(baseResponse, iterated);
+  baseResponse['scope'] = util.parseScope(iterated['scope']);
 
   if (!options.mrrt) {
-    delete baseResponse.resource;
+    delete baseResponse.scope;
   }
 
   var dateNow = new Date();
@@ -264,7 +269,7 @@ util.createResponse = function(options, iteration) {
   var cachedResponse = _.clone(decodedResponse);
   cachedResponse['_clientId'] = parameters.clientId;
   cachedResponse['_authority'] = authority;
-  cachedResponse['resource'] = iterated['resource'];
+  cachedResponse['scope'] = util.parseScope(iterated['scope']);
   if (options.mrrt) {
     cachedResponse.isMRRT = true;
   }
@@ -274,7 +279,7 @@ util.createResponse = function(options, iteration) {
     decodedResponse : decodedResponse,
     cachedResponse : cachedResponse,
     decodedIdToken : decodedIdToken,
-    resource : iterated['resource'],
+    scope : iterated['scope'],
     refreshToken : iterated['refresh_token'],
     clientId : cachedResponse['_clientId'],
     authority : authority
@@ -333,7 +338,7 @@ util.setupExpectedClientCredTokenRequestResponse = function(httpCode, returnDoc,
   queryParameters['grant_type'] = 'client_credentials';
   queryParameters['client_id'] = parameters.clientId;
   queryParameters['client_secret'] = parameters.clientSecret;
-  queryParameters['resource'] = parameters.resource;
+  queryParameters['scope'] = parameters.scope;
 
   return util.setupExpectedOAuthResponse(queryParameters, parameters.tokenUrlPath, httpCode, returnDoc, authEndpoint);
 };
@@ -342,7 +347,7 @@ util.setupExpectedInstanceDiscoveryRequest = function(httpCode, discoveryHost, r
   var instanceDiscoveryUrl = {};
   instanceDiscoveryUrl.protocol = 'https:';
   instanceDiscoveryUrl.host = discoveryHost;
-  instanceDiscoveryUrl.pathname = '/common/discovery/instance';
+  instanceDiscoveryUrl.pathname = '/common/discovery/v2.0/instance';
   instanceDiscoveryUrl.query = {};
   instanceDiscoveryUrl.query['authorization_endpoint'] = url.format(authority);
   instanceDiscoveryUrl.query['api-version'] = '1.0';
@@ -457,17 +462,19 @@ util.setupExpectedMexWSTrustRequestCommon = function() {
   return { done : doneFunc };
 };
 
-util.setupExpectedRefreshTokenRequestResponse = function(httpCode, returnDoc, authorityEndpoint, resource, clientSecret) {
+util.setupExpectedRefreshTokenRequestResponse = function(httpCode, returnDoc, authorityEndpoint, scope, clientSecret) {
   var authEndpoint = authorityEndpoint || parameters.authority;
 
   var queryParameters = {};
   queryParameters['grant_type'] = 'refresh_token';
   queryParameters['client_id'] = parameters.clientId;
+  
+  if (scope) { 
+     queryParameters['scope'] = util.parseScope(scope);      
+  }
+ 
   if (clientSecret) {
     queryParameters['client_secret'] = clientSecret;
-  }
-  if (resource) {
-    queryParameters['resource'] = resource;
   }
   queryParameters['refresh_token'] = parameters.refreshToken;
 
@@ -483,6 +490,7 @@ util.setupExpectedClientAssertionTokenRequestResponse = function(httpCode, retur
   queryParameters['client_assertion'] = parameters.expectedJwt;
   queryParameters['client_id'] = parameters.clientId;
   queryParameters['resource'] = parameters.resource;
+  queryParameters['scope'] = parameters.scope;
 
   return util.setupExpectedOAuthResponse(queryParameters, parameters.tokenUrlPath, httpCode, returnDoc, authEndpoint);
 };
@@ -614,5 +622,16 @@ util.getNockAuthorityHost = function(authority) {
     var authEndpoint = authority || this.commonParameters.evoEndpoint;
     return this.trimPathFromUrl(authEndpoint);
 };
+
+util.parseScope = function (scope) {
+    var scopeList = '';
+    if (scope) {
+        for (var i = 0; i < scope.length; ++i) {
+            scopeList += (i != scope.length - 1) ? scope[i] + ' ' : scope[i];
+        }
+    }
+    
+    return scopeList;  
+}
 
 module.exports = util;

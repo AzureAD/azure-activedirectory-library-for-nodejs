@@ -32,7 +32,7 @@ var util = require('./util/util');
 var testRequire = util.testRequire;
 var cp = util.commonParameters;
 
-var adal = testRequire('adal');
+var adal = testRequire('../lib/adal');
 var AuthenticationContext = adal.AuthenticationContext;
 
 /**
@@ -50,9 +50,8 @@ suite('authorization-code', function() {
     queryParameters['code'] = authorizationCode;
     queryParameters['client_id'] = cp.clientId;
     queryParameters['client_secret'] = cp.clientSecret;
-    queryParameters['resource'] = cp.resource;
     queryParameters['redirect_uri'] = redirectUri;
-
+    queryParameters['scope'] = util.parseScope(cp.scope);
     var query = querystring.stringify(queryParameters);
 
     var tokenRequest = nock(authEndpoint)
@@ -72,7 +71,7 @@ suite('authorization-code', function() {
     var tokenRequest = setupExpectedAuthCodeTokenRequestResponse(200, response.wireResponse);
 
     var context = new AuthenticationContext(cp.authUrl);
-    context.acquireTokenWithAuthorizationCode(authorizationCode, redirectUri, response.resource, cp.clientId, cp.clientSecret, function (err, tokenResponse) {
+    context.acquireTokenWithAuthorizationCode(authorizationCode, redirectUri, response.scope, cp.clientId, cp.clientSecret, function (err, tokenResponse) {
       if (!err) {
         assert(util.isMatchTokenResponse(response.decodedResponse, tokenResponse), 'The response did not match what was expected');
         tokenRequest.done();
@@ -87,7 +86,8 @@ suite('authorization-code', function() {
 
     nock.enableNetConnect();
     var context = new AuthenticationContext('https://0.1.1.1:12/my.tenant.com');
-    context.acquireTokenWithAuthorizationCode(authorizationCode, redirectUri, cp.resource, cp.clientId, cp.clientSecret, function (err) {
+    //context.acquireTokenWithAuthorizationCode(authorizationCode, redirectUri, cp.resource, cp.clientId, cp.clientSecret, function (err) {
+    context.acquireTokenWithAuthorizationCode(authorizationCode, redirectUri, cp.scope, cp.clientId, cp.clientSecret, function (err) {
       assert(err, 'Did not recieve expected error on failed http request.');
       nock.disableNetConnect();
       done();

@@ -31,9 +31,9 @@ var util = require('./util/util');
 var cp = util.commonParameters;
 var testRequire = util.testRequire;
 
-var adal = testRequire('adal');
+var adal = testRequire('../lib/adal');
 var AuthenticationContext = adal.AuthenticationContext;
-var Authority = testRequire('authority').Authority;
+var Authority = testRequire('../lib/authority').Authority;
 
 /**
  * Tests the Authority class and instance discovery.
@@ -52,7 +52,7 @@ suite('Authority', function() {
 
   // use this as authority to force dynamic as opposed to static instance discovery.
   var nonHardCodedAuthority = 'https://login.doesntexist.com/' + cp.tenant;
-  var nonHardCodedAuthorizeEndpoint = nonHardCodedAuthority + '/oauth2/authorize';
+  var nonHardCodedAuthorizeEndpoint = nonHardCodedAuthority + '/oauth2/v2.0/authorize';
 
 
   function setupExpectedInstanceDiscoveryRequestRetries(requestParametersList, authority) {
@@ -80,12 +80,12 @@ suite('Authority', function() {
     };
     var response = util.createResponse(responseOptions);
     var wireResponse = response.wireResponse;
-    var tokenRequest = util.setupExpectedClientCredTokenRequestResponse(200, wireResponse, nonHardCodedAuthority);
+    var tokenRequest = util.setupExpectedRefreshTokenRequestResponse(200, wireResponse, nonHardCodedAuthority, response.scope, cp.clientSecret);
 
     var context = new AuthenticationContext(nonHardCodedAuthority);
-    context.acquireTokenWithClientCredentials(response.resource, cp.clientId, cp.clientSecret, function (err, tokenResponse) {
+    context.acquireTokenWithRefreshToken(cp.refreshToken, cp.clientId,cp.clientSecret, response.scope, function (err, tokenResponse) {
       if (!err) {
-        assert(util.isMatchTokenResponse(response.cachedResponse, tokenResponse), 'The response does not match what was expected.: ' + JSON.stringify(tokenResponse));
+        assert(util.isMatchTokenResponse(response.decodedResponse, tokenResponse), 'The response does not match what was expected.: ' + JSON.stringify(tokenResponse));
         instanceDiscoveryRequest.done();
         tokenRequest.done();
       }
@@ -101,12 +101,12 @@ suite('Authority', function() {
     };
     var response = util.createResponse(responseOptions);
     var wireResponse = response.wireResponse;
-    var tokenRequest = util.setupExpectedClientCredTokenRequestResponse(200, wireResponse, hardCodedAuthority);
+    var tokenRequest = util.setupExpectedRefreshTokenRequestResponse(200, wireResponse, hardCodedAuthority, response.scope, cp.clientSecret);
 
     var context = new AuthenticationContext(hardCodedAuthority);
-    context.acquireTokenWithClientCredentials(response.resource, cp.clientId, cp.clientSecret, function (err, tokenResponse) {
+    context.acquireTokenWithRefreshToken(cp.refreshToken, cp.clientId, cp.clientSecret, response.scope, function (err, tokenResponse) {
       if (!err) {
-        assert(util.isMatchTokenResponse(response.cachedResponse, tokenResponse), 'The response does not match what was expected.: ' + JSON.stringify(tokenResponse));
+        assert(util.isMatchTokenResponse(response.decodedResponse, tokenResponse), 'The response does not match what was expected.: ' + JSON.stringify(tokenResponse));
         tokenRequest.done();
       }
       callback(err);
@@ -149,7 +149,7 @@ suite('Authority', function() {
     var instanceDiscoveryRequests = setupExpectedInstanceDiscoveryRequestRetries(expectedInstanceDiscoveryRequests, nonHardCodedAuthorizeEndpoint);
 
     var context = new AuthenticationContext(nonHardCodedAuthority);
-    context.acquireTokenWithClientCredentials(cp.resource, cp.clientId, cp.clientSecret, function (err) {
+    context.acquireTokenWithRefreshToken(cp.refreshToken, cp.clientId, cp.clientSecret, cp.scope, function (err) {
       assert(err, 'No error was returned when one was expected.');
       assert(err.message.indexOf('500') !== -1, 'The http error was not returned');
       instanceDiscoveryRequests.forEach(function(request){
@@ -172,7 +172,7 @@ suite('Authority', function() {
     var instanceDiscoveryRequests = setupExpectedInstanceDiscoveryRequestRetries(expectedInstanceDiscoveryRequests, nonHardCodedAuthorizeEndpoint);
 
     var context = new AuthenticationContext(nonHardCodedAuthority);
-    context.acquireTokenWithClientCredentials(cp.resource, cp.clientId, cp.clientSecret, function (err) {
+    context.acquireTokenWithRefreshToken(cp.refreshToken, cp.clientId, cp.clientSecret, cp.scope, function (err) {
       assert(err, 'No error was returned when one was expected.');
       assert(err.message.indexOf('invalid_instance') !== -1, 'The server error was not returned');
       assert(err.message.indexOf('instance was invalid') !== -1, 'The server error message was not returned');
@@ -187,12 +187,12 @@ suite('Authority', function() {
   test('validation-off', function(done) {
     var response = util.createResponse();
     var wireResponse = response.wireResponse;
-    var tokenRequest = util.setupExpectedClientCredTokenRequestResponse(200, wireResponse, response.authority);
+    var tokenRequest = util.setupExpectedRefreshTokenRequestResponse(200, wireResponse, response.authority, response.scope, cp.clientSecret);
 
     var context = new AuthenticationContext(cp.authorityTenant, false);
-    context.acquireTokenWithClientCredentials(response.resource, cp.clientId, cp.clientSecret, function (err, tokenResponse) {
+    context.acquireTokenWithRefreshToken(cp.refreshToken, cp.clientId, cp.clientSecret, response.scope, function (err, tokenResponse) {
       if (!err) {
-        assert(util.isMatchTokenResponse(response.cachedResponse, tokenResponse), 'The response does not match what was expected.');
+        assert(util.isMatchTokenResponse(response.decodedResponse, tokenResponse), 'The response does not match what was expected.');
         tokenRequest.done();
       }
       done(err);

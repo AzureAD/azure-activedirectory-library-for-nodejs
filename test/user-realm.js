@@ -31,7 +31,7 @@ var util = require('./util/util');
 var cp = util.commonParameters;
 var testRequire = util.testRequire;
 
-var UserRealm = testRequire('user-realm');
+var UserRealm = testRequire('../lib/user-realm');
 
 /**
  * Tests the UserRealm class and user realm discovery.
