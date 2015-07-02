@@ -107,9 +107,9 @@ if (!parametersFile) {
     tenant : 'common',
     authorityHostUrl : 'https://login.microsoftonline.com',
     clientId : 'e1eb8a8d-7b0c-4a14-9313-3f2c25c82929',
-    username : 'admin@convergeTest.onmicrosoft.com',
-    password : 'pass@word1',
-    clientSecret: 'gPuaDOLxguGGmbPXUN8D5EJcSDBXalou'
+    username : '',
+    password : '',
+    clientSecret: ''
   };
 }
 
