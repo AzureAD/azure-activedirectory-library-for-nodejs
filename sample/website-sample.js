@@ -26,16 +26,56 @@ var cookieParser = require('cookie-parser');
 var session = require('cookie-session');
 var fs = require('fs');
 var crypto = require('crypto');
+var https = require('https');
 
-var AuthenticationContext = require('adal-node').AuthenticationContext;
+var AuthenticationContext = require('../lib/adal.js').AuthenticationContext;
 
 var app = express();
 app.use(logger());
 app.use(cookieParser('a deep secret'));
 app.use(session({secret: '1234567890QWERTY'}));
 
+var options = {
+    key: fs.readFileSync('key.pem'),
+    cert: fs.readFileSync('cert.pem')
+};
+
 app.get('/', function(req, res) {
-  res.redirect('login');
+    if (req.query.code) {
+        var authenticationContext = new AuthenticationContext(authorityUrl);
+        process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+        authenticationContext.options = {
+            http : {
+                proxy : 'http://127.0.0.1:8888'
+            }
+        };
+
+        authenticationContext.acquireTokenWithAuthorizationCode(req.query.code, redirectUri, scope, sampleParameters.clientId, sampleParameters.clientSecret, function (err, response) {
+            var message = '';
+            if (err) {
+                message = 'error: ' + err.message + '\n';
+            }
+            message += 'response: ' + JSON.stringify(response);
+            
+            if (err) {
+                res.send(message);
+                return;
+            }
+            
+            //Later, if the access token is expired it can be refreshed.
+            authenticationContext.acquireTokenWithRefreshToken(response.refreshToken, sampleParameters.clientId, sampleParameters.clientSecret, scope, function (refreshErr, refreshResponse) {
+                if (refreshErr) {
+                    message += 'refreshError: ' + refreshErr.message + '\n';
+                }
+                message += 'refreshResponse: ' + JSON.stringify(refreshResponse);
+                
+                res.send(message);
+            });
+        });
+    }
+    else {
+        res.redirect('login');
+    }
 });
 
 /*
@@ -64,20 +104,21 @@ if (parametersFile) {
 
 if (!parametersFile) {
   sampleParameters = {
-    tenant : 'rrandallaad1.onmicrosoft.com',
-    authorityHostUrl : 'https://login.windows.net',
-    clientId : '624ac9bd-4c1c-4686-aec8-b56a8991cfb3',
-    username : 'frizzo@naturalcauses.com',
-    password : ''
+    tenant : 'common',
+    authorityHostUrl : 'https://login.microsoftonline.com',
+    clientId : 'e1eb8a8d-7b0c-4a14-9313-3f2c25c82929',
+    username : '',
+    password : '',
+    clientSecret: ''
   };
 }
 
 var authorityUrl = sampleParameters.authorityHostUrl + '/' + sampleParameters.tenant;
-var redirectUri = 'http://localhost:3000/getAToken';
-var resource = '00000002-0000-0000-c000-000000000000';
+var redirectUri = 'https://cid.azurewebsites.net';
+var resource = 'https://outlook.office.com';
+var scope = ['openid','https://outlook.office.com/Mail.Read'];
 
-var templateAuthzUrl = 'https://login.windows.net/' + sampleParameters.tenant + '/oauth2/authorize?response_type=code&client_id=<client_id>&redirect_uri=<redirect_uri>&state=<state>&resource=<resource>';
-
+var templateAuthzUrl = 'https://login.microsoftonline.com/' + sampleParameters.tenant + '/oauth2/v2.0/authorize?response_type=code&client_id=<client_id>&redirect_uri=<redirect_uri>&state=<state>&x-client-SKU=Js&x-client-Ver=1.0.0&slice=testslice&msaproxy=true&scope=openid%20https%3A%2F%2Foutlook.office.com%2FMail.Read';
 
 app.get('/', function(req, res) {
   res.redirect('/login');
@@ -102,7 +143,6 @@ function createAuthorizationUrl(state) {
   var authorizationUrl = templateAuthzUrl.replace('<client_id>', sampleParameters.clientId);
   authorizationUrl = authorizationUrl.replace('<redirect_uri>',redirectUri);
   authorizationUrl = authorizationUrl.replace('<state>', state);
-  authorizationUrl = authorizationUrl.replace('<resource>', resource);
   return authorizationUrl;
 }
 
@@ -120,37 +160,6 @@ app.get('/auth', function(req, res) {
   });
 });
 
-// After consent is granted AAD redirects here.  The ADAL library is invoked via the
-// AuthenticationContext and retrieves an access token that can be used to access the
-// user owned resource.
-app.get('/getAToken', function(req, res) {
-  if (req.cookies.authstate !== req.query.state) {
-    res.send('error: state does not match');
-  }
-  var authenticationContext = new AuthenticationContext(authorityUrl);
-  authenticationContext.acquireTokenWithAuthorizationCode(req.query.code, redirectUri, resource, sampleParameters.clientId, sampleParameters.clientSecret, function(err, response) {
-    var message = '';
-    if (err) {
-      message = 'error: ' + err.message + '\n';
-    }
-    message += 'response: ' + JSON.stringify(response);
+https.createServer(options, app).listen(3000);
 
-    if (err) {
-      res.send(message);
-      return;
-    }
-
-    // Later, if the access token is expired it can be refreshed.
-    authenticationContext.acquireTokenWithRefreshToken(response.refreshToken, sampleParameters.clientId, sampleParameters.clientSecret, resource, function(refreshErr, refreshResponse) {
-      if (refreshErr) {
-        message += 'refreshError: ' + refreshErr.message + '\n';
-      }
-      message += 'refreshResponse: ' + JSON.stringify(refreshResponse);
-
-      res.send(message); 
-    }); 
-  });
-});
-
-app.listen(3000);
 console.log('listening on 3000');

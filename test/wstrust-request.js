@@ -32,7 +32,7 @@ var util = require('./util/util');
 var cp = util.commonParameters;
 var testRequire = util.testRequire;
 
-var WSTrustRequest = testRequire('wstrust-request');
+var WSTrustRequest = testRequire('../lib/wstrust-request');
 
 /**
  * Tests the WSTrustRequest class that creates and sends a ws-trust RST request.

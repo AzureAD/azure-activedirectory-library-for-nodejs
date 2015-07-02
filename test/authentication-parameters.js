@@ -32,7 +32,7 @@ var util = require('./util/util');
 var cp = util.commonParameters;
 var testRequire = util.testRequire;
 
-var adal = testRequire('adal');
+var adal = testRequire('../lib/adal');
 
 suite('authentication-parameters', function() {
   function runTestCases(testData, testFunc) {
@@ -54,7 +54,7 @@ suite('authentication-parameters', function() {
         var stack = !error || error.stack;
         assert(!error, assertPrefixMsg + 'Parse failed but should have succeeded. ' + stack);
         assert(parameters.authorizationUri === testParameters.authorizationUri, assertPrefixMsg + 'Parsed authorizationUri did not match expected value.: ' + parameters.authorizationUri);
-        assert(parameters.resource === testParameters.resource, assertPrefixMsg + 'Parsed resource  did not match expected value.: ' + parameters.resource);
+        assert(parameters.scope === testParameters.scope, assertPrefixMsg + 'Parsed scope did not match expected value.: ' + parameters.scope);
       } else {
         assert(error, assertPrefixMsg + 'Parse succeeded but should have failed.');
       }
@@ -64,91 +64,91 @@ suite('authentication-parameters', function() {
   test('create-from-header', function(done) {
     var testData = [
       [
-        'Bearer authorization_uri="foobar,lkfj,;l,", fruitcake="f",resource="clark, &^()- q32,shark" , f="foo"',
+        'Bearer authorization_uri="foobar,lkfj,;l,", fruitcake="f",scope="clark, &^()- q32,shark" , f="foo"',
         {
           'authorizationUri' : 'foobar,lkfj,;l,',
-          'resource' : 'clark, &^()- q32,shark',
+          'scope' : 'clark, &^()- q32,shark',
         }
       ],
       [
-        'Bearer  resource="clark, &^()- q32,shark", authorization_uri="foobar,lkfj,;l,"',
+        'Bearer  scope="clark, &^()- q32,shark", authorization_uri="foobar,lkfj,;l,"',
         {
           'authorizationUri' : 'foobar,lkfj,;l,',
-          'resource' : 'clark, &^()- q32,shark',
+          'scope' : 'clark, &^()- q32,shark',
         }
       ],
       [
-        'Bearer authorization_uri="' + cp.authorityTenant + '", resource="' + cp.resource + '"',
+        'Bearer authorization_uri="' + cp.authorityTenant + '", scope="' + util.parseScope(cp.scope) + '"',
         {
           'authorizationUri' : cp.authorityTenant,
-          'resource' : cp.resource,
+          'scope' : util.parseScope(cp.scope),
         }
       ],
       [
-        'Bearer authorization_uri="' + cp.authorizeUrl + '", resource="' + cp.resource + '"',
+        'Bearer authorization_uri="' + cp.authorizeUrl + '", scope="' + util.parseScope(cp.scope) + '"',
         {
           'authorizationUri' : cp.authorizeUrl,
-          'resource' : cp.resource,
+          'scope' : util.parseScope(cp.scope),
         }
       ],
       // Add second = sign on first pair.
       [
-        'Bearer authorization_uri=="foobar,lkfj,;l,", resource="clark, &^()- q32,shark",fruitcake="f" , f="foo"',
+        'Bearer authorization_uri=="foobar,lkfj,;l,", scope="clark, &^()- q32,shark",fruitcake="f" , f="foo"',
         null
       ],
       // Add second = sign on second pair.
       [
-        'Bearer authorization_uri="foobar,lkfj,;l,", resource=="clark, &^()- q32,shark",fruitcake="f" , f="foo"',
+        'Bearer authorization_uri="foobar,lkfj,;l,", scope=="clark, &^()- q32,shark",fruitcake="f" , f="foo"',
         null
       ],
       // Add second quote on first pair.
       [
-        'Bearer authorization_uri=""foobar,lkfj,;l,", resource="clark, &^()- q32,shark",fruitcake="f" , f="foo"',
+        'Bearer authorization_uri=""foobar,lkfj,;l,", scope="clark, &^()- q32,shark",fruitcake="f" , f="foo"',
         null
       ],
       // Add second quote on second pair.
       [
-        'Bearer authorization_uri=foobar,lkfj,;l,", resource="clark, &^()- q32,shark"",fruitcake="f" , f="foo"',
+        'Bearer authorization_uri=foobar,lkfj,;l,", scope="clark, &^()- q32,shark"",fruitcake="f" , f="foo"',
         null
       ],
       // Add trailing quote.
       [
-        'Bearer authorization_uri=foobar,lkfj,;l,", resource="clark, &^()- q32,shark",fruitcake="f" , f="foo""',
+        'Bearer authorization_uri=foobar,lkfj,;l,", scope="clark, &^()- q32,shark",fruitcake="f" , f="foo""',
         null
       ],
       // Add trailing comma at end of string.
       [
-        'Bearer authorization_uri=foobar,lkfj,;l,", resource="clark, &^()- q32,shark",fruitcake="f" , f="foo",',
+        'Bearer authorization_uri=foobar,lkfj,;l,", scope="clark, &^()- q32,shark",fruitcake="f" , f="foo",',
         null
       ],
       // Add second comma between 2 and 3 pairs.
       [
-        'Bearer authorization_uri=foobar,lkfj,;l,", resource="clark, &^()- q32,shark",fruitcake="f" ,, f="foo"',
+        'Bearer authorization_uri=foobar,lkfj,;l,", scope="clark, &^()- q32,shark",fruitcake="f" ,, f="foo"',
         null
       ],
       // Add second comma between 1 and 2 pairs.
       [
-        'Bearer authorization_uri=foobar,lkfj,;l,", , resource="clark, &^()- q32,shark",fruitcake="f" , f="foo"',
+        'Bearer authorization_uri=foobar,lkfj,;l,", , scope="clark, &^()- q32,shark",fruitcake="f" , f="foo"',
         null
       ],
       // Add random letter between Bearer and first pair.
       [
-        'Bearer  f authorization_uri=foobar,lkfj,;l,", resource="clark, &^()- q32,shark",fruitcake="f" , f="foo"',
+        'Bearer  f authorization_uri=foobar,lkfj,;l,", scope="clark, &^()- q32,shark",fruitcake="f" , f="foo"',
         null
       ],
       // Add random letter between 2 and 3 pair.
       [
-        'Bearer  authorization_uri=foobar,lkfj,;l,", a resource="clark, &^()- q32,shark",fruitcake="f" , f="foo"',
+        'Bearer  authorization_uri=foobar,lkfj,;l,", a scope="clark, &^()- q32,shark",fruitcake="f" , f="foo"',
         null
       ],
       // Add random letter between 3 and 2 pair.
       [
-        'Bearer  authorization_uri=foobar,lkfj,;l,", resource="clark, &^()- q32,shark",fruitcake="f" a, f="foo"',
+        'Bearer  authorization_uri=foobar,lkfj,;l,", scope="clark, &^()- q32,shark",fruitcake="f" a, f="foo"',
         null
       ],
       // Mispell Bearer
       [
-        'Berer authorization_uri=foobar,lkfj,;l,", resource="clark, &^()- q32,shark",fruitcake="f" , f="foo"',
+        'Berer authorization_uri=foobar,lkfj,;l,", scope="clark, &^()- q32,shark",fruitcake="f" , f="foo"',
         null
       ],
       // Missing resource.
@@ -160,7 +160,7 @@ suite('authentication-parameters', function() {
       ],
       // Missing authoritzation uri.
       [
-        'Bearer resource="clark, &^()- q32,shark",fruitcake="f" , f="foo"',
+        'Bearer scope="clark, &^()- q32,shark",fruitcake="f" , f="foo"',
         null
       ],
       // Boris's test.
@@ -169,7 +169,7 @@ suite('authentication-parameters', function() {
         null
       ],
       [
-        'Bearerauthorization_uri="authuri", resource="resourceHere"',
+        'Bearerauthorization_uri="authuri", scope="scopeHere"',
         null
       ],
     ];
@@ -183,17 +183,17 @@ suite('authentication-parameters', function() {
       [
         {
           statusCode : 401,
-          headers : { 'www-authenticate' : 'Bearer authorization_uri="foobar,lkfj,;l,", fruitcake="f",resource="clark, &^()- q32,shark" , f="foo"' }
+          headers : { 'www-authenticate' : 'Bearer authorization_uri="foobar,lkfj,;l,", fruitcake="f",scope="clark, &^()- q32,shark" , f="foo"' }
         },
         {
           'authorizationUri' : 'foobar,lkfj,;l,',
-          'resource' : 'clark, &^()- q32,shark',
+          'scope' : 'clark, &^()- q32,shark',
         }
       ],
       [
         {
           statusCode : 200,
-          headers : { 'www-authenticate' : 'Bearer authorization_uri="foobar,lkfj,;l,", fruitcake="f",resource="clark, &^()- q32,shark" , f="foo"' }
+          headers : { 'www-authenticate' : 'Bearer authorization_uri="foobar,lkfj,;l,", fruitcake="f",scope="clark, &^()- q32,shark" , f="foo"' }
         },
         null
       ],
@@ -213,7 +213,7 @@ suite('authentication-parameters', function() {
       [
         {
           statusCode : 401,
-          headers : { 'www-authenticate' : 'Berer authorization_uri=foobar,lkfj,;l,", resource="clark, &^()- q32,shark",fruitcake="f" , f="foo"' }
+          headers : { 'www-authenticate' : 'Berer authorization_uri=foobar,lkfj,;l,", scope="clark, &^()- q32,shark",fruitcake="f" , f="foo"' }
         },
         null
       ],
@@ -252,7 +252,7 @@ suite('authentication-parameters', function() {
                         })
                        .get(testPath)
                        .reply(401, 'foo',
-                         { 'www-authenticate' : 'Bearer authorization_uri="foobar,lkfj,;l,", fruitcake="f",resource="clark, &^()- q32,shark" , f="foo"' }
+                         { 'www-authenticate' : 'Bearer authorization_uri="foobar,lkfj,;l,", fruitcake="f",scope="clark, &^()- q32,shark" , f="foo"' }
                        );
 
     util.matchStandardRequestHeaders(getResource);
@@ -261,10 +261,10 @@ suite('authentication-parameters', function() {
       if (!err) {
         var testParameters = {
           'authorizationUri' : 'foobar,lkfj,;l,',
-          'resource' : 'clark, &^()- q32,shark',
+          'scope' : 'clark, &^()- q32,shark',
         };
         assert(parameters.authorizationUri === testParameters.authorizationUri, 'Parsed authorizationUri did not match expected value.: ' + parameters.authorizationUri);
-        assert(parameters.resource === testParameters.resource, 'Parsed resource  did not match expected value.: ' + parameters.resource);
+        assert(parameters.scope === testParameters.scope, 'Parsed scope  did not match expected value.: ' + parameters.scope);
         getResource.done();
       }
       done(err);
@@ -278,7 +278,7 @@ suite('authentication-parameters', function() {
                         })
                        .get(testPath)
                        .reply(401, 'foo',
-                         { 'www-authenticate' : 'Bearer authorization_uri="foobar,lkfj,;l,", fruitcake="f",resource="clark, &^()- q32,shark" , f="foo"' }
+                         { 'www-authenticate' : 'Bearer authorization_uri="foobar,lkfj,;l,", fruitcake="f",scope="clark, &^()- q32,shark" , f="foo"' }
                        );
 
     util.matchStandardRequestHeaders(getResource);
@@ -289,10 +289,10 @@ suite('authentication-parameters', function() {
       if (!err) {
         var testParameters = {
           'authorizationUri' : 'foobar,lkfj,;l,',
-          'resource' : 'clark, &^()- q32,shark',
+          'scope' : 'clark, &^()- q32,shark',
         };
         assert(parameters.authorizationUri === testParameters.authorizationUri, 'Parsed authorizationUri did not match expected value.: ' + parameters.authorizationUri);
-        assert(parameters.resource === testParameters.resource, 'Parsed resource  did not match expected value.: ' + parameters.resource);
+        assert(parameters.scope === testParameters.scope, 'Parsed scope did not match expected value.: ' + parameters.scope);
       }
       done(err);
     });

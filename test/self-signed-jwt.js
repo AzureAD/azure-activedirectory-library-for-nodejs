@@ -28,7 +28,7 @@ var util = require('./util/util');
 var cp = util.commonParameters;
 var testRequire = util.testRequire;
 
-var SelfSignedJwt = testRequire('self-signed-jwt');
+var SelfSignedJwt = testRequire('../lib/self-signed-jwt');
 
 var assert = require('assert');
 var sinon = require('sinon');
