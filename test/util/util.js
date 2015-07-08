@@ -103,6 +103,8 @@ parameters.authorityHosts = {
   gov : 'login.cloudgovapi.us'
 };
 
+parameters.policy = 'testing_policy';
+
 parameters.refreshToken = refreshToken;
 
 // This is a default authority to be used in tests that don't care that there are multiple.
@@ -270,6 +272,10 @@ util.createResponse = function(options, iteration) {
   cachedResponse['_clientId'] = parameters.clientId;
   cachedResponse['_authority'] = authority;
   cachedResponse['scope'] = util.parseScope(iterated['scope']);
+  if (options.policy && !_.isEmpty(options.policy)){
+    cachedResponse['policy'] = options.policy;
+  }
+
   if (options.mrrt) {
     cachedResponse.isMRRT = true;
   }
@@ -462,7 +468,7 @@ util.setupExpectedMexWSTrustRequestCommon = function() {
   return { done : doneFunc };
 };
 
-util.setupExpectedRefreshTokenRequestResponse = function(httpCode, returnDoc, authorityEndpoint, scope, clientSecret) {
+util.setupExpectedRefreshTokenRequestResponse = function(httpCode, returnDoc, authorityEndpoint, scope, clientSecret, policy, redirectUri) {
   var authEndpoint = authorityEndpoint || parameters.authority;
 
   var queryParameters = {};
@@ -476,9 +482,19 @@ util.setupExpectedRefreshTokenRequestResponse = function(httpCode, returnDoc, au
   if (clientSecret) {
     queryParameters['client_secret'] = clientSecret;
   }
+
   queryParameters['refresh_token'] = parameters.refreshToken;
 
-  return util.setupExpectedOAuthResponse(queryParameters, parameters.tokenUrlPath, httpCode, returnDoc, authEndpoint);
+  if (redirectUri){
+    queryParameters['redirect_uri'] = redirectUri;
+  }
+
+  var tokenUrlPath = parameters.tokenUrlPath;
+  if (policy && !_.isEmpty(policy)){
+    tokenUrlPath = parameters.tokenUrlPath + '&p=' + policy; 
+  }
+  
+  return util.setupExpectedOAuthResponse(queryParameters, tokenUrlPath, httpCode, returnDoc, authEndpoint);
 };
 
 util.setupExpectedClientAssertionTokenRequestResponse = function(httpCode, returnDoc, authorityEndpoint) {
