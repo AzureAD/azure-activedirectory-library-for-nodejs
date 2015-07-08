@@ -42,7 +42,6 @@ var options = {
 
 app.get('/', function(req, res) {
     if (req.query.code) {
-        console.log('Calling to acquire token');
         var authenticationContext = new AuthenticationContext(authorityUrl);
         process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
         authenticationContext.options = {
@@ -51,8 +50,7 @@ app.get('/', function(req, res) {
             }
         };
 
-        authenticationContext.acquireTokenWithAuthorizationCode(req.query.code, redirectUri, scope, sampleParameters.clientId, sampleParameters.clientSecret, sampleParameters.policy, function (err, response) {
-            console.log('getting response with the token request');
+        authenticationContext.acquireTokenWithAuthorizationCode(req.query.code, redirectUri, scope, sampleParameters.clientId, sampleParameters.clientSecret, function (err, response) {
             var message = '';
             if (err) {
                 message = 'error: ' + err.message + '\n';
@@ -63,11 +61,9 @@ app.get('/', function(req, res) {
                 res.send(message);
                 return;
             }
-
-            //res.send(message);
             
             //Later, if the access token is expired it can be refreshed.
-            authenticationContext.acquireTokenWithRefreshToken(response.refreshToken, sampleParameters.clientId, sampleParameters.clientSecret, scope, sampleParameters.policy, redirectUri, function (refreshErr, refreshResponse) {
+            authenticationContext.acquireTokenWithRefreshToken(response.refreshToken, sampleParameters.clientId, sampleParameters.clientSecret, scope, function (refreshErr, refreshResponse) {
                 if (refreshErr) {
                     message += 'refreshError: ' + refreshErr.message + '\n';
                 }
@@ -108,27 +104,21 @@ if (parametersFile) {
 
 if (!parametersFile) {
   sampleParameters = {
-    //tenant : 'common',
-    tenant : 'strockisdevthree.onmicrosoft.com',
+    tenant : 'common',
     authorityHostUrl : 'https://login.microsoftonline.com',
-    //clientId : 'e1eb8a8d-7b0c-4a14-9313-3f2c25c82929',
-    clientId : 'ec5465e6-f48e-4ec2-a76a-ea99891a8d84',
+    clientId : 'e1eb8a8d-7b0c-4a14-9313-3f2c25c82929',
     username : '',
     password : '',
-    clientSecret: 'thlN3jYRQa8468VjVu0G8FxDXcDk0LIKC9Nfkim8WXM=', 
-    policy : 'b2c_1_sign_in'
+    clientSecret: ''
   };
 }
 
 var authorityUrl = sampleParameters.authorityHostUrl + '/' + sampleParameters.tenant;
-//var redirectUri = 'https://cid.azurewebsites.net';
-var redirectUri = 'https://localhost:44316/';
+var redirectUri = 'https://cid.azurewebsites.net';
 var resource = 'https://outlook.office.com';
-//var scope = ['openid','https://outlook.office.com/Mail.Read'];
-var scope = ['openid'];
+var scope = ['openid','https://outlook.office.com/Mail.Read'];
 
-//var templateAuthzUrl = 'https://login.microsoftonline.com/' + sampleParameters.tenant + '/oauth2/v2.0/authorize?response_type=code&client_id=<client_id>&redirect_uri=<redirect_uri>&state=<state>&x-client-SKU=Js&x-client-Ver=1.0.0&slice=testslice&msaproxy=true&scope=openid%20https%3A%2F%2Foutlook.office.com%2FMail.Read';
-var templateAuthzUrl = 'https://login.microsoftonline.com/' + sampleParameters.tenant + '/oauth2/authorize?response_type=code&client_id=<client_id>&redirect_uri=<redirect_uri>&state=<state>&x-client-SKU=Js&x-client-Ver=1.0.0&slice=testslice&msaproxy=true&scope=openid&p=b2c_1_sign_in';
+var templateAuthzUrl = 'https://login.microsoftonline.com/' + sampleParameters.tenant + '/oauth2/v2.0/authorize?response_type=code&client_id=<client_id>&redirect_uri=<redirect_uri>&state=<state>&x-client-SKU=Js&x-client-Ver=1.0.0&slice=testslice&msaproxy=true&scope=openid%20https%3A%2F%2Foutlook.office.com%2FMail.Read';
 
 app.get('/', function(req, res) {
   res.redirect('/login');
