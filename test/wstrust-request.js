@@ -32,7 +32,10 @@ var util = require('./util/util');
 var cp = util.commonParameters;
 var testRequire = util.testRequire;
 
-var WSTrustRequest = testRequire('wstrust-request');
+var xmldom = require('xmldom');
+var DOMParser = xmldom.DOMParser;
+
+var WSTrustRequest = testRequire('../lib/wstrust-request');
 
 /**
  * Tests the WSTrustRequest class that creates and sends a ws-trust RST request.
@@ -138,6 +141,28 @@ suite('WSTrustRequest', function() {
       assert(err, 'Did not recieve expected error.');
       done();
     });
+  });
+
+  test('xml-format-test', function (done) { 
+    var username = 'test_username';
+    var password = 'test_password&<>\'"';
+    var appliesTo = 'test_appliesTo';
+    var templateRST = fs.readFileSync(__dirname + '/wstrust/RST.xml', 'utf8');
+
+    var rst = new WSTrustRequest(cp.callContext, wstrustEndpoint, appliesTo)._buildRST(username, password);
+
+    var options = {
+        errorHandler : function () { throw new Error(); }
+    };
+    
+    try {
+        new DOMParser(options).parseFromString(rst);
+    }
+    catch (e) { 
+       assert(!e, 'Unexpected error received.');
+    }
+    
+    done();
   });
 });
 
