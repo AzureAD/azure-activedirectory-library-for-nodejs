@@ -100,6 +100,8 @@ parameters.authorityHosts = {
   china : 'login.chinacloudapi.cn',
   gov : 'login.cloudgovapi.us'
 };
+parameters.language = 'en';
+parameters.deviceCode = 'ABCDE:device_code';
 
 parameters.refreshToken = refreshToken;
 
@@ -117,6 +119,8 @@ parameters.successResponseWithRefresh = successResponseWithRefresh;
 parameters.authUrl = url.parse(parameters.evoEndpoint + '/' + parameters.tenant);
 parameters.tokenPath = '/oauth2/token';
 parameters.tokenUrlPath = parameters.authUrl.pathname + parameters.tokenPath;
+parameters.deviceCodePath = '/oauth2/devicecode'
+parameters.deviceCodeUrlPath = parameters.authUrl.pathname + parameters.deviceCodePath;
 parameters.authorizePath = '/oauth/authorize';
 parameters.authorizeUrlPath = parameters.authUrl.pathname + parameters.authorizePath;
 parameters.authorizeUrl = parameters.authUrl.href + parameters.authorizePath;
@@ -191,6 +195,15 @@ TOKEN_RESPONSE_MAP['expires_in'] = 'expiresIn';
 TOKEN_RESPONSE_MAP['error'] = 'error';
 TOKEN_RESPONSE_MAP['error_description'] = 'errorDescription';
 TOKEN_RESPONSE_MAP['resource'] = 'resource';
+
+var DEVICE_CODE_RESPONSE_MAP = {};
+DEVICE_CODE_RESPONSE_MAP['device_code'] = 'device_code';
+DEVICE_CODE_RESPONSE_MAP['user_code'] = 'user_code';
+DEVICE_CODE_RESPONSE_MAP['verification_url'] = 'verification_url';
+DEVICE_CODE_RESPONSE_MAP['interval'] = 'interval';
+DEVICE_CODE_RESPONSE_MAP['expires_in'] = 'expires_in';
+DEVICE_CODE_RESPONSE_MAP['error'] = 'error';
+DEVICE_CODE_RESPONSE_MAP['error_description'] = 'error_description';
 
 function mapFields(inObj, outObj, map) {
   for (var key in inObj) {
@@ -279,6 +292,28 @@ util.createResponse = function(options, iteration) {
     clientId : cachedResponse['_clientId'],
     authority : authority
   };
+};
+
+util.createDeviceCodeResponse = function (options, iteration) {
+    options = options || {};
+    
+    var authority = options.authority || parameters.authorityTenant;
+    var resource = options.resource || parameters.resource;
+
+    var wireResponse = {};
+    wireResponse['expires_in'] = 28800;
+    wireResponse['device_code'] = 'device_code:12345';
+    wireResponse['user_code'] = 'user_code:12345';
+    wireResponse['verification_url'] = 'go:to:verify';
+    wireResponse['interval'] = 5;
+
+    var decodedResponse = {};
+    mapFields(wireResponse, decodedResponse, DEVICE_CODE_RESPONSE_MAP);
+
+    return {
+       wireResponse : wireResponse, 
+       decodedResponse : decodedResponse
+    };
 };
 
 util.compareQueryStrings = function(left, right) {
@@ -547,6 +582,24 @@ util.isMatchTokenResponse = function(expected, received, print) {
 
   var isEqual = _.isEqual(expectedClone, receivedClone);
   return isEqual;
+};
+
+util.isMathDeviceCodeResponse = function(expected, received, print) {
+   if (print) {
+      console.log('DIFFS');
+      util.findDiffs(expected, received);
+      console.log('EXPECTED');
+      console.log(expected);
+      console.log('RECEIVED');
+      console.log(received);
+   }
+
+   var receivedClone = _.clone(received);
+   var expectedClone = _.clone(expected);
+
+   var isEqual = _.isEqual(expectedClone, receivedClone);
+
+   return isEqual;
 };
 
 util.createTokenResponseWithIdToken = function(response) {
