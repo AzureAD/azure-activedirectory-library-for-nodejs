@@ -99,14 +99,14 @@ suite('CacheDriver', function() {
   }
 
 
-  test('add-entry', function(done) {
+  test('add-entry-without-policy', function(done) {
     var fakeTokenRequest = util.createEmptyADALObject();
 
     var response = util.createResponse();
     var expectedResponse = response.cachedResponse;
 
     var memCache = new MemoryCache();
-    var cacheDriver = new CacheDriver(fakeTokenRequest._callContext, response.authority, response.scope, response.clientId, memCache, unexpectedRefreshFunction);
+    var cacheDriver = new CacheDriver(fakeTokenRequest._callContext, response.authority, response.scope, response.clientId, null, memCache, unexpectedRefreshFunction);
 
     cacheDriver.add(response.decodedResponse, function(err) {
       var stack = err ? err.stack : null;
@@ -118,12 +118,178 @@ suite('CacheDriver', function() {
     });
   });
 
+  test('add-entry-with-policy', function(done) {
+     var fakeTokenRequest = util.createEmptyADALObject();
+            
+     var options = {};
+     options.policy = cp.policy;
+     var response = util.createResponse(options);
+     var expectedResponse = response.cachedResponse;
+            
+     var memCache = new MemoryCache();
+     var cacheDriver = new CacheDriver(fakeTokenRequest._callContext, response.authority, response.scope, response.clientId, cp.policy, memCache, unexpectedRefreshFunction);
+
+     cacheDriver.add(response.decodedResponse, function(err) {
+        var stack = err ? err.stack : null;
+        assert(!err, 'Received unexpected error: ' + stack);
+        var length = memCache._entries.length;
+        assert(length === 1, 'Cache after test has does not have the correct number of entries ' + length + ': ' + memCache._entries);
+        assertEntriesEqual(expectedResponse, memCache._entries[0], 'The saved cache entry has been modified');
+        done();
+     });
+  });
+
+  test('cache-lookup-scope', function (done) {
+     var fakeTokenRequest = util.createEmptyADALObject();
+     var memCache = new MemoryCache();
+
+     var response1 = util.createResponse();
+     var cacheDriver1 = new CacheDriver(fakeTokenRequest._callContext, response1.authority, response1.scope, response1.clientId, cp.policy, memCache, unexpectedRefreshFunction);
+     cacheDriver1.add(response1.decodedResponse, function (err) {
+        var stack = err ? err.stack : null;
+        assert(!err, 'Received unexpected error: ' + stack);
+     });   
+     
+     var scope = ['00000002-0000-0000-c000-000000000000/openid'];
+     var query = {
+       clientId : cp.clientId, 
+       scope : scope
+     }
+
+     var cacheDriver = new CacheDriver(fakeTokenRequest._callContext, response1.authority, response1.scope, response1.clientId, cp.policy, memCache, unexpectedRefreshFunction);
+     cacheDriver.find(query, function(err, entry) {
+        assert(!err, 'Unexpected error received');
+        assert(entry, 'Expected a matching entry, but none was returned.');
+     });
+
+     scope = ['00000002-0000-0000-c000-000000000000/openid', '00000002-0000-0000-c000-000000000000/mail.read', '00000002-0000-0000-c000-000000000000/mail.Write'];
+     query = {
+        clientId : cp.clientId, 
+        scope : scope
+     }
+     var cacheDriver2 = new CacheDriver(fakeTokenRequest._callContext, response1.authority, scope, response1.clientId, cp.policy, memCache, unexpectedRefreshFunction);
+     cacheDriver2.find(query, function(err, entry) {
+        assert(!err, 'Receive unexpected error.')
+        assert(!entry, 'No matching record should be returned.');
+     });
+     done();
+  });
+    
+  test('manage-cache', function (done) {
+     var fakeTokenRequest = util.createEmptyADALObject();
+     var memCache = new MemoryCache();
+
+     var options = {};
+     options.policy = cp.policy;
+     var response = util.createResponse(options);
+
+     var cacheDriver = new CacheDriver(fakeTokenRequest._callContext, response.authority, response.scope, response.clientId, cp.policy, memCache, unexpectedRefreshFunction);
+     cacheDriver.add(response.decodedResponse, function(err) {
+        assert(!err, 'Receive unexpected error.');
+     });
+
+     var scope = ['00000002-0000-0000-c000-000000000000/openid', '00000002-0000-0000-c000-000000000000/mail.read', '00000002-0000-0000-c000-000000000000/mail.Write'];
+     options.scope = scope;
+     var response2 = util.createResponse(options);
+     var cacheDriver2 = new CacheDriver(fakeTokenRequest._callContext, response.authority, scope, response.clientId, cp.policy, memCache, unexpectedRefreshFunction);
+     cacheDriver2.manageCache(response2.decodedResponse, function(err) {
+        assert(!err);
+     })
+
+     var query = {
+        clientId : cp.clientId, 
+        policy : cp.policy
+     }
+
+     cacheDriver2.find(query, function(err, entry) {
+        assert(!err, 'Receives unexpected error.');
+        assert(entry, 'Expected a matching entry, but none was returned');
+        assert.equal(entry.scope, util.parseScope(scope), 'scope is not as expected');
+     });
+
+     done();
+  });
+
+  test('cache-lookup-policy', function (done) {
+    var fakeTokenRequest = util.createEmptyADALObject();
+    var memCache = new MemoryCache();
+
+    // insert one with policy
+    var options = {};
+    options.policy = cp.policy;
+    var response1 = util.createResponse(options);
+    var cacheDriver1 = new CacheDriver(fakeTokenRequest._callContext, response1.authority, response1.scope, response1.clientId, cp.policy, memCache, unexpectedRefreshFunction);
+    cacheDriver1.add(response1.decodedResponse, function(err) {
+       var stack = err ? err.stack : null;
+       assert(!err, 'Received unexpected error: ' + stack);
+    });   
+
+    // create another entry without policy. 
+    var response2 = util.createResponse();
+    var cacheDriver2 = new CacheDriver(fakeTokenRequest._callContext, response2.authority, response2.scope, response2.clientId, null, memCache, unexpectedRefreshFunction);
+    cacheDriver2.add(response2.decodedResponse, function(err) {
+       var stack = err ? err.stack : null;
+       assert(!err, 'Received unexpected error: ' + stack);
+    });
+
+    // construct the query for lookup
+    var query = {
+        clientId : cp.clientId, 
+        policy : cp.policy, 
+        scope : cp.scope
+    };
+
+    // test cache look up with policy
+    var lookupCacheDriver = new CacheDriver(fakeTokenRequest._callContext, cp.authorityTenant, cp.scope, cp.clientId, cp.policy, memCache, unexpectedRefreshFunction);
+    lookupCacheDriver.find(query, function(err, entry) {
+        assert (!err, 'Unexpected error received');
+        assert(entry, 'Expected a matching entry, but none was returned.');  
+    });
+
+    // test cache look up with policy
+    query = {
+       clientId : cp.clientId, 
+       scope : cp.scope
+    }; 
+    var lookupCacheDriver2 = new CacheDriver(fakeTokenRequest._callContext, cp.authorityTenant, cp.scope, cp.clientId, null, memCache, unexpectedRefreshFunction);
+    lookupCacheDriver2.find(query, function (err, entry) {
+       assert(err, 'Expecting error for the cache lookup');
+       assert(err.message === 'More than one token matches the criteria.  The result is ambiguous.', 'unexpected error message received');
+    }); 
+
+    //test cache look up with policy but a subset scope, expecte one entry to be found
+    var scope = ['00000002-0000-0000-c000-000000000000/openid'];
+    query = {
+       clientId : cp.clientId, 
+       policy : cp.policy, 
+       scope : scope
+    };
+    var lookupCacheDriver3 = new CacheDriver(fakeTokenRequest._callContext, cp.authorityTenant, scope, cp.clientId, cp.policy, memCache, unexpectedRefreshFunction);
+    lookupCacheDriver3.find(query, function (err, entry) {
+        assert(!err, 'Unexpected error received');
+        assert(entry, 'Expected a matching entry, but none was returned.');  
+    });
+
+    // test cache look up with a subset scope but not policy, expect error returned. 
+    query = {
+       clientId : cp.clientId, 
+       scope : scope
+    }
+    var lookupCacheDriver4 = new CacheDriver(fakeTokenRequest._callContext, cp.authorityTenant, scope, cp.clientId, null, memCache, unexpectedRefreshFunction);
+    lookupCacheDriver4.find(query, function (err, entry) {
+        assert(err, 'Expecting error for the cache lookup');
+        assert(err.message === 'More than one token matches the criteria.  The result is ambiguous.', 'unexpected error message received');
+    });
+
+    done();
+  });
+
   test('add-entry-no-cache', function(done) {
     var fakeTokenRequest = util.createEmptyADALObject();
 
     var response = util.createResponse();
 
-    var cacheDriver = new CacheDriver(fakeTokenRequest._callContext, response.authority, response.scope, cp.clientId, null, unexpectedRefreshFunction);
+    var cacheDriver = new CacheDriver(fakeTokenRequest._callContext, response.authority, response.scope, cp.clientId, null, null, unexpectedRefreshFunction);
 
     cacheDriver.add(response.decodedResponse, function(err) {
       var stack = err ? err.stack : null;
@@ -138,11 +304,10 @@ suite('CacheDriver', function() {
     var responseOptions = { mrrt : true };
     var response = util.createResponse(responseOptions);
     var expectedResponse = response.cachedResponse;
-    //var resource = response.resource;
     var scope = response.scope;
 
     var memCache = new MemoryCache();
-    var cacheDriver = new CacheDriver(fakeTokenRequest._callContext, response.authority, scope, cp.clientId, memCache, unexpectedRefreshFunction);
+    var cacheDriver = new CacheDriver(fakeTokenRequest._callContext, response.authority, scope, cp.clientId, null, memCache, unexpectedRefreshFunction);
 
     cacheDriver.add(response.decodedResponse, function(err) {
       var stack = err ? err.stack : null;
@@ -161,7 +326,7 @@ suite('CacheDriver', function() {
    *                            be smaller than numEntries.
    * @param  {Function} callback   returns an object with the CacheDriver etc...
    */
-  function fillCache(numEntries, numMrrt, addExpired, callback) {
+  function fillCache(numEntries, numMrrt, addExpired, policy, callback) {
     var fakeTokenRequest = util.createEmptyADALObject();
 
     var memCache = new MemoryCache();
@@ -191,7 +356,7 @@ suite('CacheDriver', function() {
       function(callback) {
         var scope = responses[count].scope;
         var clientId = responses[count].clientId;
-        var cacheDriver = new CacheDriver(fakeTokenRequest._callContext, authority, scope, clientId, memCache, unexpectedRefreshFunction);
+        var cacheDriver = new CacheDriver(fakeTokenRequest._callContext, authority, scope, clientId, null, memCache, unexpectedRefreshFunction);
         var responseToAdd = _.clone(responses[count].decodedResponse);
         cacheDriver.add(responseToAdd, function(err) {
           count++;
@@ -222,7 +387,7 @@ suite('CacheDriver', function() {
 
   test('add-multiple-entries-ensure-authority-respected', function(done) {
     var numMRRTTokens = 6;
-    fillCache(20, numMRRTTokens, false, function(err, testValues) {
+    fillCache(20, numMRRTTokens, false, null, function(err, testValues) {
       var responses = testValues.cachedResponses;
       var memCache = testValues.memCache;
       var fakeTokenRequest = testValues.fakeTokenRequest;
@@ -241,11 +406,11 @@ suite('CacheDriver', function() {
 
         // order is important here.  We want to ensure that when we add the second MRRT it has only updated
         // the refresh token of the entries with the same authority.
-        var cacheDriver = new CacheDriver(fakeTokenRequest._callContext, otherAuthority, differentAuthorityResponse.scope, differentAuthorityResponse.clientId, memCache, unexpectedRefreshFunction);
+        var cacheDriver = new CacheDriver(fakeTokenRequest._callContext, otherAuthority, differentAuthorityResponse.scope, differentAuthorityResponse.clientId, null, memCache, unexpectedRefreshFunction);
         cacheDriver.add(differentAuthorityResponse.decodedResponse, function(err) {
           assert(!err, 'Unexpected err adding entry with different authority.');
 
-          var cacheDriver2 = new CacheDriver(fakeTokenRequest._callContext, cp.authorityTenant, extraMRRTResponse.scope, extraMRRTResponse.clientId, memCache, unexpectedRefreshFunction);
+          var cacheDriver2 = new CacheDriver(fakeTokenRequest._callContext, cp.authorityTenant, extraMRRTResponse.scope, extraMRRTResponse.clientId, null, memCache, unexpectedRefreshFunction);
           cacheDriver2.add(extraMRRTResponse.decodedResponse, function(err2) {
             assert(!err2, 'Unexpected error adding second entry with previous authority.');
             compareInputAndCache(responses, memCache, numMRRTTokens);
@@ -264,7 +429,7 @@ suite('CacheDriver', function() {
 
   test('add-multiple-entries-find-non-mrrt', function(done) {
     var numMRRTTokens = 6;
-    fillCache(20, numMRRTTokens, false, function(err, testValues) {
+    fillCache(20, numMRRTTokens, false, null, function(err, testValues) {
       var responses = testValues.cachedResponses;
       var memCache = testValues.memCache;
       var fakeTokenRequest = testValues.fakeTokenRequest;
@@ -273,7 +438,7 @@ suite('CacheDriver', function() {
         compareInputAndCache(responses, memCache, numMRRTTokens);
 
         var findResponse = _.find(responses, function(entry) { return !entry.isMRRT; });
-        var cacheDriver = new CacheDriver(fakeTokenRequest._callContext, cp.authorityTenant, findResponse.scope.split(' '), findResponse.clientId, memCache, unexpectedRefreshFunction);
+        var cacheDriver = new CacheDriver(fakeTokenRequest._callContext, cp.authorityTenant, findResponse.scope.split(' '), findResponse.clientId, null, memCache, unexpectedRefreshFunction);
 
         cacheDriver.find({}, function(err, entry) {
           if (!err) {
@@ -292,7 +457,7 @@ suite('CacheDriver', function() {
 
   test('add-multiple-entries-mrrt', function(done) {
     var numMRRTTokens = 6;
-    fillCache(19, numMRRTTokens, false, function(err, testValues) {
+    fillCache(19, numMRRTTokens, false, null, function(err, testValues) {
       var responses = testValues.cachedResponses;
       var memCache = testValues.memCache;
       var finalMrrt = testValues.finalMrrt;
@@ -313,7 +478,7 @@ suite('CacheDriver', function() {
   //     correctly.
   test('add-multiple-entries-mrrt-different-users--url-safe-id_token', function(done) {
     var numMRRTTokens = 6;
-    fillCache(19, numMRRTTokens, false, function(err, testValues) {
+    fillCache(19, numMRRTTokens, false, null, function(err, testValues) {
       var responses = testValues.cachedResponses;
       var memCache = testValues.memCache;
       var finalMrrt = testValues.finalMrrt;
@@ -329,7 +494,7 @@ suite('CacheDriver', function() {
 
       responses.push(refreshedResponse.cachedResponse);
 
-      var cacheDriver = new CacheDriver(fakeTokenRequest._callContext, testValues.authority, refreshedResponse.scope, refreshedResponse.clientId, memCache, unexpectedRefreshFunction);
+      var cacheDriver = new CacheDriver(fakeTokenRequest._callContext, testValues.authority, refreshedResponse.scope, refreshedResponse.clientId, null, memCache, unexpectedRefreshFunction);
       cacheDriver.add(refreshedResponse.decodedResponse, function(err) {
         if (!err) {
           compareInputAndCache(responses, memCache, numMRRTTokens + 1, finalMrrt);
@@ -342,7 +507,7 @@ suite('CacheDriver', function() {
 
   test('add-multiple-entries-find-mrrt', function(done) {
     var numMRRTTokens = 6;
-    fillCache(20, numMRRTTokens, false, function(err, testValues) {
+    fillCache(20, numMRRTTokens, false, null, function(err, testValues) {
       var responses = testValues.cachedResponses;
       var memCache = testValues.memCache;
       var fakeTokenRequest = testValues.fakeTokenRequest;
@@ -352,7 +517,7 @@ suite('CacheDriver', function() {
       if (!err) {
         compareInputAndCache(responses, memCache, numMRRTTokens);
 
-        var cacheDriver = new CacheDriver(fakeTokenRequest._callContext, cp.authorityTenant, mrrtEntry.scope.split(','), mrrtEntry._clientId, memCache, unexpectedRefreshFunction);
+        var cacheDriver = new CacheDriver(fakeTokenRequest._callContext, cp.authorityTenant, mrrtEntry.scope.split(','), mrrtEntry._clientId, null, memCache, unexpectedRefreshFunction);
         cacheDriver.find({}, function(err, entry) {
           if (!err) {
             assert(entry, 'Find did not return any entry');
@@ -387,7 +552,7 @@ suite('CacheDriver', function() {
 
   test('add-multiple-entries-mrrt-find-refreshed-mrrt', function(done) {
     var numMRRTTokens = 5;
-    fillCache(20, 5, false, function(err, testValues) {
+    fillCache(20, 5, false, null, function(err, testValues) {
       var responses = testValues.cachedResponses;
       var memCache = testValues.memCache;
       var fakeTokenRequest = testValues.fakeTokenRequest;
@@ -404,7 +569,7 @@ suite('CacheDriver', function() {
         compareInputAndCache(responses, memCache, numMRRTTokens, finalMrrt);
 
         responses.push(refreshedResponse.cachedResponse);
-        var cacheDriver = new CacheDriver(fakeTokenRequest._callContext, authority, unknownScope, cp.clientId, memCache, refreshFunction);
+        var cacheDriver = new CacheDriver(fakeTokenRequest._callContext, authority, unknownScope, cp.clientId, null, memCache, refreshFunction);
         cacheDriver.find(null, function(err, entry) {
           if (!err) {
             assert(entry, 'Expected a matching entry, but none was returned.');
@@ -442,7 +607,7 @@ suite('CacheDriver', function() {
 
   test('add-multiple-entries-failed-mrrt-refresh', function(done) {
     var numMRRTTokens = 5;
-    fillCache(20, 5, false, function(err, testValues) {
+    fillCache(20, 5, false, null, function(err, testValues) {
       var responses = testValues.cachedResponses;
       var memCache = testValues.memCache;
       var fakeTokenRequest = testValues.fakeTokenRequest;
@@ -455,7 +620,7 @@ suite('CacheDriver', function() {
       if (!err) {
         compareInputAndCache(responses, memCache, numMRRTTokens, finalMrrt);
 
-        var cacheDriver = new CacheDriver(fakeTokenRequest._callContext, authority, unknownResource, cp.clientId, memCache, refreshFunction);
+        var cacheDriver = new CacheDriver(fakeTokenRequest._callContext, authority, unknownResource, cp.clientId, null, memCache, refreshFunction);
         cacheDriver.find(null, function(err) {
           assert(err, 'Did not receive expected error.');
           assert(-1 !== err.message.indexOf('FAILED REFRESH'), 'Error message did not contain correct text');
@@ -481,7 +646,7 @@ suite('CacheDriver', function() {
 
   test('expired-access-token', function(done) {
     var numMRRTTokens = 5;
-    fillCache(20, 5, true, function(err, testValues) {
+    fillCache(20, 5, true, null, function(err, testValues) {
       var responses = testValues.cachedResponses;
       var memCache = testValues.memCache;
       var fakeTokenRequest = testValues.fakeTokenRequest;
@@ -499,7 +664,7 @@ suite('CacheDriver', function() {
 
         responses = removeResponse(responses, expiredEntry);
         responses.push(refreshedResponse.cachedResponse);
-        var cacheDriver = new CacheDriver(fakeTokenRequest._callContext, authority, expiredEntry.scope.split(' '), cp.clientId, memCache, refreshFunction);
+        var cacheDriver = new CacheDriver(fakeTokenRequest._callContext, authority, expiredEntry.scope.split(' '), cp.clientId, null, memCache, refreshFunction);
         cacheDriver.find(null, function(err, entry) {
           if (!err) {
             assert(entry, 'Expected a matching entry, but none was returned.');
@@ -535,7 +700,7 @@ suite('CacheDriver', function() {
 
   test('expired-access-token-failed-refresh', function(done) {
     var numMRRTTokens = 5;
-    fillCache(20, 5, true, function(err, testValues) {
+    fillCache(20, 5, true, null, function(err, testValues) {
       var responses = testValues.cachedResponses;
       var memCache = testValues.memCache;
       var fakeTokenRequest = testValues.fakeTokenRequest;
@@ -548,7 +713,7 @@ suite('CacheDriver', function() {
       if (!err) {
         compareInputAndCache(responses, memCache, numMRRTTokens, finalMrrt);
 
-        var cacheDriver = new CacheDriver(fakeTokenRequest._callContext, authority, expiredEntry.scope.split(' '), cp.clientId, memCache, refreshFunction);
+        var cacheDriver = new CacheDriver(fakeTokenRequest._callContext, authority, expiredEntry.scope.split(' '), cp.clientId, null, memCache, refreshFunction);
         cacheDriver.find(null, function(err) {
           assert(err, 'Did not receive expected error about failed refresh.');
           assert(-1 !== err.message.indexOf('FAILED REFRESH'), 'Error message did not contain correct text');

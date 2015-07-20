@@ -41,8 +41,23 @@ var AuthenticationContext = adal.AuthenticationContext;
 suite('authorization-code', function() {
   var authorizationCode = '1234870909';
   var redirectUri = 'app_bundle:foo.bar.baz';
+  var policy = 'testing_policy';
+  
+  function setupQueryParameters(withPolicy){
+    var queryParameters = {};
+    queryParameters['grant_type'] = 'authorization_code';
+    queryParameters['code'] = authorizationCode;
+    queryParameters['client_id'] = cp.clientId;
+    queryParameters['client_secret'] = cp.clientSecret;
+    queryParameters['redirect_uri'] = redirectUri;
+    queryParameters['scope'] = util.parseScope(cp.scope);
+    
+    if (withPolicy){
+       queryParameters['p'] = policy; 
+    }
+  }
 
-  function setupExpectedAuthCodeTokenRequestResponse(httpCode, returnDoc, authorityEndpoint) {
+  function setupExpectedAuthCodeTokenRequestResponse(queryParameters, httpCode, returnDoc, authorityEndpoint) {
     var authEndpoint = util.getNockAuthorityHost(authorityEndpoint);
 
     var queryParameters = {};
@@ -66,12 +81,12 @@ suite('authorization-code', function() {
     return tokenRequest;
   }
 
-  test('happy-path', function(done) {
+  test('happy-path-without-policy', function(done) {
     var response = util.createResponse();
-    var tokenRequest = setupExpectedAuthCodeTokenRequestResponse(200, response.wireResponse);
+    var tokenRequest = setupExpectedAuthCodeTokenRequestResponse(setupQueryParameters(false), 200, response.wireResponse);
 
     var context = new AuthenticationContext(cp.authUrl);
-    context.acquireTokenWithAuthorizationCode(authorizationCode, redirectUri, response.scope, cp.clientId, cp.clientSecret, function (err, tokenResponse) {
+    context.acquireTokenWithAuthorizationCode(authorizationCode, redirectUri, response.scope, cp.clientId, cp.clientSecret, null, function (err, tokenResponse) {
       if (!err) {
         assert(util.isMatchTokenResponse(response.decodedResponse, tokenResponse), 'The response did not match what was expected');
         tokenRequest.done();
@@ -80,25 +95,82 @@ suite('authorization-code', function() {
     });
   });
 
+  test('happy-path-with-policy', function(done) {
+    var response = util.createResponse();
+    var tokenRequest = setupExpectedAuthCodeTokenRequestResponse(setupQueryParameters(true), 200, response.wireResponse);
+        
+    var context = new AuthenticationContext(cp.authUrl);
+    context.acquireTokenWithAuthorizationCode(authorizationCode, redirectUri, response.scope, cp.clientId, cp.clientSecret, null, function (err, tokenResponse) {
+        if (!err) {
+           assert(util.isMatchTokenResponse(response.decodedResponse, tokenResponse), 'The response did not match what was expected');
+           tokenRequest.done();
+        }
+        done(err);
+     });
+  });
+
   test('failed-http-request', function(done) {
     this.timeout(6000);
     this.slow(4000);  // This test takes longer than I would like to fail.  It probably needs a better way of producing this error.
 
     nock.enableNetConnect();
     var context = new AuthenticationContext('https://0.1.1.1:12/my.tenant.com');
-    //context.acquireTokenWithAuthorizationCode(authorizationCode, redirectUri, cp.resource, cp.clientId, cp.clientSecret, function (err) {
-    context.acquireTokenWithAuthorizationCode(authorizationCode, redirectUri, cp.scope, cp.clientId, cp.clientSecret, function (err) {
+    context.acquireTokenWithAuthorizationCode(authorizationCode, redirectUri, cp.scope, cp.clientId, cp.clientSecret, null, function (err) {
       assert(err, 'Did not recieve expected error on failed http request.');
-      nock.disableNetConnect();
-      done();
     });
+
+    context.acquireTokenWithAuthorizationCode(authorizationCode, redirectUri, cp.scope, cp.clientId, cp.clientSecret, policy, function (err) {
+       assert(err, 'Did not recieve expected error on failed http request.');
+       nock.disableNetConnect();
+       done();
+    })
   });
 
   test('bad-argument', function(done) {
     var context = new AuthenticationContext(cp.authUrl);
-    context.acquireTokenWithAuthorizationCode(authorizationCode, redirectUri, null, cp.clientId, cp.clientSecret, function (err) {
+    
+    context.acquireTokenWithAuthorizationCode(authorizationCode, redirectUri, null, cp.clientId, cp.clientSecret, null, function (err) {
       assert(err, 'Did not receive expected argument error.');
-      done();
     });
+
+    //no callback
+    try{
+       context.acquireTokenWithAuthorizationCode(authorizationCode, redirectUri, cp.scope, cp.clientId, cp.clientSecret, null);
+    } catch (e) {
+       assert(e, 'Expect error returned');
+       assert(e.message === 'acquireToken requires a function callback parameter.', 'Unexpected error message returned.');
+    }
+
+    // scope is null
+    context.acquireTokenWithAuthorizationCode(authorizationCode, redirectUri, null, cp.clientId, cp.clientSecret, null, function (err) {
+       assert(err, 'Did not receive expected argument error.');
+       assert(err.message === 'The scope parameter is required.');
+    })
+
+    // scope is not array
+    context.acquireTokenWithAuthorizationCode(authorizationCode, redirectUri, 'scope', cp.clientId, cp.clientSecret, null, function (err) {
+       assert(err, 'Did not receive expected argument error.');
+       assert(err.message === 'The scope parameter must be of type Array.', 'Unexpected error message returned.');
+    })
+
+    // scope contains non-string argument
+    context.acquireTokenWithAuthorizationCode(authorizationCode, redirectUri, ['scope', 1], cp.clientId, cp.clientSecret, null, function (err) {
+       assert(err, 'Did not receive expected argument error.');
+       assert(err.message === 'The scope parameter must be consisted of an array of String');
+    })
+
+    // clientId is null
+    context.acquireTokenWithAuthorizationCode(authorizationCode, redirectUri, cp.scope, null, cp.clientSecret, null, function (err) {
+        assert(err, 'Did not receive expected argument error.');
+        assert(err.message === 'The clientId parameter is required.');
+    })
+
+    // clientId is not string
+    context.acquireTokenWithAuthorizationCode(authorizationCode, redirectUri, cp.scope, 2, cp.clientSecret, null, function (err) {
+        assert(err, 'Did not receive expected argument error.');
+        assert(err.message === 'The clientId parameter must be of type String.');
+    });
+
+    done();
   });
 });
