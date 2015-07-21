@@ -79,7 +79,7 @@ suite('self-signed-jwt', function() {
     } catch (err) {
       expectedErr = err;
     }
-    assert(expectedErr, 'Did not recieve expected error');
+    assert(expectedErr, 'Did not receive expected error');
     done();
   });
 
@@ -90,7 +90,7 @@ suite('self-signed-jwt', function() {
     } catch (err) {
       expectedErr = err;
     }
-    assert(expectedErr, 'Did not recieve expected error');
+    assert(expectedErr, 'Did not receive expected error');
     done();
   });
 
@@ -102,7 +102,7 @@ suite('self-signed-jwt', function() {
     } catch (err) {
       expectedErr = err;
     }
-    assert(expectedErr, 'Did not recieve expected error');
+    assert(expectedErr, 'Did not receive expected error');
     done();
   });
 
@@ -114,7 +114,7 @@ suite('self-signed-jwt', function() {
     } catch (err) {
       expectedErr = err;
     }
-    assert(expectedErr, 'Did not recieve expected error');
+    assert(expectedErr, 'Did not receive expected error');
     done();
   });
 });

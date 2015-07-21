@@ -250,7 +250,7 @@ suite('Authority', function() {
     var obj = util.createEmptyADALObject();
     authority.validate(obj._callContext, function(err) {
       if (err) {
-        assert(!err, 'Recieved unexpected error: ' + err.stack);
+        assert(!err, 'Received unexpected error: ' + err.stack);
       }
       instanceDiscoveryRequest.done();
       done();

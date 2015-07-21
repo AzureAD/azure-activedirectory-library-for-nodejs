@@ -88,7 +88,7 @@ suite('authorization-code', function() {
     nock.enableNetConnect();
     var context = new AuthenticationContext('https://0.1.1.1:12/my.tenant.com');
     context.acquireTokenWithAuthorizationCode(authorizationCode, redirectUri, cp.resource, cp.clientId, cp.clientSecret, function (err) {
-      assert(err, 'Did not recieve expected error on failed http request.');
+      assert(err, 'Did not receive expected error on failed http request.');
       nock.disableNetConnect();
       done();
     });
