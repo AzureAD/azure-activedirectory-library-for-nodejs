@@ -43,14 +43,8 @@ var options = {
 app.get('/', function(req, res) {
     if (req.query.code) {
         var authenticationContext = new AuthenticationContext(authorityUrl);
-        process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-        authenticationContext.options = {
-            http : {
-                proxy : 'http://127.0.0.1:8888'
-            }
-        };
 
-        authenticationContext.acquireTokenWithAuthorizationCode(req.query.code, redirectUri, scope, sampleParameters.clientId, sampleParameters.clientSecret, function (err, response) {
+        authenticationContext.acquireTokenWithAuthorizationCode(req.query.code, redirectUri, scope, sampleParameters.clientId, sampleParameters.clientSecret, null, function (err, response) {
             var message = '';
             if (err) {
                 message = 'error: ' + err.message + '\n';
@@ -63,7 +57,7 @@ app.get('/', function(req, res) {
             }
             
             //Later, if the access token is expired it can be refreshed.
-            authenticationContext.acquireTokenWithRefreshToken(response.refreshToken, sampleParameters.clientId, sampleParameters.clientSecret, scope, function (refreshErr, refreshResponse) {
+            authenticationContext.acquireTokenWithRefreshToken(response.refreshToken, sampleParameters.clientId, sampleParameters.clientSecret, scope, null, null, function (refreshErr, refreshResponse) {
                 if (refreshErr) {
                     message += 'refreshError: ' + refreshErr.message + '\n';
                 }
@@ -118,7 +112,7 @@ var redirectUri = 'https://cid.azurewebsites.net';
 var resource = 'https://outlook.office.com';
 var scope = ['openid','https://outlook.office.com/Mail.Read'];
 
-var templateAuthzUrl = 'https://login.microsoftonline.com/' + sampleParameters.tenant + '/oauth2/v2.0/authorize?response_type=code&client_id=<client_id>&redirect_uri=<redirect_uri>&state=<state>&x-client-SKU=Js&x-client-Ver=1.0.0&slice=testslice&msaproxy=true&scope=openid%20https%3A%2F%2Foutlook.office.com%2FMail.Read';
+var templateAuthzUrl = 'https://login.microsoftonline.com/' + sampleParameters.tenant + '/oauth2/v2.0/authorize?response_type=code&client_id=<client_id>&redirect_uri=<redirect_uri>&state=<state>&x-client-SKU=Js&x-client-Ver=1.0.0&slice=testslice&msaproxy=true&scope=openid%20https%3A%2F%2Foutlook.office.com%2FMail.Read%20offline_access';
 
 app.get('/', function(req, res) {
   res.redirect('/login');
