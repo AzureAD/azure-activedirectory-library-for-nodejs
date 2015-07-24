@@ -28,7 +28,7 @@ var fs = require('fs');
 var crypto = require('crypto');
 var https = require('https');
 
-var AuthenticationContext = require('../lib/adal.js').AuthenticationContext;
+var AuthenticationContext = require('adal-node').AuthenticationContext;
 
 var app = express();
 app.use(logger());
