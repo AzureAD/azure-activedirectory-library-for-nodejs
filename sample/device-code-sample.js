@@ -103,12 +103,12 @@ context.acquireUserCode(resource, sampleParameters.clientId, 'es-mx', function (
            }
         });
 
-        setTimeout(function() {
-           context.cancelRequestToGetTokenWithDeviceCode(response, function(err) {
-              if (err) {
-                 console.log('error during cancelling');
-              }
-           });
-        }, 5000);
+        //setTimeout(function() {
+        //   context.cancelRequestToGetTokenWithDeviceCode(response, function(err) {
+        //      if (err) {
+        //         console.log('error during cancelling');
+        //      }
+        //   });
+        //}, 5000);
     }
 });
