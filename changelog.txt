@@ -1,3 +1,9 @@
+Version pre-2.0.0
+--------------
+Release Date: 27 July 2015
+	* Add support for convergence. 
+	* Add support for b2c. 
+
 Version 0.1.14
 --------------
 Release Date: 5 May 2015
