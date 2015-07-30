@@ -31,7 +31,7 @@ var util = require('./util/util');
 var cp = util.commonParameters;
 var testRequire = util.testRequire;
 
-var Mex = testRequire('mex');
+var Mex = testRequire('../lib/mex');
 
 /**
  * Tests the Mex class which does Mex retrieval and parsing.
@@ -55,7 +55,7 @@ suite('MEX', function() {
     var mex = new Mex(cp.callContext, cp.adfsMex);
     mex.discover(function(err) {
       if (!err) {
-        assert(mex.usernamePasswordUrl === expectedUrl,
+        assert(mex.usernamePasswordPolicy.url === expectedUrl,
           'returned url did not match: ' + expectedUrl + ': ' + mex.usernamePasswordUrl);
         mexRequest.done();
       }

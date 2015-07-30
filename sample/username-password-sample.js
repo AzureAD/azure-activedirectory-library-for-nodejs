@@ -20,7 +20,7 @@
  */
 'use strict';
 
-var adal = require('adal-node');
+var adal = require('../lib/adal');
 var fs = require('fs');
 var https = require('https');
 
@@ -69,17 +69,20 @@ if (parametersFile) {
 
 if (!parametersFile) {
   sampleParameters = {
-    tenant : 'rrandallaad1.onmicrosoft.com',
+    //tenant : 'rrandallaad1.onmicrosoft.com',
+    tenant : 'common', 
     authorityHostUrl : 'https://login.windows.net',
-    clientId : '624ac9bd-4c1c-4686-aec8-b56a8991cfb3',
-    username : 'frizzo@naturalcauses.com',
-    password : ''
+    //clientId : '624ac9bd-4c1c-4686-aec8-b56a8991cfb3',
+    clientId : 'd3590ed6-52b3-4102-aeff-aad2292ab01c',
+    username : 'weji@usystech.net',
+    password : 'M1cr0s0ft'
   };
 }
 
 var authorityUrl = sampleParameters.authorityHostUrl + '/' + sampleParameters.tenant;
 
-var resource = '00000002-0000-0000-c000-000000000000';
+//var resource = '00000002-0000-0000-c000-000000000000';
+var resource = 'https://officeapps.live.com';
 
 // +++++ Using a Private CA ++++++
 // If you are testing against an ADFS instance whose SSL cert was issued by

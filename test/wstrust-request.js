@@ -36,6 +36,7 @@ var xmldom = require('xmldom');
 var DOMParser = xmldom.DOMParser;
 
 var WSTrustRequest = testRequire('../lib/wstrust-request');
+var WSTrustVersion = testRequire('../lib/constants').WSTrustVersion;
 
 /**
  * Tests the WSTrustRequest class that creates and sends a ws-trust RST request.
@@ -93,7 +94,6 @@ suite('WSTrustRequest', function() {
 
       rst = replaceDateInTemplate(body, rst, 'Expires', '%EXPIRES%');
       assert(rst, 'Could not find Expires date');
-
       assert(compareRSTDocs(rst, body), 'RST returned does not match expected RST:\n' + body);
       return 'OK';
     })
@@ -112,7 +112,7 @@ suite('WSTrustRequest', function() {
     var rst = templateRST.replace('%USERNAME%', username).replace('%PASSWORD%', password).replace('%APPLIES_TO%', appliesTo).replace('%WSTRUST_ENDPOINT%', wstrustEndpoint);
 
     var rstRequest = setupUpOutgoingRSTCompare(rst);
-    var request = new WSTrustRequest(cp.callContext, wstrustEndpoint, appliesTo);
+    var request = new WSTrustRequest(cp.callContext, wstrustEndpoint, appliesTo, WSTrustVersion.wstrust13);
 
     // Take over handling the response to short circuit without having WSTrustRequest attmpt
     // to proceed with response parsing.
@@ -134,7 +134,7 @@ suite('WSTrustRequest', function() {
     var rst = templateRST.replace('%USERNAME%', username).replace('%PASSWORD%', password).replace('%APPLIES_TO%', appliesTo).replace('%WSTRUST_ENDPOINT%', wstrustEndpoint);
 
     var rstRequest = setupUpOutgoingRSTCompare(rst);
-    var request = new WSTrustRequest(cp.callContext, wstrustEndpoint, appliesTo);
+    var request = new WSTrustRequest(cp.callContext, wstrustEndpoint, appliesTo, WSTrustVersion.wstrust13);
 
     request.acquireToken(username, password, function(err) {
       rstRequest.done();
@@ -149,7 +149,7 @@ suite('WSTrustRequest', function() {
     var appliesTo = 'test_appliesTo';
     var templateRST = fs.readFileSync(__dirname + '/wstrust/RST.xml', 'utf8');
 
-    var rst = new WSTrustRequest(cp.callContext, wstrustEndpoint, appliesTo)._buildRST(username, password);
+    var rst = new WSTrustRequest(cp.callContext, wstrustEndpoint, appliesTo, WSTrustVersion.wstrust13)._buildRST(username, password);
 
     var options = {
         errorHandler : function () { throw new Error(); }
