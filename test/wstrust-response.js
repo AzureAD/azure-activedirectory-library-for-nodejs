@@ -31,7 +31,8 @@ var util = require('./util/util');
 var cp = util.commonParameters;
 var testRequire = util.testRequire;
 
-var WSTrustResponse = testRequire('wstrust-response');
+var WSTrustResponse = testRequire('../lib/wstrust-response');
+var WSTrustVersion = testRequire('../lib/constants').WSTrustVersion;
 
 /**
  * Tests the WSTrustResponse class which parses a ws-trust RSTR.
@@ -137,6 +138,17 @@ suite('WSTrustResponse', function() {
     assert(-1 !== thrownError.message.indexOf('Failed to parse'), 'Did not receive expected error message: ' + thrownError);
     assert(!wstrustResponse.errorCode, 'Recieved ErrorCode when none was expected: ' + wstrustResponse.errorCode);
     assert(!wstrustResponse.faultMessage, 'Recieved FaultMessage when none was expected' + wstrustResponse.faultMessage);
+    done();
+  });
+
+  test('happy-path-wstrust2005', function(done) {
+    var tokenResponse = fs.readFileSync(__dirname + '/wstrust/RSTR2005.xml', 'utf8');
+        
+    var wstrustResponse = new WSTrustResponse(cp.callContext, tokenResponse, WSTrustVersion.WSTRUST2005);
+        
+    wstrustResponse.parse();
+    assert(wstrustResponse.tokenType === 'urn:oasis:names:tc:SAML:1.0:assertion', 'TokenType did not match expected value: ' + wstrustResponse.tokenType);
+    assert(-1 !== wstrustResponse.token.indexOf('y7TujD6J60uo1eFddnNJ1g=='), 'Did not find expected ImmutableID value in Token property: ' + wstrustResponse.token);
     done();
   });
 });

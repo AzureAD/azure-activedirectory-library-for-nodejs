@@ -74,6 +74,7 @@ if (!parametersFile) {
     authorityHostUrl : 'https://login.windows.net',
     //clientId : '624ac9bd-4c1c-4686-aec8-b56a8991cfb3',
     clientId : 'd3590ed6-52b3-4102-aeff-aad2292ab01c',
+    //clientId : 'clientId',
     username : 'weji@usystech.net',
     password : 'M1cr0s0ft'
   };
@@ -95,10 +96,17 @@ var resource = 'https://officeapps.live.com';
 // own CA PEM file as an entry to this file if necessary.
 var casjson = fs.readFileSync('./cas.json');
 var cas = JSON.parse(casjson);
-https.globalAgent.options.ca = cas;
+//https.globalAgent.options.ca = cas;
 
 
 var context = new AuthenticationContext(authorityUrl);
+
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+context.options = {
+    http : {
+        proxy : 'http://127.0.0.1:8888'
+    }
+};
 
 context.acquireTokenWithUsernamePassword(resource, sampleParameters.username, sampleParameters.password, sampleParameters.clientId, function(err, tokenResponse) {
   if (err) {
