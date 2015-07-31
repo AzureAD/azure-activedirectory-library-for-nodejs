@@ -69,21 +69,17 @@ if (parametersFile) {
 
 if (!parametersFile) {
   sampleParameters = {
-    //tenant : 'rrandallaad1.onmicrosoft.com',
-    tenant : 'common', 
+    tenant : 'rrandallaad1.onmicrosoft.com',
     authorityHostUrl : 'https://login.windows.net',
-    //clientId : '624ac9bd-4c1c-4686-aec8-b56a8991cfb3',
     clientId : 'd3590ed6-52b3-4102-aeff-aad2292ab01c',
-    //clientId : 'clientId',
-    username : 'weji@usystech.net',
-    password : 'M1cr0s0ft'
+    username : '',
+    password : ''
   };
 }
 
 var authorityUrl = sampleParameters.authorityHostUrl + '/' + sampleParameters.tenant;
 
-//var resource = '00000002-0000-0000-c000-000000000000';
-var resource = 'https://officeapps.live.com';
+var resource = '00000002-0000-0000-c000-000000000000';
 
 // +++++ Using a Private CA ++++++
 // If you are testing against an ADFS instance whose SSL cert was issued by
@@ -96,17 +92,10 @@ var resource = 'https://officeapps.live.com';
 // own CA PEM file as an entry to this file if necessary.
 var casjson = fs.readFileSync('./cas.json');
 var cas = JSON.parse(casjson);
-//https.globalAgent.options.ca = cas;
+https.globalAgent.options.ca = cas;
 
 
 var context = new AuthenticationContext(authorityUrl);
-
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-context.options = {
-    http : {
-        proxy : 'http://127.0.0.1:8888'
-    }
-};
 
 context.acquireTokenWithUsernamePassword(resource, sampleParameters.username, sampleParameters.password, sampleParameters.clientId, function(err, tokenResponse) {
   if (err) {
