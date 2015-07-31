@@ -35,8 +35,8 @@ var testRequire = util.testRequire;
 var xmldom = require('xmldom');
 var DOMParser = xmldom.DOMParser;
 
-var WSTrustRequest = testRequire('../lib/wstrust-request');
-var WSTrustVersion = testRequire('../lib/constants').WSTrustVersion;
+var WSTrustRequest = testRequire('wstrust-request');
+var WSTrustVersion = testRequire('constants').WSTrustVersion;
 
 /**
  * Tests the WSTrustRequest class that creates and sends a ws-trust RST request.

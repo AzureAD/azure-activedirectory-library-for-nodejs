@@ -42,12 +42,12 @@ var adal = testRequire('adal');
 var AuthenticationContext = adal.AuthenticationContext;
 
 var MemoryCache = testRequire('memory-cache');
-var Mex = testRequire('../lib/mex');
+var Mex = testRequire('mex');
 var OAuth2Client = testRequire('oauth2client');
-var TokenRequest = testRequire('../lib/token-request');
+var TokenRequest = testRequire('token-request');
 var UserRealm = testRequire('user-realm');
-var WSTrustRequest = testRequire('../lib/wstrust-request');
-var WSTrustResponse = testRequire('../lib/wstrust-response');
+var WSTrustRequest = testRequire('wstrust-request');
+var WSTrustResponse = testRequire('wstrust-response');
 
 /**
  * Tests AuthenticationContext.acquireTokenWithUsernamePassword

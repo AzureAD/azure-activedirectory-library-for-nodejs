@@ -31,7 +31,7 @@ var util = require('./util/util');
 var cp = util.commonParameters;
 var testRequire = util.testRequire;
 
-var Mex = testRequire('../lib/mex');
+var Mex = testRequire('mex');
 
 /**
  * Tests the Mex class which does Mex retrieval and parsing.
