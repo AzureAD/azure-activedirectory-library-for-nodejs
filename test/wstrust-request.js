@@ -112,7 +112,7 @@ suite('WSTrustRequest', function() {
     var rst = templateRST.replace('%USERNAME%', username).replace('%PASSWORD%', password).replace('%APPLIES_TO%', appliesTo).replace('%WSTRUST_ENDPOINT%', wstrustEndpoint);
 
     var rstRequest = setupUpOutgoingRSTCompare(rst);
-    var request = new WSTrustRequest(cp.callContext, wstrustEndpoint, appliesTo, WSTrustVersion.wstrust13);
+    var request = new WSTrustRequest(cp.callContext, wstrustEndpoint, appliesTo, WSTrustVersion.WSTRUST13);
 
     // Take over handling the response to short circuit without having WSTrustRequest attmpt
     // to proceed with response parsing.
@@ -126,6 +126,26 @@ suite('WSTrustRequest', function() {
     });
   });
 
+  test('happy-path-wstrust2005', function(done) {
+    var username = 'test_username';
+    var password = 'test_password';
+    var appliesTo = 'test_appliesTo';
+    var templateRST = fs.readFileSync(__dirname + '/wstrust/RST2005.xml', 'utf8');
+    var rst = templateRST.replace('%USERNAME%', username).replace('%PASSWORD%', password).replace('%APPLIES_TO%', appliesTo).replace('%WSTRUST_ENDPOINT%', wstrustEndpoint);
+
+    var rstRequest = setupUpOutgoingRSTCompare(rst);
+    var request = new WSTrustRequest(cp.callContext, wstrustEndpoint, appliesTo, WSTrustVersion.WSTRUST2005);
+
+    request._handleRSTR = function(body, callback) {
+       callback();
+    };
+
+    request.acquireToken(username, password, function(err) {
+       rstRequest.done();
+       done(err);
+    });
+  });
+
   test('fail-to-parse-rstr', function(done) {
     var username = 'test_username';
     var password = 'test_password';
@@ -134,7 +154,7 @@ suite('WSTrustRequest', function() {
     var rst = templateRST.replace('%USERNAME%', username).replace('%PASSWORD%', password).replace('%APPLIES_TO%', appliesTo).replace('%WSTRUST_ENDPOINT%', wstrustEndpoint);
 
     var rstRequest = setupUpOutgoingRSTCompare(rst);
-    var request = new WSTrustRequest(cp.callContext, wstrustEndpoint, appliesTo, WSTrustVersion.wstrust13);
+    var request = new WSTrustRequest(cp.callContext, wstrustEndpoint, appliesTo, WSTrustVersion.WSTRUST13);
 
     request.acquireToken(username, password, function(err) {
       rstRequest.done();
@@ -149,7 +169,7 @@ suite('WSTrustRequest', function() {
     var appliesTo = 'test_appliesTo';
     var templateRST = fs.readFileSync(__dirname + '/wstrust/RST.xml', 'utf8');
 
-    var rst = new WSTrustRequest(cp.callContext, wstrustEndpoint, appliesTo, WSTrustVersion.wstrust13)._buildRST(username, password);
+    var rst = new WSTrustRequest(cp.callContext, wstrustEndpoint, appliesTo, WSTrustVersion.WSTRUST13)._buildRST(username, password);
 
     var options = {
         errorHandler : function () { throw new Error(); }
