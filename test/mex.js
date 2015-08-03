@@ -56,7 +56,7 @@ suite('MEX', function() {
     mex.discover(function(err) {
       if (!err) {
         assert(mex.usernamePasswordPolicy.url === expectedUrl,
-          'returned url did not match: ' + expectedUrl + ': ' + mex.usernamePasswordUrl);
+          'returned url did not match: ' + expectedUrl + ': ' + mex.usernamePasswordPolicy.url);
         mexRequest.done();
       }
       done();

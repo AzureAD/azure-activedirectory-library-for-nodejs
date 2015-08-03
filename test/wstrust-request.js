@@ -146,6 +146,21 @@ suite('WSTrustRequest', function() {
     });
   });
 
+  test('fail-wstrustversion-undefined', function(done) {
+        var username = 'test_username';
+        var password = 'test_password';
+        var appliesTo = 'test_appliesTo';
+        var templateRST = fs.readFileSync(__dirname + '/wstrust/RST2005.xml', 'utf8');
+        var rst = templateRST.replace('%USERNAME%', username).replace('%PASSWORD%', password).replace('%APPLIES_TO%', appliesTo).replace('%WSTRUST_ENDPOINT%', wstrustEndpoint);
+        
+        var request = new WSTrustRequest(cp.callContext, wstrustEndpoint, appliesTo, WSTrustVersion.UNDEFINED);      
+        request.acquireToken(username, password, function (err) {
+            assert(err, 'Did not receive expected error.');
+            assert(err.message === 'Unsupported wstrust endpoint version. Current support version is wstrust2005 or wstrust13.');
+            done();
+        });
+  });
+
   test('fail-to-parse-rstr', function(done) {
     var username = 'test_username';
     var password = 'test_password';
