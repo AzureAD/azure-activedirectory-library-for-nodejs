@@ -361,7 +361,7 @@ suite('username-password', function() {
   function createMexStub(usernamePasswordUrl, err) {
     var mex = new Mex(cp.callContext, '');
     sinon.stub(mex, 'discover').callsArgWith(0, err);
-    mex._usernmaePasswordUrl = usernamePasswordUrl;
+    mex._usernamePasswordPolicy = {url: usernamePasswordUrl};
     return mex;
   }
 
@@ -376,14 +376,14 @@ suite('username-password', function() {
   }
 
   function createWSTrustRequestStub(err, tokenType, noToken) {
-    var wstrustResponse = new WSTrustResponse(cp.callContext,'');
+    var wstrustResponse = new WSTrustResponse(cp.callContext,'', '');
     sinon.stub(wstrustResponse, 'parse');
     if (!noToken) {
       wstrustResponse._token = 'This is a stubbed token';
       wstrustResponse._tokenType = tokenType;
     }
 
-    var wstrustRequest = new WSTrustRequest(cp.callContext, '', '');
+    var wstrustRequest = new WSTrustRequest(cp.callContext, '', '', '');
     sinon.stub(wstrustRequest, 'acquireToken').callsArgWith(2, err, wstrustResponse);
 
     return wstrustRequest;
@@ -428,7 +428,7 @@ suite('username-password', function() {
     });
   });
 
-  test('federated-user-realm-returns-no-mex-endpoint', function(done) {
+  test('federated-user-realm-returns-no-mex-endpoint-wstrust13', function(done) {
     var context = createAuthenticationContextStub(cp.authorityTenant);
     var mex = createMexStub(cp.adfsWsTrust);
     var userRealm = createUserRealmStub('wstrust', 'federated', null, cp.adfsWsTrust);
@@ -447,6 +447,27 @@ suite('username-password', function() {
       }
       done(err);
     });
+  });
+
+  test('federated-user-realm-returns-no-mex-endpoint-wstrust2005', function(done) {
+     var context = createAuthenticationContextStub(cp.authorityTenant);
+     var mex = createMexStub(cp.afsWsTrust2005);
+     var userRealm = createUserRealmStub('wstrust', 'federated', null, cp.adfsWsTrust2005);
+     var wstrustRequest = createWSTrustRequestStub(null, 'urn:oasis:names:tc:SAML:1.0:assertion');
+
+     var response = util.createResponse();
+     var oauthClient = createOAuth2ClientStub(cp.authority, response.decodedResponse, null);
+
+     util.turnOnLogging();
+     var tokenRequest = new TokenRequest(cp.callContext, context, response.clientId, response.resource);
+     stubOutTokenRequestDependencies(tokenRequest, userRealm, mex, wstrustRequest, oauthClient);
+
+     tokenRequest.getTokenWithUsernamePassword('username', 'password', function (err, tokenResponse) {
+       if (!err) {
+         assert(util.isMatchTokenResponse(response.cachedResponse, tokenResponse), 'The response did not match what was expected');
+       }
+       done(err);
+     });
   });
 
   test('user-realm-returns-unknown-account-type', function(done) {

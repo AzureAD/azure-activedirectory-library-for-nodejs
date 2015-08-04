@@ -20,7 +20,7 @@
  */
 'use strict';
 
-var adal = require('adal-node');
+var adal = require('../lib/adal');
 var fs = require('fs');
 var https = require('https');
 
@@ -71,8 +71,8 @@ if (!parametersFile) {
   sampleParameters = {
     tenant : 'rrandallaad1.onmicrosoft.com',
     authorityHostUrl : 'https://login.windows.net',
-    clientId : '624ac9bd-4c1c-4686-aec8-b56a8991cfb3',
-    username : 'frizzo@naturalcauses.com',
+    clientId : 'd3590ed6-52b3-4102-aeff-aad2292ab01c',
+    username : '',
     password : ''
   };
 }

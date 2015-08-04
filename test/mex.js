@@ -55,11 +55,11 @@ suite('MEX', function() {
     var mex = new Mex(cp.callContext, cp.adfsMex);
     mex.discover(function(err) {
       if (!err) {
-        assert(mex.usernamePasswordUrl === expectedUrl,
-          'returned url did not match: ' + expectedUrl + ': ' + mex.usernamePasswordUrl);
+        assert(mex.usernamePasswordPolicy.url === expectedUrl,
+          'returned url did not match: ' + expectedUrl + ': ' + mex.usernamePasswordPolicy.url);
         mexRequest.done();
       }
-      done(err);
+      done();
     });
   }
 
@@ -73,6 +73,10 @@ suite('MEX', function() {
 
   test('happy-path-3', function(done) {
     happyPathTest('archan.us.mex.xml', 'https://arvmserver2012.archan.us/adfs/services/trust/13/usernamemixed', done);
+  });
+
+  test('happy-path-wstrust2005', function(done) {
+    happyPathTest('usystech.mex.xml', 'https://sts.usystech.net/adfs/services/trust/2005/usernamemixed', done);
   });
 
   function badMexDocTest(testFile, done) {
