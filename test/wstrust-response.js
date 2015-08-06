@@ -32,12 +32,13 @@ var cp = util.commonParameters;
 var testRequire = util.testRequire;
 
 var WSTrustResponse = testRequire('wstrust-response');
+var WSTrustVersion = testRequire('constants').WSTrustVersion;
 
 /**
  * Tests the WSTrustResponse class which parses a ws-trust RSTR.
  */
 suite('WSTrustResponse', function() {
-  test('parse-error-happey-path', function(done) {
+  test('parse-error-happy-path', function(done) {
     var errorResponse = '\
     <s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope" xmlns:a="http://www.w3.org/2005/08/addressing" xmlns:u="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">\
       <s:Header>\
@@ -75,7 +76,7 @@ suite('WSTrustResponse', function() {
     }
 
     assert(thrownError, 'Exppected an exception but none was thrown');
-    assert(wstrustResponse.errorCode === 'RequestFailed', 'wstrustRespone.ErrorCode does not match expected value: ' + wstrustResponse.errorCode);
+    assert(wstrustResponse.errorCode === 'RequestFailed', 'wstrustResponse.ErrorCode does not match expected value: ' + wstrustResponse.errorCode);
     assert(-1 !== wstrustResponse.faultMessage.indexOf('MSIS3127: The specified request failed.'), 'wstrustResponse.FaultMessage does not match expected value: ' + wstrustResponse.faultMessage);
 
     done();
@@ -102,9 +103,9 @@ suite('WSTrustResponse', function() {
     }
 
     assert(thrownError, 'Did not receive expected exception');
-    assert(-1 !== thrownError.message.indexOf('empty'), 'Did not recieve expected error message: ' + thrownError);
-    assert(!wstrustResponse.errorCode, 'Recieved ErrorCode when none was expected: ' + wstrustResponse.errorCode);
-    assert(!wstrustResponse.faultMessage, 'Recieved FaultMessage when none was expected' + wstrustResponse.faultMessage);
+    assert(-1 !== thrownError.message.indexOf('empty'), 'Did not receive expected error message: ' + thrownError);
+    assert(!wstrustResponse.errorCode, 'Received ErrorCode when none was expected: ' + wstrustResponse.errorCode);
+    assert(!wstrustResponse.faultMessage, 'Received FaultMessage when none was expected' + wstrustResponse.faultMessage);
     done();
   });
 
@@ -118,9 +119,9 @@ suite('WSTrustResponse', function() {
     }
 
     assert(thrownError, 'Did not receive expected exception');
-    assert(-1 !== thrownError.message.indexOf('empty'), 'Did not recieve expected error message: ' + thrownError.stack);
-    assert(!wstrustResponse.errorCode, 'Recieved ErrorCode when none was expected: ' + wstrustResponse.errorCode);
-    assert(!wstrustResponse.faultMessage, 'Recieved FaultMessage when none was expected' + wstrustResponse.faultMessage);
+    assert(-1 !== thrownError.message.indexOf('empty'), 'Did not receive expected error message: ' + thrownError.stack);
+    assert(!wstrustResponse.errorCode, 'Received ErrorCode when none was expected: ' + wstrustResponse.errorCode);
+    assert(!wstrustResponse.faultMessage, 'Received FaultMessage when none was expected' + wstrustResponse.faultMessage);
     done();
   });
 
@@ -135,8 +136,19 @@ suite('WSTrustResponse', function() {
 
     assert(thrownError, 'Did not receive expected exception');
     assert(-1 !== thrownError.message.indexOf('Failed to parse'), 'Did not receive expected error message: ' + thrownError);
-    assert(!wstrustResponse.errorCode, 'Recieved ErrorCode when none was expected: ' + wstrustResponse.errorCode);
-    assert(!wstrustResponse.faultMessage, 'Recieved FaultMessage when none was expected' + wstrustResponse.faultMessage);
+    assert(!wstrustResponse.errorCode, 'Received ErrorCode when none was expected: ' + wstrustResponse.errorCode);
+    assert(!wstrustResponse.faultMessage, 'Received FaultMessage when none was expected' + wstrustResponse.faultMessage);
+    done();
+  });
+
+  test('happy-path-wstrust2005', function(done) {
+    var tokenResponse = fs.readFileSync(__dirname + '/wstrust/RSTR2005.xml', 'utf8');
+        
+    var wstrustResponse = new WSTrustResponse(cp.callContext, tokenResponse, WSTrustVersion.WSTRUST2005);
+        
+    wstrustResponse.parse();
+    assert(wstrustResponse.tokenType === 'urn:oasis:names:tc:SAML:1.0:assertion', 'TokenType did not match expected value: ' + wstrustResponse.tokenType);
+    assert(-1 !== wstrustResponse.token.indexOf('y7TujD6J60uo1eFddnNJ1g=='), 'Did not find expected ImmutableID value in Token property: ' + wstrustResponse.token);
     done();
   });
 });

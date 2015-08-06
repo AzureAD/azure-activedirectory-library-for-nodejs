@@ -32,7 +32,11 @@ var util = require('./util/util');
 var cp = util.commonParameters;
 var testRequire = util.testRequire;
 
+var xmldom = require('xmldom');
+var DOMParser = xmldom.DOMParser;
+
 var WSTrustRequest = testRequire('wstrust-request');
+var WSTrustVersion = testRequire('constants').WSTrustVersion;
 
 /**
  * Tests the WSTrustRequest class that creates and sends a ws-trust RST request.
@@ -90,7 +94,6 @@ suite('WSTrustRequest', function() {
 
       rst = replaceDateInTemplate(body, rst, 'Expires', '%EXPIRES%');
       assert(rst, 'Could not find Expires date');
-
       assert(compareRSTDocs(rst, body), 'RST returned does not match expected RST:\n' + body);
       return 'OK';
     })
@@ -109,7 +112,7 @@ suite('WSTrustRequest', function() {
     var rst = templateRST.replace('%USERNAME%', username).replace('%PASSWORD%', password).replace('%APPLIES_TO%', appliesTo).replace('%WSTRUST_ENDPOINT%', wstrustEndpoint);
 
     var rstRequest = setupUpOutgoingRSTCompare(rst);
-    var request = new WSTrustRequest(cp.callContext, wstrustEndpoint, appliesTo);
+    var request = new WSTrustRequest(cp.callContext, wstrustEndpoint, appliesTo, WSTrustVersion.WSTRUST13);
 
     // Take over handling the response to short circuit without having WSTrustRequest attmpt
     // to proceed with response parsing.
@@ -123,6 +126,41 @@ suite('WSTrustRequest', function() {
     });
   });
 
+  test('happy-path-wstrust2005', function(done) {
+    var username = 'test_username';
+    var password = 'test_password';
+    var appliesTo = 'test_appliesTo';
+    var templateRST = fs.readFileSync(__dirname + '/wstrust/RST2005.xml', 'utf8');
+    var rst = templateRST.replace('%USERNAME%', username).replace('%PASSWORD%', password).replace('%APPLIES_TO%', appliesTo).replace('%WSTRUST_ENDPOINT%', wstrustEndpoint);
+
+    var rstRequest = setupUpOutgoingRSTCompare(rst);
+    var request = new WSTrustRequest(cp.callContext, wstrustEndpoint, appliesTo, WSTrustVersion.WSTRUST2005);
+
+    request._handleRSTR = function(body, callback) {
+       callback();
+    };
+
+    request.acquireToken(username, password, function(err) {
+       rstRequest.done();
+       done(err);
+    });
+  });
+
+  test('fail-wstrustversion-undefined', function(done) {
+        var username = 'test_username';
+        var password = 'test_password';
+        var appliesTo = 'test_appliesTo';
+        var templateRST = fs.readFileSync(__dirname + '/wstrust/RST2005.xml', 'utf8');
+        var rst = templateRST.replace('%USERNAME%', username).replace('%PASSWORD%', password).replace('%APPLIES_TO%', appliesTo).replace('%WSTRUST_ENDPOINT%', wstrustEndpoint);
+        
+        var request = new WSTrustRequest(cp.callContext, wstrustEndpoint, appliesTo, WSTrustVersion.UNDEFINED);      
+        request.acquireToken(username, password, function (err) {
+            assert(err, 'Did not receive expected error.');
+            assert(err.message === 'Unsupported wstrust endpoint version. Current support version is wstrust2005 or wstrust13.');
+            done();
+        });
+  });
+
   test('fail-to-parse-rstr', function(done) {
     var username = 'test_username';
     var password = 'test_password';
@@ -131,13 +169,35 @@ suite('WSTrustRequest', function() {
     var rst = templateRST.replace('%USERNAME%', username).replace('%PASSWORD%', password).replace('%APPLIES_TO%', appliesTo).replace('%WSTRUST_ENDPOINT%', wstrustEndpoint);
 
     var rstRequest = setupUpOutgoingRSTCompare(rst);
-    var request = new WSTrustRequest(cp.callContext, wstrustEndpoint, appliesTo);
+    var request = new WSTrustRequest(cp.callContext, wstrustEndpoint, appliesTo, WSTrustVersion.WSTRUST13);
 
     request.acquireToken(username, password, function(err) {
       rstRequest.done();
-      assert(err, 'Did not recieve expected error.');
+      assert(err, 'Did not receive expected error.');
       done();
     });
+  });
+
+  test('xml-format-test', function (done) { 
+    var username = 'test_username';
+    var password = 'test_password&<>\'"';
+    var appliesTo = 'test_appliesTo';
+    var templateRST = fs.readFileSync(__dirname + '/wstrust/RST.xml', 'utf8');
+
+    var rst = new WSTrustRequest(cp.callContext, wstrustEndpoint, appliesTo, WSTrustVersion.WSTRUST13)._buildRST(username, password);
+
+    var options = {
+        errorHandler : function () { throw new Error(); }
+    };
+    
+    try {
+        new DOMParser(options).parseFromString(rst);
+    }
+    catch (e) { 
+       assert(!e, 'Unexpected error received.');
+    }
+    
+    done();
   });
 });
 

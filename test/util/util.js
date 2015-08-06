@@ -111,8 +111,10 @@ parameters.authorityTenant = parameters.authority + '/' + parameters.tenant;
 parameters.adfsUrlNoPath = 'https://adfs.federatedtenant.com';
 parameters.adfsMexPath = '/adfs/services/trust/mex';
 parameters.adfsWsTrustPath = '/adfs/services/trust/13/usernamemixed';
+parameters.adfsWsTrustPath2005 = '/adfs/services/trust/2005/usernamemixed';
 parameters.adfsMex = parameters.adfsUrlNoPath + parameters.adfsMexPath;
 parameters.adfsWsTrust = parameters.adfsUrlNoPath + parameters.adfsWsTrustPath;
+parameters.adfsWsTrust2005 = parameters.adfsUrlNoPath + parameters.adfsWsTrustPath2005;
 
 parameters.successResponse = successResponse;
 parameters.successResponseWithRefresh = successResponseWithRefresh;
@@ -525,14 +527,14 @@ util.setupExpectedClientAssertionTokenRequestResponse = function(httpCode, retur
 function isDateWithinTolerance(date, expectedDate) {
   var expected = expectedDate || new Date();
   var fiveBefore = expected.clone();
-  expected = expected.addSeconds(5);
-  fiveBefore = fiveBefore.addSeconds(-5);
+  fiveBefore.addSeconds(-5);
+  expected.addSeconds(5);
 
-  if (!date.between(fiveBefore, expected)) {
-    return false;
+  if (date.between(fiveBefore, expected)) {
+    return true;
   }
 
-  return true;
+  return false;
 }
 
 function isExpiresWithinTolerance(expiresOn, expired){
