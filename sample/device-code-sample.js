@@ -21,7 +21,7 @@
 'use strict';
 
 var fs = require('fs');
-var adal = require('../lib/adal.js');
+var adal = require('adal-node');
 var async = require('async');
 
 var AuthenticationContext = adal.AuthenticationContext;
@@ -67,8 +67,8 @@ if (parametersFile) {
 if (!parametersFile) {
     sampleParameters = {
         tenant : 'common',
-        authorityHostUrl : 'https://10.121.217.12:8478',
-        clientId : '80113153-1a97-4e8b-b51b-aea1f984f69c'
+        authorityHostUrl : '',
+        clientId : ''
     };
 }
 
@@ -79,13 +79,6 @@ var resource = '00000002-0000-0000-c000-000000000000';
 //turnOnLogging();
 
 var context = new AuthenticationContext(authorityUrl);
-
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-context.options = {
-    http : {
-        proxy : 'http://127.0.0.1:8888'
-    }
-};
 
 context.acquireUserCode(resource, sampleParameters.clientId, 'es-mx', function (err, response) {
     if (err) {
@@ -102,13 +95,5 @@ context.acquireUserCode(resource, sampleParameters.clientId, 'es-mx', function (
               console.log(tokenResponse);
            }
         });
-
-        //setTimeout(function() {
-        //   context.cancelRequestToGetTokenWithDeviceCode(response, function(err) {
-        //      if (err) {
-        //         console.log('error during cancelling');
-        //      }
-        //   });
-        //}, 5000);
     }
 });
