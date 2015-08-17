@@ -130,7 +130,7 @@ suite('device-code', function () {
         });
     });
     
-    test('bad-argument', function (done) {
+    test.only('bad-argument', function (done) {
         var context = new AuthenticationContext(cp.authUrl);
 
         var userCodeInfo = { interval: 5, expires_in: 1000};
@@ -164,6 +164,12 @@ suite('device-code', function () {
             assert(e, 'Did not receive expected error. ');
             assert(e.message === 'acquireToken requires a function callback parameter.', 'Unexpected error message returned.');
         }
+
+        userCodeInfo = { device_code: 'test_device_code', interval: 0, expires_in: 1000 };
+        context.acquireTokenWithDeviceCode(cp.clientId, userCodeInfo, function (err) {
+          assert(err, 'id not receive expected error.');
+          assert(err.message === 'invalid refresh interval');
+        });
         
         done();
     });
@@ -194,7 +200,7 @@ suite('device-code', function () {
         userCodeInfo = { device_code: cp.deviceCode, interval: 1, expires_in: 200 };
         context.cancelRequestToGetTokenWithDeviceCode(userCodeInfo, function (err) {
             assert(err, 'Did not receive expected error. ');
-            assert(err === 'No acquireTokenWithDeviceCodeRequest existed to be cancelled', 'Unexpected error message returned.');
+            assert(err.message === 'No acquireTokenWithDeviceCodeRequest existed to be cancelled', 'Unexpected error message returned.');
         })
         
         done();

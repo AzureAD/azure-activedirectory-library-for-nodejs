@@ -45,7 +45,6 @@ suite('acquire-user-code', function() {
       if (withLanguage) {
          queryParameters['mkt'] = cp.language;
       }
-      queryParameters['scope'] = 'openid';
      
       var query = querystring.stringify(queryParameters);
 
