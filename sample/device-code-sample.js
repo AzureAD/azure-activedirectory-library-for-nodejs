@@ -21,7 +21,7 @@
 'use strict';
 
 var fs = require('fs');
-var adal = require('adal-node');
+var adal = require('../lib/adal.js');
 var async = require('async');
 
 var AuthenticationContext = adal.AuthenticationContext;
@@ -52,7 +52,7 @@ function turnOnLogging() {
  *    "clientSecret" : "verySecret=""
  * }
  */
-var parametersFile = process.argv[2] || process.env['ADAL_SAMPLE_PARAMETERS_FILE'];
+var parametersFile = process.argv[2] || process.env['ADAL_SAMPLE_PARAMETERS_FILE' ];
 
 var sampleParameters;
 if (parametersFile) {
@@ -66,9 +66,9 @@ if (parametersFile) {
 
 if (!parametersFile) {
     sampleParameters = {
-        tenant : 'common',
-        authorityHostUrl : '',
-        clientId : ''
+        tenant : 'auxteststageauto.ccsctp.net',
+        authorityHostUrl : 'https://login.windows-ppe.net',
+        clientId : '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
     };
 }
 
@@ -86,14 +86,22 @@ context.acquireUserCode(resource, sampleParameters.clientId, 'es-mx', function (
     } else {
         console.log(response);
         console.log('calling acquire token with device code');
-        context.acquireTokenWithDeviceCode(sampleParameters.clientId, response, function(err, tokenResponse) {
-           if (err) {
-              console.log('error happens when acquiring token with device code');
-              console.log(err);
-           }
-           else {
-              console.log(tokenResponse);
-           }
+        context.acquireTokenWithDeviceCode(sampleParameters.clientId, response, function (err, tokenResponse) {
+            if (err) {
+                console.log('error happens when acquiring token with device code');
+                console.log(err);
+            }
+            else {
+                console.log(tokenResponse);
+            }
         });
+
+        //setTimeout(function() {
+        //   context.cancelRequestToGetTokenWithDeviceCode(response, function(err) {
+        //      if (err) {
+        //         console.log('error during cancelling');
+        //      }
+        //   });
+        //}, 5000);
     }
 });
