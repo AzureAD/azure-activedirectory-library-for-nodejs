@@ -36,12 +36,18 @@ var adal = testRequire('adal');
 var AuthenticationContext = adal.AuthenticationContext;
 
 suite('device-code', function () {
+    setup(function () {
+        util.resetLogging();
+        util.clearStaticCache();
+    });
+
     function setupExpectedTokenRequestResponse(httpCode, returnDoc, authorityEndpoint) {
         var authEndpoint = util.getNockAuthorityHost(authorityEndpoint);
         
         var queryParameters = {};
         queryParameters['grant_type'] = 'device_code';
         queryParameters['client_id'] = cp.clientId;
+        queryParameters['resource'] = cp.resource;
         queryParameters['code'] = cp.deviceCode;
         
         var query = querystring.stringify(queryParameters);
@@ -64,10 +70,10 @@ suite('device-code', function () {
         
         var userCodeInfo = { device_code: cp.deviceCode, interval: 1, expires_in: 1 };
         var context = new AuthenticationContext(cp.authUrl);
-        context.acquireTokenWithDeviceCode(cp.clientId, userCodeInfo, function (err, tokenResponse) {
-           assert(!err, 'Receive unexpected error');
-           tokenRequest.done();
-           done();
+        context.acquireTokenWithDeviceCode(cp.resource, cp.clientId, userCodeInfo, function (err, tokenResponse) {
+            assert(!err, 'Receive unexpected error');
+            tokenRequest.done();
+            done(err);
         });
     });
 
@@ -77,6 +83,7 @@ suite('device-code', function () {
        var queryParameter = {};
        queryParameter['grant_type'] = 'device_code';
        queryParameter['client_id'] = cp.clientId;
+       queryParameter['resource'] = cp.resource;
        queryParameter['code'] = cp.deviceCode;
        var query = querystring.stringify(queryParameter);
        
@@ -87,7 +94,7 @@ suite('device-code', function () {
                              return util.filterQueryString(query, body);
                           })
                           .post(cp.tokenUrlPath, query)
-                          .reply(200, authPendingResponse)
+                          .reply(400, authPendingResponse)
                           .post(cp.tokenUrlPath, query)
                           .reply(200, returnDoc);
        
@@ -102,9 +109,9 @@ suite('device-code', function () {
         
         var userCodeInfo = { device_code: cp.deviceCode, interval: 1, expires_in: 200 };
         var context = new AuthenticationContext(cp.authUrl);
-        context.acquireTokenWithDeviceCode(cp.clientId, userCodeInfo, function (err, tokenResponse) {
+        context.acquireTokenWithDeviceCode(cp.resource, cp.clientId, userCodeInfo, function (err, tokenResponse) {
            if (!err) {
-              assert(util.isMatchTokenResponse(response.decodedResponse, tokenResponse), 'The response did not match what was expected');
+              assert(util.isMatchTokenResponse(response.cachedResponse, tokenResponse), 'The response did not match what was expected');
               tokenRequest.done();
            }
            done(err);
@@ -112,17 +119,17 @@ suite('device-code', function () {
     });
 
     test('happy-path-cancelRequest', function (done) {
+        nock.cleanAll();
         var response = util.createResponse();
         var tokenRequest = setupExpectedTokenRequestResponseWithAuthPending(response.wireResponse);
         
         var userCodeInfo = { device_code: cp.deviceCode, interval: 1, expires_in: 200 };
         var context = new AuthenticationContext(cp.authUrl);
 
-        context.acquireTokenWithDeviceCode(cp.clientId, userCodeInfo, function (err, tokenResponse) {
-           if (!err) {
-              assert(tokenResponse === 'polling request is cancelled');
-           }
-           done(err);
+        context.acquireTokenWithDeviceCode(cp.resource, cp.clientId, userCodeInfo, function (err, tokenResponse) {
+           assert(err, 'Did not receive expected error');
+           assert(err.message === 'Polling_Request_Cancelled');
+           done();
         });
 
         context.cancelRequestToGetTokenWithDeviceCode(userCodeInfo, function(err) {
@@ -130,44 +137,45 @@ suite('device-code', function () {
         });
     });
     
-    test.only('bad-argument', function (done) {
+    test('bad-argument', function (done) {
+        nock.cleanAll();
         var context = new AuthenticationContext(cp.authUrl);
 
         var userCodeInfo = { interval: 5, expires_in: 1000};
-        context.acquireTokenWithDeviceCode(cp.clientId, userCodeInfo, function (err) {
+        context.acquireTokenWithDeviceCode(cp.resource, cp.clientId, userCodeInfo, function (err) {
             assert(err, 'Did not receive expected argument error');
             assert(err.message === 'The userCodeInfo is missing device_code');
         });
 
         userCodeInfo = { device_code: 'test_device_code', expires_in: 1000 };
-        context.acquireTokenWithDeviceCode(cp.clientId, userCodeInfo, function (err) {
+        context.acquireTokenWithDeviceCode(cp.resource, cp.clientId, userCodeInfo, function (err) {
             assert(err, 'Did not receive expected argument error');
             assert(err.message === 'The userCodeInfo is missing interval');
         });
 
         userCodeInfo = { device_code: 'test_device_code', interval: 5 };
-        context.acquireTokenWithDeviceCode(cp.clientId, userCodeInfo, function (err) {
+        context.acquireTokenWithDeviceCode(cp.resource, cp.clientId, userCodeInfo, function (err) {
             assert(err, 'Did not receive expected argument error');
             assert(err.message === 'The userCodeInfo is missing expires_in');
         });
 
         // test if usercodeInfo is null
-        context.acquireTokenWithDeviceCode(cp.clientId, null, function (err) {
+        context.acquireTokenWithDeviceCode(cp.resource, cp.clientId, null, function (err) {
             assert(err, 'Did not receive expected argument error');
             assert(err.message === 'The userCodeInfo parameter is required');
         });
 
         userCodeInfo = { device_code: 'test_device_code', interval: 5, expires_in: 1000 };
         try {
-            context.acquireTokenWithDeviceCode(cp.clientId, userCodeInfo);
+            context.acquireTokenWithDeviceCode(cp.resource, cp.clientId, userCodeInfo);
         } catch (e) {
             assert(e, 'Did not receive expected error. ');
             assert(e.message === 'acquireToken requires a function callback parameter.', 'Unexpected error message returned.');
         }
 
         userCodeInfo = { device_code: 'test_device_code', interval: 0, expires_in: 1000 };
-        context.acquireTokenWithDeviceCode(cp.clientId, userCodeInfo, function (err) {
-          assert(err, 'id not receive expected error.');
+        context.acquireTokenWithDeviceCode(cp.resource, cp.clientId, userCodeInfo, function (err) {
+          assert(err, 'Did not receive expected error.');
           assert(err.message === 'invalid refresh interval');
         });
         
