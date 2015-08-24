@@ -23,6 +23,7 @@
 var fs = require('fs');
 var adal = require('../lib/adal.js');
 var async = require('async');
+var url = require('url');
 
 var AuthenticationContext = adal.AuthenticationContext;
 
@@ -86,7 +87,7 @@ context.acquireUserCode(resource, sampleParameters.clientId, 'es-mx', function (
     } else {
         console.log(response);
         console.log('calling acquire token with device code');
-        context.acquireTokenWithDeviceCode(sampleParameters.clientId, response, function (err, tokenResponse) {
+        context.acquireTokenWithDeviceCode(resource, sampleParameters.clientId, response, function (err, tokenResponse) {
             if (err) {
                 console.log('error happens when acquiring token with device code');
                 console.log(err);
