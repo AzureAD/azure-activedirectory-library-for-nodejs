@@ -67,9 +67,9 @@ if (parametersFile) {
 
 if (!parametersFile) {
     sampleParameters = {
-        tenant : 'auxteststageauto.ccsctp.net',
-        authorityHostUrl : 'https://login.windows-ppe.net',
-        clientId : '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
+        tenant : '',
+        authorityHostUrl : '',
+        clientId : ''
     };
 }
 
@@ -96,13 +96,5 @@ context.acquireUserCode(resource, sampleParameters.clientId, 'es-mx', function (
                 console.log(tokenResponse);
             }
         });
-
-        //setTimeout(function() {
-        //   context.cancelRequestToGetTokenWithDeviceCode(response, function(err) {
-        //      if (err) {
-        //         console.log('error during cancelling');
-        //      }
-        //   });
-        //}, 5000);
     }
 });
