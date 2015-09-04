@@ -1,3 +1,9 @@
+Version 0.1.15
+--------------
+Release Date: 4 Aug 2015
+	* Fix issue #68 - add support for wstrust 2005 endpoint. 
+	* Fix issue #62 - escape xml chars in password before creating a xml request for wstrust. 
+
 Version 0.1.14
 --------------
 Release Date: 5 May 2015
