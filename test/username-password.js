@@ -458,7 +458,7 @@ suite('username-password', function() {
      var response = util.createResponse();
      var oauthClient = createOAuth2ClientStub(cp.authority, response.decodedResponse, null);
 
-     util.turnOnLogging();
+     //util.turnOnLogging();
      var tokenRequest = new TokenRequest(cp.callContext, context, response.clientId, response.resource);
      stubOutTokenRequestDependencies(tokenRequest, userRealm, mex, wstrustRequest, oauthClient);
 
