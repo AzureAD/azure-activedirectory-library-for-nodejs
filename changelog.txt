@@ -1,3 +1,8 @@
+Version 0.1.16
+--------------
+Release Date: 3 Sep 2015
+	* Add support for device profile 
+
 Version 0.1.15
 --------------
 Release Date: 4 Aug 2015
