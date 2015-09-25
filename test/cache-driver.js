@@ -35,7 +35,7 @@ var testRequire = util.testRequire;
 var assert = require('assert');
 
 var MemoryCache = testRequire('memory-cache');
-var CacheDriver = testRequire('../lib/cache-driver');
+var CacheDriver = testRequire('cache-driver');
 
 suite('CacheDriver', function() {
 

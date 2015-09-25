@@ -217,6 +217,12 @@ function mapFields(inObj, outObj, map) {
   }
 }
 
+/**
+ * Create response based on the given options and iteration number. 
+ * @options Options is used to flex the reponse creation, i.e authority, resource and isMRRT. 
+ * @param iteration Iteraton will be used to create a distinct token for each value of iteration and it will always return that same token 
+ *                  for same value of iteration. 
+ */
 util.createResponse = function(options, iteration) {
   options = options || {};
 

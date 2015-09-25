@@ -52,37 +52,17 @@ suite('device-code', function () {
         
         var query = querystring.stringify(queryParameters);
 
-        var tokenUrlPath = cp.tokenUrlPath;
-        if (extraQP !== undefined && extraQP !== null) {
-           tokenUrlPath += extraQP;
-        }
-        
         var tokenRequest = nock(authEndpoint)
                                 .filteringRequestBody(function (body) {
                                     return util.filterQueryString(query, body);
                                  })
-                                .post(tokenUrlPath, query)
+                                .post(cp.tokenUrlPath, query)
                                 .reply(httpCode, returnDoc);
         
         util.matchStandardRequestHeaders(tokenRequest);
         
         return tokenRequest;
     }
-
-    test('happy-path-with-extraqp', function (done) {
-        var response = util.createResponse();
-        var tokenRequest = setupExpectedTokenRequestResponse(200, response.wireResponse, null, '&a=b&b=c');
-
-        var userCodeInfo = { deviceCode: cp.deviceCode, interval: 1, expiresIn: 1 };
-        var context = new AuthenticationContext(cp.authUrl);
-        context.extraQP = 'a=b&b=c';
-        context.acquireTokenWithDeviceCode(cp.resource, cp.clientId, userCodeInfo, function (err, tokenResponse) {
-            assert(!err, 'Receive unexpected error');
-            tokenRequest.done();
-            done(err);
-        });
-        
-    });
 
     test('happy-path-successOnFirstRequest', function (done) {
         var response = util.createResponse();
