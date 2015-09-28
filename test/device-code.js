@@ -41,7 +41,7 @@ suite('device-code', function () {
         util.clearStaticCache();
     });
 
-    function setupExpectedTokenRequestResponse(httpCode, returnDoc, authorityEndpoint) {
+    function setupExpectedTokenRequestResponse(httpCode, returnDoc, authorityEndpoint, extraQP) {
         var authEndpoint = util.getNockAuthorityHost(authorityEndpoint);
         
         var queryParameters = {};
@@ -51,7 +51,7 @@ suite('device-code', function () {
         queryParameters['code'] = cp.deviceCode;
         
         var query = querystring.stringify(queryParameters);
-        
+
         var tokenRequest = nock(authEndpoint)
                                 .filteringRequestBody(function (body) {
                                     return util.filterQueryString(query, body);
@@ -63,12 +63,12 @@ suite('device-code', function () {
         
         return tokenRequest;
     }
-    
+
     test('happy-path-successOnFirstRequest', function (done) {
         var response = util.createResponse();
         var tokenRequest = setupExpectedTokenRequestResponse(200, response.wireResponse);
         
-        var userCodeInfo = { device_code: cp.deviceCode, interval: 1, expires_in: 1 };
+        var userCodeInfo = { deviceCode: cp.deviceCode, interval: 1, expiresIn: 1 };
         var context = new AuthenticationContext(cp.authUrl);
         context.acquireTokenWithDeviceCode(cp.resource, cp.clientId, userCodeInfo, function (err, tokenResponse) {
             assert(!err, 'Receive unexpected error');
@@ -107,7 +107,7 @@ suite('device-code', function () {
         var response = util.createResponse();
         var tokenRequest = setupExpectedTokenRequestResponseWithAuthPending(response.wireResponse);
         
-        var userCodeInfo = { device_code: cp.deviceCode, interval: 1, expires_in: 200 };
+        var userCodeInfo = { deviceCode: cp.deviceCode, interval: 1, expiresIn: 200 };
         var context = new AuthenticationContext(cp.authUrl);
         context.acquireTokenWithDeviceCode(cp.resource, cp.clientId, userCodeInfo, function (err, tokenResponse) {
            if (!err) {
@@ -123,7 +123,7 @@ suite('device-code', function () {
         var response = util.createResponse();
         var tokenRequest = setupExpectedTokenRequestResponseWithAuthPending(response.wireResponse);
         
-        var userCodeInfo = { device_code: cp.deviceCode, interval: 1, expires_in: 200 };
+        var userCodeInfo = { deviceCode: cp.deviceCode, interval: 1, expiresIn: 200 };
         var context = new AuthenticationContext(cp.authUrl);
 
         context.acquireTokenWithDeviceCode(cp.resource, cp.clientId, userCodeInfo, function (err, tokenResponse) {
@@ -141,19 +141,19 @@ suite('device-code', function () {
         nock.cleanAll();
         var context = new AuthenticationContext(cp.authUrl);
 
-        var userCodeInfo = { interval: 5, expires_in: 1000};
+        var userCodeInfo = { interval: 5, expiresIn: 1000};
         context.acquireTokenWithDeviceCode(cp.resource, cp.clientId, userCodeInfo, function (err) {
             assert(err, 'Did not receive expected argument error');
             assert(err.message === 'The userCodeInfo is missing device_code');
         });
 
-        userCodeInfo = { device_code: 'test_device_code', expires_in: 1000 };
+        userCodeInfo = { deviceCode: 'test_device_code', expiresIn: 1000 };
         context.acquireTokenWithDeviceCode(cp.resource, cp.clientId, userCodeInfo, function (err) {
             assert(err, 'Did not receive expected argument error');
             assert(err.message === 'The userCodeInfo is missing interval');
         });
 
-        userCodeInfo = { device_code: 'test_device_code', interval: 5 };
+        userCodeInfo = { deviceCode: 'test_device_code', interval: 5 };
         context.acquireTokenWithDeviceCode(cp.resource, cp.clientId, userCodeInfo, function (err) {
             assert(err, 'Did not receive expected argument error');
             assert(err.message === 'The userCodeInfo is missing expires_in');
@@ -165,7 +165,7 @@ suite('device-code', function () {
             assert(err.message === 'The userCodeInfo parameter is required');
         });
 
-        userCodeInfo = { device_code: 'test_device_code', interval: 5, expires_in: 1000 };
+        userCodeInfo = { deviceCode: 'test_device_code', interval: 5, expiresIn: 1000 };
         try {
             context.acquireTokenWithDeviceCode(cp.resource, cp.clientId, userCodeInfo);
         } catch (e) {
@@ -173,7 +173,7 @@ suite('device-code', function () {
             assert(e.message === 'acquireToken requires a function callback parameter.', 'Unexpected error message returned.');
         }
 
-        userCodeInfo = { device_code: 'test_device_code', interval: 0, expires_in: 1000 };
+        userCodeInfo = { deviceCode: 'test_device_code', interval: 0, expiresIn: 1000 };
         context.acquireTokenWithDeviceCode(cp.resource, cp.clientId, userCodeInfo, function (err) {
           assert(err, 'Did not receive expected error.');
           assert(err.message === 'invalid refresh interval');
@@ -185,7 +185,7 @@ suite('device-code', function () {
     test('bad-argument-cancel-request', function (done) {
        var context = new AuthenticationContext(cp.authUrl);
 
-        var userCodeInfo = { interval: 5, expires_in: 1000 };
+        var userCodeInfo = { interval: 5, expiresIn: 1000 };
         context.cancelRequestToGetTokenWithDeviceCode(userCodeInfo, function (err) {
             assert(err, 'Did not receive expected argument error');
             assert(err.message === 'The userCodeInfo is missing device_code');
@@ -197,7 +197,7 @@ suite('device-code', function () {
             assert(err.message === 'The userCodeInfo parameter is required');
         });
 
-        userCodeInfo = { device_code: 'test_device_code', interval: 5, expires_in: 1000 };
+        userCodeInfo = { deviceCode: 'test_device_code', interval: 5, expiresIn: 1000 };
         try {
             context.cancelRequestToGetTokenWithDeviceCode(userCodeInfo);
         } catch (e) {
@@ -205,7 +205,7 @@ suite('device-code', function () {
             assert(e.message === 'acquireToken requires a function callback parameter.', 'Unexpected error message returned.');
         }
 
-        userCodeInfo = { device_code: cp.deviceCode, interval: 1, expires_in: 200 };
+        userCodeInfo = { deviceCode: cp.deviceCode, interval: 1, expiresIn: 200 };
         context.cancelRequestToGetTokenWithDeviceCode(userCodeInfo, function (err) {
             assert(err, 'Did not receive expected error. ');
             assert(err.message === 'No acquireTokenWithDeviceCodeRequest existed to be cancelled', 'Unexpected error message returned.');

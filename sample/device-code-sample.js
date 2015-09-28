@@ -24,6 +24,7 @@ var fs = require('fs');
 var adal = require('../lib/adal.js');
 var async = require('async');
 var url = require('url');
+var MemoryCache = require('../lib/memory-cache');
 
 var AuthenticationContext = adal.AuthenticationContext;
 
@@ -67,20 +68,23 @@ if (parametersFile) {
 
 if (!parametersFile) {
     sampleParameters = {
-        tenant : '',
-        authorityHostUrl : '',
-        clientId : ''
+        tenant : 'convergeTest.onmicrosoft.com',
+        authorityHostUrl : 'https://login.microsoftonline.com',
+        clientId : '',
+        anothertenant: ''
     };
 }
 
 var authorityUrl = sampleParameters.authorityHostUrl + '/' + sampleParameters.tenant;
 
 var resource = '00000002-0000-0000-c000-000000000000';
+var userId = '';
 
 //turnOnLogging();
 
-var context = new AuthenticationContext(authorityUrl);
+var cache = new MemoryCache();
 
+var context = new AuthenticationContext(authorityUrl, null, cache);
 context.acquireUserCode(resource, sampleParameters.clientId, 'es-mx', function (err, response) {
     if (err) {
         console.log('well that didn\'t work: ' + err.stack);
@@ -93,8 +97,20 @@ context.acquireUserCode(resource, sampleParameters.clientId, 'es-mx', function (
                 console.log(err);
             }
             else {
-                console.log(tokenResponse);
+                authorityUrl = sampleParameters.authorityHostUrl + '/' + sampleParameters.anothertenant;
+                
+                var context2 = new AuthenticationContext(authorityUrl, null, cache);
+                context2.acquireToken(resource, userId, sampleParameters.clientId, function (err, tokenResponse) {
+                    if (err) {
+                        console.log('error happens when acquiring token with device code');
+                        console.log(err);
+                    }
+                    else {
+                        console.log(tokenResponse);
+                    }
+                });
             }
         });
     }
 });
+
