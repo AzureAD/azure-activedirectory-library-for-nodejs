@@ -27,12 +27,14 @@
 var assert = require('assert');
 var nock = require('nock');
 var querystring = require('querystring');
+var url = require('url');
 
 var util = require('./util/util');
 var testRequire = util.testRequire;
 var cp = util.commonParameters;
 
 var adal = testRequire('adal');
+var MemoryCache = testRequire('memory-cache');
 var AuthenticationContext = adal.AuthenticationContext;
 
 suite('device-code', function () {
@@ -212,5 +214,45 @@ suite('device-code', function () {
         })
         
         done();
+    });
+
+    test.only('cross-tenant-refresh-token', function (done) {
+        var memCache = new MemoryCache();
+        var response = util.createResponse({mrrt: true});
+        var tokenRequest = setupExpectedTokenRequestResponse(200, response.wireResponse);
+        
+        var userCodeInfo = { deviceCode: cp.deviceCode, interval: 1, expiresIn: 1 };
+        var context = new AuthenticationContext(cp.authUrl, false, memCache);
+        context.acquireTokenWithDeviceCode(cp.resource, cp.clientId, userCodeInfo, function (err, tokenResponse) {
+            assert(!err, 'Receive unexpected error');
+
+            var someOtherAuthority = url.parse(cp.evoEndpoint + '/' + 'anotherTenant');
+            var responseOptions = { refreshedRefresh : true, mrrt: true};
+            var response = util.createResponse(responseOptions);
+            var wireResponse = response.wireResponse;
+            //need to change tokenUrlPath for the different tenant token request, and make sure get it changed back to not affect other tests
+            var tokenUrlPath = cp.tokenUrlPath;
+            cp.tokenUrlPath = someOtherAuthority.pathname + cp.tokenPath + cp.extraQP;
+
+            var refreshRequest = util.setupExpectedRefreshTokenRequestResponse(200, wireResponse, someOtherAuthority, response.resource);
+            cp.tokenUrlPath = tokenUrlPath;
+            var conextForAnotherAuthority = new AuthenticationContext(someOtherAuthority, false, memCache);
+
+            conextForAnotherAuthority.acquireToken(response.resource, tokenResponse.userId, response.clientId, function (error, tokenResponseForAnotherAuthority) {
+                assert(!error, 'Receive unexpected error');
+
+                assert(memCache._entries.length === 2, 'There should two cache entries in the cache');
+                memCache.find({userId: tokenResponse.userId, _clientId: response.clientId, _authority: cp.evoEndpoint + '/' + cp.tenant}, function (err, entry) {
+                    assert(!err, 'Unexpected error received');
+                    assert(entry.length === 1, 'no result returned for given tenant.');
+                });
+
+                memCache.find({userId: tokenResponse.userId, _clientId: response.clientId, _authority: url.format(someOtherAuthority)}, function (err, entry) {
+                    assert(!err, 'unexpected error received');
+                    assert(entry.length === 1, 'no result returned for given tenant.');
+                });
+                done(err);
+            });
+        });        
     });
 });
