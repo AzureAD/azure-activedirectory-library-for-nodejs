@@ -236,8 +236,8 @@ suite('device-code', function () {
 
             var refreshRequest = util.setupExpectedRefreshTokenRequestResponse(200, wireResponse, someOtherAuthority, response.resource);
             cp.tokenUrlPath = tokenUrlPath;
-
             var conextForAnotherAuthority = new AuthenticationContext(someOtherAuthority, false, memCache);
+
             conextForAnotherAuthority.acquireToken(response.resource, tokenResponse.userId, response.clientId, function (error, tokenResponseForAnotherAuthority) {
                 assert(!error, 'Receive unexpected error');
 
