@@ -7,6 +7,8 @@ targets/*
 /obj/
 /bin/
 .ntvs_analysis.dat
+*.njsproj
+*.sln
 
 # Node #
 test/recordings/
