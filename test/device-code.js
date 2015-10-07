@@ -216,7 +216,7 @@ suite('device-code', function () {
         done();
     });
 
-    test.only('cross-tenant-refresh-token', function (done) {
+    test('cross-tenant-refresh-token', function (done) {
         var memCache = new MemoryCache();
         var response = util.createResponse({mrrt: true});
         var tokenRequest = setupExpectedTokenRequestResponse(200, response.wireResponse);
@@ -237,7 +237,6 @@ suite('device-code', function () {
             var refreshRequest = util.setupExpectedRefreshTokenRequestResponse(200, wireResponse, someOtherAuthority, response.resource);
             cp.tokenUrlPath = tokenUrlPath;
             var conextForAnotherAuthority = new AuthenticationContext(someOtherAuthority, false, memCache);
-
             conextForAnotherAuthority.acquireToken(response.resource, tokenResponse.userId, response.clientId, function (error, tokenResponseForAnotherAuthority) {
                 assert(!error, 'Receive unexpected error');
 
