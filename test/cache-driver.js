@@ -214,6 +214,7 @@ suite('CacheDriver', function() {
           authority : authority,
           expiredEntry : expiredEntry
         };
+
         callback(err, testValues, finalRefreshToken);
       }
     );
@@ -231,7 +232,7 @@ suite('CacheDriver', function() {
 
         var otherAuthority = 'someOtherAuthority';
         var responseOptions = { authority : otherAuthority, mrrt : true, resource : responses[0].resource };
-        var differentAuthorityResponse = util.createResponse(responseOptions);
+        var differentAuthorityResponse = util.createResponse(responseOptions, 21);
         delete responseOptions.authority;
         var extraMRRTResponse = util.createResponse(responseOptions, 21);
         responses.push(extraMRRTResponse.cachedResponse);
@@ -240,6 +241,7 @@ suite('CacheDriver', function() {
 
         // order is important here.  We want to ensure that when we add the second MRRT it has only updated
         // the refresh token of the entries with the same authority.
+        // update: with mega refresh token(cross tenant RT), refresh token of the entry will be updated if there is a match with userId, clientId. 
         var cacheDriver = new CacheDriver(fakeTokenRequest._callContext, otherAuthority, differentAuthorityResponse.resource, differentAuthorityResponse.clientId, memCache, unexpectedRefreshFunction);
         cacheDriver.add(differentAuthorityResponse.decodedResponse, function(err) {
           assert(!err, 'Unexpected err adding entry with different authority.');
@@ -247,7 +249,6 @@ suite('CacheDriver', function() {
           var cacheDriver2 = new CacheDriver(fakeTokenRequest._callContext, cp.authorityTenant, extraMRRTResponse.resource, extraMRRTResponse.clientId, memCache, unexpectedRefreshFunction);
           cacheDriver2.add(extraMRRTResponse.decodedResponse, function(err2) {
             assert(!err2, 'Unexpected error adding second entry with previous authority.');
-            compareInputAndCache(responses, memCache, numMRRTTokens);
 
             // ensure that we only find the mrrt with the different authority.
             cacheDriver.find( { resource : differentAuthorityResponse.resource}, function(err3, entry) {
@@ -396,6 +397,7 @@ suite('CacheDriver', function() {
       var responseOptions = { resource : unknownResource, mrrt : true, refreshedRefresh : true };
       var refreshedResponse = util.createResponse(responseOptions);
       var refreshedRefreshToken = refreshedResponse.refreshToken;
+
       var refreshFunction = createRefreshFunction(finalMrrt, refreshedResponse.decodedResponse);
 
       if (!err) {

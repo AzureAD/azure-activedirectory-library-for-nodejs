@@ -120,9 +120,10 @@ parameters.successResponse = successResponse;
 parameters.successResponseWithRefresh = successResponseWithRefresh;
 parameters.authUrl = url.parse(parameters.evoEndpoint + '/' + parameters.tenant);
 parameters.tokenPath = '/oauth2/token';
-parameters.tokenUrlPath = parameters.authUrl.pathname + parameters.tokenPath;
+parameters.extraQP = '?api-version=1.0';
+parameters.tokenUrlPath = parameters.authUrl.pathname + parameters.tokenPath + parameters.extraQP;
 parameters.deviceCodePath = '/oauth2/devicecode'
-parameters.deviceCodeUrlPath = parameters.authUrl.pathname + parameters.deviceCodePath;
+parameters.deviceCodeUrlPath = parameters.authUrl.pathname + parameters.deviceCodePath + parameters.extraQP;
 parameters.authorizePath = '/oauth/authorize';
 parameters.authorizeUrlPath = parameters.authUrl.pathname + parameters.authorizePath;
 parameters.authorizeUrl = parameters.authUrl.href + parameters.authorizePath;
@@ -199,13 +200,13 @@ TOKEN_RESPONSE_MAP['error_description'] = 'errorDescription';
 TOKEN_RESPONSE_MAP['resource'] = 'resource';
 
 var DEVICE_CODE_RESPONSE_MAP = {};
-DEVICE_CODE_RESPONSE_MAP['device_code'] = 'device_code';
-DEVICE_CODE_RESPONSE_MAP['user_code'] = 'user_code';
-DEVICE_CODE_RESPONSE_MAP['verification_url'] = 'verification_url';
+DEVICE_CODE_RESPONSE_MAP['device_code'] = 'deviceCode';
+DEVICE_CODE_RESPONSE_MAP['user_code'] = 'userCode';
+DEVICE_CODE_RESPONSE_MAP['verification_url'] = 'verificationUrl';
 DEVICE_CODE_RESPONSE_MAP['interval'] = 'interval';
-DEVICE_CODE_RESPONSE_MAP['expires_in'] = 'expires_in';
+DEVICE_CODE_RESPONSE_MAP['expires_in'] = 'expiresIn';
 DEVICE_CODE_RESPONSE_MAP['error'] = 'error';
-DEVICE_CODE_RESPONSE_MAP['error_description'] = 'error_description';
+DEVICE_CODE_RESPONSE_MAP['error_description'] = 'errorDescription';
 
 function mapFields(inObj, outObj, map) {
   for (var key in inObj) {
@@ -216,6 +217,12 @@ function mapFields(inObj, outObj, map) {
   }
 }
 
+/**
+ * Create response based on the given options and iteration number. 
+ * @options Options is used to flex the reponse creation, i.e authority, resource and isMRRT. 
+ * @param iteration Iteraton will be used to create a distinct token for each value of iteration and it will always return that same token 
+ *                  for same value of iteration. 
+ */
 util.createResponse = function(options, iteration) {
   options = options || {};
 
@@ -277,6 +284,7 @@ util.createResponse = function(options, iteration) {
   decodedResponse['expiresOn'] = expiresOnDate;
 
   var cachedResponse = _.clone(decodedResponse);
+
   cachedResponse['_clientId'] = parameters.clientId;
   cachedResponse['_authority'] = authority;
   cachedResponse['resource'] = iterated['resource'];
