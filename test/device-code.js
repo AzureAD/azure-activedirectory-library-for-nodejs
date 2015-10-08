@@ -216,7 +216,7 @@ suite('device-code', function () {
         done();
     });
 
-    test.only('cross-tenant-refresh-token', function (done) {
+    test('cross-tenant-refresh-token', function (done) {
         var memCache = new MemoryCache();
         var response = util.createResponse({mrrt: true});
         var tokenRequest = setupExpectedTokenRequestResponse(200, response.wireResponse);

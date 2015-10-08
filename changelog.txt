@@ -1,3 +1,8 @@
+Version 0.1.17
+--------------
+Release Date: 8 Oct 2015
+    * Add support for cross tenant refresh token
+
 Version 0.1.16
 --------------
 Release Date: 3 Sep 2015
