@@ -55,10 +55,6 @@ suite('token-request capture surface correct error', function () {
   context._authority._tokenEndpoint = 'http://' + fakedHostname;
   var callContext = { '_logContext' : {} };
   
-  function verifyError(err) {
-    assert(err.message.indexOf(fakedHostname) > 0);
-  }
-  
   //test cases
   test('when it gets more than 2 matched tokens', function (done) {
     cachedTokenList.push(cachedTokenList[0]);
@@ -73,7 +69,7 @@ suite('token-request capture surface correct error', function () {
   test('when token refresh failed for getTokenFromCacheWithRefresh', function (done) {
     var tokenRequest = new TokenRequest(callContext, context, cp.clientId, cp.resource, null);
     tokenRequest.getTokenFromCacheWithRefresh('user@foo.com', function (err) {
-      verifyError(err);
+      assert(err.message.indexOf(fakedHostname) > 0);
       done();
     });
   });
