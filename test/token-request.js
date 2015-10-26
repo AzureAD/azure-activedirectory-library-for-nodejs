@@ -77,30 +77,4 @@ suite('token-request capture surface correct error', function () {
       done();
     });
   });
-  
-  test('when token refresh failed for getTokenWithUsernamePassword', function (done) {
-    var tokenRequest = new TokenRequest(callContext, context, cp.clientId, cp.resource, null);
-    tokenRequest.getTokenWithUsernamePassword('user@foo.com', 'password', function (err) {
-      verifyError(err);
-      done();
-    });
-  });
-  
-  test('when token refresh failed for getTokenWithClientCredentials', function (done) {
-    var tokenRequest = new TokenRequest(callContext, context, cp.clientId, cp.resource, null);
-    tokenRequest.getTokenFromCacheWithRefresh('mysecret', function (err) {
-      verifyError(err);
-      done();
-    });
-  });
-  
-  test('when token refresh failed for getTokenWithCertificate', function (done) {
-    var tokenRequest = new TokenRequest(callContext, context, cp.clientId, cp.resource, null);
-    sinon.stub(tokenRequest, '_createJwt').returns({});
-    tokenRequest.getTokenWithCertificate('certificate1', 'thumbprint1', function (err) {
-      verifyError(err);
-      tokenRequest._createJwt.restore();
-      done();
-    });
-  });
 });
