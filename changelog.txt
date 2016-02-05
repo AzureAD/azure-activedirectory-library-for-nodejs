@@ -1,3 +1,8 @@
+Version 0.1.18
+--------------
+Release Date: 5 Feb 2016
+    * Add oid in IDTokenMap to expose for returned user info. 
+
 Version 0.1.17
 --------------
 Release Date: 8 Oct 2015
