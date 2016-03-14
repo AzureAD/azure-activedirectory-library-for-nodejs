@@ -684,7 +684,7 @@ suite('username-password', function() {
     var preRequests = util.setupExpectedUserRealmResponseCommon(false);
     var response = util.createResponse();
 
-    response.wireResponse['expires_in'] = 'foo';
+    response.wireResponse['expires_in'] = 'test';
 
     var upRequest = setupExpectedUserNamePasswordRequestResponse(200, response.wireResponse, response.authority);
 
