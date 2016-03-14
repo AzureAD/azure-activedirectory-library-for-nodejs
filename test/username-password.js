@@ -664,13 +664,13 @@ suite('username-password', function() {
     ];
 
     var oauthObj = util.createEmptyADALObject();
-    var crack = OAuth2Client.prototype._crackJwt.bind(oauthObj);
+    var parseJWT = OAuth2Client.prototype._crackJwt.bind(oauthObj);
     for (var i = 0; i < testData.length; i++) {
       var testCase = testData[i];
       var testJWT = testCase[0];
       var testResult = testCase[1];
 
-      var crackedJwt = crack(testJWT);
+      var crackedJwt = parseJWT(testJWT);
       if (testResult) {
         assert(_.isEqual(testResult, crackedJwt), 'The cracked token does not match the expected result.');
       } else {
