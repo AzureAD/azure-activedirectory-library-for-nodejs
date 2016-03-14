@@ -201,7 +201,7 @@ suite('client-credential', function() {
     });
   });
 
-  test('error-with-junk-return', function(done) {
+  test('error-with-useless-return', function(done) {
     var junkResponse = 'This is not properly formated return value.';
 
     var tokenRequest = util.setupExpectedClientCredTokenRequestResponse(400, junkResponse);
@@ -214,7 +214,7 @@ suite('client-credential', function() {
     });
   });
 
-  test('success-with-junk-return', function(done) {
+  test('success-with-useless-return', function(done) {
     var junkResponse = 'This is not properly formated return value.';
 
     var tokenRequest = util.setupExpectedClientCredTokenRequestResponse(200, junkResponse);
