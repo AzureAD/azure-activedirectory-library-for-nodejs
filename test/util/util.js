@@ -41,7 +41,8 @@ var parsedIdToken = {
   'userId' : 'rrandall@rrandallaad1.onmicrosoft.com',
   'givenName' : 'Rich',
   'familyName' : 'Randall',
-  'isUserIdDisplayable' : true
+  'isUserIdDisplayable' : true, 
+  'oid' : 'a443204a-abc9-4cb8-adc1-c0dfc12300aa'
 };
 
 
@@ -65,10 +66,11 @@ var encodedIdTokenUrlSafe = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJhdWQiOiJlOTU
 
 var parsedIdTokenUrlSafe = {
   'tenantId' : 'cceba14c-6a00-49ac-b806-84de52bf1d42',
-  'userId' : 'foobar@someplaceelse.com',
+  'userId' : 'test@someplaceelse.com',
   'givenName' : 'Ri<?ch',
   'familyName' : 'Randall',
-  'isUserIdDisplayable' : true
+  'isUserIdDisplayable' : true, 
+  'oid' : 'a443204a-abc9-4cb8-adc1-c0dfc12300aa'
 };
 
 var decodedTokenUrlSafeTest = {
@@ -80,7 +82,7 @@ var decodedTokenUrlSafeTest = {
   ver: '1.0',
   tid: 'cceba14c-6a00-49ac-b806-84de52bf1d42',
   oid: 'a443204a-abc9-4cb8-adc1-c0dfc12300aa',
-  upn: 'foobar@someplaceelse.com',
+  upn: 'test@someplaceelse.com',
   'unique_name': 'rrandall@rrandallaad1.onmicrosoft.com',
   sub: '4gTv4EtoYW-DTow0bDnJd1AA4sfChBbjermqt6Q_Za4',
   'family_name': 'Randall',

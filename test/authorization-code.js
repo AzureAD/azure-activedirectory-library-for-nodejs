@@ -40,7 +40,7 @@ var AuthenticationContext = adal.AuthenticationContext;
  */
 suite('authorization-code', function() {
   var authorizationCode = '1234870909';
-  var redirectUri = 'app_bundle:foo.bar.baz';
+  var redirectUri = 'app_bundle:test.bar.baz';
 
   function setupExpectedAuthCodeTokenRequestResponse(httpCode, returnDoc, authorityEndpoint) {
     var authEndpoint = util.getNockAuthorityHost(authorityEndpoint);

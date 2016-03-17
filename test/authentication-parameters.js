@@ -64,16 +64,16 @@ suite('authentication-parameters', function() {
   test('create-from-header', function(done) {
     var testData = [
       [
-        'Bearer authorization_uri="foobar,lkfj,;l,", fruitcake="f",resource="clark, &^()- q32,shark" , f="foo"',
+        'Bearer authorization_uri="test,lkfj,;l,", fruitcake="f",resource="clark, &^()- q32,shark" , f="test"',
         {
-          'authorizationUri' : 'foobar,lkfj,;l,',
+          'authorizationUri' : 'test,lkfj,;l,',
           'resource' : 'clark, &^()- q32,shark',
         }
       ],
       [
-        'Bearer  resource="clark, &^()- q32,shark", authorization_uri="foobar,lkfj,;l,"',
+        'Bearer  resource="clark, &^()- q32,shark", authorization_uri="test,lkfj,;l,"',
         {
-          'authorizationUri' : 'foobar,lkfj,;l,',
+          'authorizationUri' : 'test,lkfj,;l,',
           'resource' : 'clark, &^()- q32,shark',
         }
       ],
@@ -93,79 +93,79 @@ suite('authentication-parameters', function() {
       ],
       // Add second = sign on first pair.
       [
-        'Bearer authorization_uri=="foobar,lkfj,;l,", resource="clark, &^()- q32,shark",fruitcake="f" , f="foo"',
+        'Bearer authorization_uri=="test,lkfj,;l,", resource="clark, &^()- q32,shark",fruitcake="f" , f="test"',
         null
       ],
       // Add second = sign on second pair.
       [
-        'Bearer authorization_uri="foobar,lkfj,;l,", resource=="clark, &^()- q32,shark",fruitcake="f" , f="foo"',
+        'Bearer authorization_uri="test,lkfj,;l,", resource=="clark, &^()- q32,shark",fruitcake="f" , f="test"',
         null
       ],
       // Add second quote on first pair.
       [
-        'Bearer authorization_uri=""foobar,lkfj,;l,", resource="clark, &^()- q32,shark",fruitcake="f" , f="foo"',
+        'Bearer authorization_uri=""test,lkfj,;l,", resource="clark, &^()- q32,shark",fruitcake="f" , f="test"',
         null
       ],
       // Add second quote on second pair.
       [
-        'Bearer authorization_uri=foobar,lkfj,;l,", resource="clark, &^()- q32,shark"",fruitcake="f" , f="foo"',
+        'Bearer authorization_uri=test,lkfj,;l,", resource="clark, &^()- q32,shark"",fruitcake="f" , f="test"',
         null
       ],
       // Add trailing quote.
       [
-        'Bearer authorization_uri=foobar,lkfj,;l,", resource="clark, &^()- q32,shark",fruitcake="f" , f="foo""',
+        'Bearer authorization_uri=test,lkfj,;l,", resource="clark, &^()- q32,shark",fruitcake="f" , f="test""',
         null
       ],
       // Add trailing comma at end of string.
       [
-        'Bearer authorization_uri=foobar,lkfj,;l,", resource="clark, &^()- q32,shark",fruitcake="f" , f="foo",',
+        'Bearer authorization_uri=test,lkfj,;l,", resource="clark, &^()- q32,shark",fruitcake="f" , f="test",',
         null
       ],
       // Add second comma between 2 and 3 pairs.
       [
-        'Bearer authorization_uri=foobar,lkfj,;l,", resource="clark, &^()- q32,shark",fruitcake="f" ,, f="foo"',
+        'Bearer authorization_uri=test,lkfj,;l,", resource="clark, &^()- q32,shark",fruitcake="f" ,, f="test"',
         null
       ],
       // Add second comma between 1 and 2 pairs.
       [
-        'Bearer authorization_uri=foobar,lkfj,;l,", , resource="clark, &^()- q32,shark",fruitcake="f" , f="foo"',
+        'Bearer authorization_uri=test,lkfj,;l,", , resource="clark, &^()- q32,shark",fruitcake="f" , f="test"',
         null
       ],
       // Add random letter between Bearer and first pair.
       [
-        'Bearer  f authorization_uri=foobar,lkfj,;l,", resource="clark, &^()- q32,shark",fruitcake="f" , f="foo"',
+        'Bearer  f authorization_uri=test,lkfj,;l,", resource="clark, &^()- q32,shark",fruitcake="f" , f="test"',
         null
       ],
       // Add random letter between 2 and 3 pair.
       [
-        'Bearer  authorization_uri=foobar,lkfj,;l,", a resource="clark, &^()- q32,shark",fruitcake="f" , f="foo"',
+        'Bearer  authorization_uri=test,lkfj,;l,", a resource="clark, &^()- q32,shark",fruitcake="f" , f="test"',
         null
       ],
       // Add random letter between 3 and 2 pair.
       [
-        'Bearer  authorization_uri=foobar,lkfj,;l,", resource="clark, &^()- q32,shark",fruitcake="f" a, f="foo"',
+        'Bearer  authorization_uri=test,lkfj,;l,", resource="clark, &^()- q32,shark",fruitcake="f" a, f="test"',
         null
       ],
       // Mispell Bearer
       [
-        'Berer authorization_uri=foobar,lkfj,;l,", resource="clark, &^()- q32,shark",fruitcake="f" , f="foo"',
+        'Berer authorization_uri=test,lkfj,;l,", resource="clark, &^()- q32,shark",fruitcake="f" , f="test"',
         null
       ],
       // Missing resource.
       [
-        'Bearer authorization_uri="foobar,lkfj,;l,"',
+        'Bearer authorization_uri="test,lkfj,;l,"',
         {
-          'authorizationUri' : 'foobar,lkfj,;l,'
+          'authorizationUri' : 'test,lkfj,;l,'
         }
       ],
       // Missing authoritzation uri.
       [
-        'Bearer resource="clark, &^()- q32,shark",fruitcake="f" , f="foo"',
+        'Bearer resource="clark, &^()- q32,shark",fruitcake="f" , f="test"',
         null
       ],
       // Boris's test.
       [
-        'Bearer foo="bar" ANYTHING HERE, ANYTHING PRESENT HERE, foo1="bar1"',
+        'Bearer test="bar" ANYTHING HERE, ANYTHING PRESENT HERE, test1="bar1"',
         null
       ],
       [
@@ -183,17 +183,17 @@ suite('authentication-parameters', function() {
       [
         {
           statusCode : 401,
-          headers : { 'www-authenticate' : 'Bearer authorization_uri="foobar,lkfj,;l,", fruitcake="f",resource="clark, &^()- q32,shark" , f="foo"' }
+          headers : { 'www-authenticate' : 'Bearer authorization_uri="test,lkfj,;l,", fruitcake="f",resource="clark, &^()- q32,shark" , f="test"' }
         },
         {
-          'authorizationUri' : 'foobar,lkfj,;l,',
+          'authorizationUri' : 'test,lkfj,;l,',
           'resource' : 'clark, &^()- q32,shark',
         }
       ],
       [
         {
           statusCode : 200,
-          headers : { 'www-authenticate' : 'Bearer authorization_uri="foobar,lkfj,;l,", fruitcake="f",resource="clark, &^()- q32,shark" , f="foo"' }
+          headers : { 'www-authenticate' : 'Bearer authorization_uri="test,lkfj,;l,", fruitcake="f",resource="clark, &^()- q32,shark" , f="test"' }
         },
         null
       ],
@@ -206,14 +206,14 @@ suite('authentication-parameters', function() {
       [
         {
           statusCode : 401,
-          headers : { 'foo' : 'this is not the www-authenticate header' }
+          headers : { 'test' : 'this is not the www-authenticate header' }
         },
         null
       ],
       [
         {
           statusCode : 401,
-          headers : { 'www-authenticate' : 'Berer authorization_uri=foobar,lkfj,;l,", resource="clark, &^()- q32,shark",fruitcake="f" , f="foo"' }
+          headers : { 'www-authenticate' : 'Berer authorization_uri=test,lkfj,;l,", resource="clark, &^()- q32,shark",fruitcake="f" , f="test"' }
         },
         null
       ],
@@ -251,8 +251,8 @@ suite('authentication-parameters', function() {
                           return util.removeQueryStringIfMatching(path, testQuery);
                         })
                        .get(testPath)
-                       .reply(401, 'foo',
-                         { 'www-authenticate' : 'Bearer authorization_uri="foobar,lkfj,;l,", fruitcake="f",resource="clark, &^()- q32,shark" , f="foo"' }
+                       .reply(401, 'test',
+                         { 'www-authenticate' : 'Bearer authorization_uri="test,lkfj,;l,", fruitcake="f",resource="clark, &^()- q32,shark" , f="test"' }
                        );
 
     util.matchStandardRequestHeaders(getResource);
@@ -260,7 +260,7 @@ suite('authentication-parameters', function() {
     adal.createAuthenticationParametersFromUrl(testUrl, function(err, parameters) {
       if (!err) {
         var testParameters = {
-          'authorizationUri' : 'foobar,lkfj,;l,',
+          'authorizationUri' : 'test,lkfj,;l,',
           'resource' : 'clark, &^()- q32,shark',
         };
         assert(parameters.authorizationUri === testParameters.authorizationUri, 'Parsed authorizationUri did not match expected value.: ' + parameters.authorizationUri);
@@ -277,8 +277,8 @@ suite('authentication-parameters', function() {
                           return util.removeQueryStringIfMatching(path, testQuery);
                         })
                        .get(testPath)
-                       .reply(401, 'foo',
-                         { 'www-authenticate' : 'Bearer authorization_uri="foobar,lkfj,;l,", fruitcake="f",resource="clark, &^()- q32,shark" , f="foo"' }
+                       .reply(401, 'test',
+                         { 'www-authenticate' : 'Bearer authorization_uri="test,lkfj,;l,", fruitcake="f",resource="clark, &^()- q32,shark" , f="test"' }
                        );
 
     util.matchStandardRequestHeaders(getResource);
@@ -288,7 +288,7 @@ suite('authentication-parameters', function() {
       getResource.done();
       if (!err) {
         var testParameters = {
-          'authorizationUri' : 'foobar,lkfj,;l,',
+          'authorizationUri' : 'test,lkfj,;l,',
           'resource' : 'clark, &^()- q32,shark',
         };
         assert(parameters.authorizationUri === testParameters.authorizationUri, 'Parsed authorizationUri did not match expected value.: ' + parameters.authorizationUri);
@@ -318,7 +318,7 @@ suite('authentication-parameters', function() {
                           return util.removeQueryStringIfMatching(path, testQuery);
                         })
                        .get(testPath)
-                       .reply(401, 'foo');
+                       .reply(401, 'test');
 
     util.matchStandardRequestHeaders(getResource);
 
@@ -335,7 +335,7 @@ suite('authentication-parameters', function() {
   // an error rather than returning an HTTP error of some sort.
   test('create-from-url-network-error', function(done) {
     nock.enableNetConnect();
-    adal.createAuthenticationParametersFromUrl('https://0.0.0.0/foobar', function(err) {
+    adal.createAuthenticationParametersFromUrl('https://0.0.0.0/test', function(err) {
       assert(err, 'Did not receive expected error');
       nock.disableNetConnect();
       done();
