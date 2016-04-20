@@ -98,7 +98,7 @@ parameters.password = 'Atestpass!@#$';
 parameters.authorityHosts = {
   global : 'login.windows.net',
   china : 'login.chinacloudapi.cn',
-  gov : 'login.cloudgovapi.us'
+  gov : 'login-us.microsoftonline.com'
 };
 parameters.language = 'en';
 parameters.deviceCode = 'ABCDE:device_code';
