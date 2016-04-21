@@ -129,7 +129,7 @@ suite('Authority', function() {
             done(err3);
             return;
           }
-          performStaticInstanceDiscovery('login.cloudgovapi.us', function(err4) {
+          performStaticInstanceDiscovery('login-us.microsoftonline.com', function(err4) {
               done(err4);
           });
         });
