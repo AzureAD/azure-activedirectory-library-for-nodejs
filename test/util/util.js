@@ -96,7 +96,7 @@ parameters.clientSecret = 'clientSecret*&^(?&';
 parameters.resource = '00000002-0000-0000-c000-000000000000';
 parameters.evoEndpoint = 'https://login.windows.net';
 parameters.username = 'rrandall@' + parameters.tenant;
-parameters.password = 'Atestpass!@#$';
+parameters.password = '<password>';
 parameters.authorityHosts = {
   global : 'login.windows.net',
   china : 'login.chinacloudapi.cn',
@@ -144,9 +144,38 @@ parameters.AssertionFile = __dirname + '/../wstrust/common.base64.encoded.assert
 parameters.logContext = { correlationId : 'test-correlation-id-123456789' };
 parameters.callContext = { _logContext : parameters.logContext };
 
-
+// This is a dummy RSA private cert used for testing purpose.It does not represent valid credential.
+// privatePem variable is a fake certificate in the form of a string.
+// Hence the following message is added to suppress CredScan warning.
+//[SuppressMessage("Microsoft.Security", "CS002:SecretInNextLine")]
 util.getSelfSignedCert = function() {
-  var privatePem = fs.readFileSync(__dirname + '/self-signed-cert.pem', { encoding : 'utf8'});
+  var privatePem = '-----BEGIN RSA PRIVATE KEY-----\n' +
+    'MIIEpAIBAAKCAQEAoMGZTZi0vU/ICYVgV4vcTwzvZCNXdJ9EgGBBFu1E0/j4FF0Y\n' +
+    'Fd2sP7IwmWVZLlWJ5VbwAtdMiRdrogX/QnWPfsNfsPzDdRRJD+Erh9tmBzJm08h7\n' +
+    '1RggS1/VehZ9WNdTDlQM3P+zNg0IG274VIr+ZSBzIbYxV6ecPdRU/EsZ5Wa5SCwG\n' +
+    'Fu1qPJW8KY8yvse9PHdFiHjrmcZSKTbBCp/2grdBrk/N1jwtH6Yj100l7G69HPE/\n' +
+    '4kXYRX9f/LjpzF77VMCj7UJtmb1yR3fRHpppbm7GkqvJFM2Kg3UG5fsp8nQBDRc+\n' +
+    'R3kjm+DU05MoFdsfo3DkzpNJjDcLUPdANe+mWwIDAQABAoIBACdb/1r+XpJTbFjY\n' +
+    'bSRCPCimtB5CgPEu5ajA6G7inQ2BUcw6luETq07VJA0KwXEUxHSAerdXW4fdUh8T\n' +
+    'dNIi0oVo9I7y9DBATTs0GGJlF2//qSmFVrxv8chCqJQB2aLc5ZsGfTfG62v6eNeu\n' +
+    'reKVPYApF8dTQnWBtkF1MXGsOaTuxEecrM6KbES97kElC0QsJ89sDnTUjKuihfc9\n' +
+    'Q9IfWDbX/5WY6JL7XMbQtKRIzd+y/E9dpU3Hu+UErKWyb5pQiud81/Q/xQThSrVt\n' +
+    'zpmXwlsEFCrSzDML+aOTDqrsRwypRc5sTNAMadkeRrrlo+5OzoUG1aTxco8tZ1MD\n' +
+    'ch7RTJECgYEA1fqn93X6S1sA8R4lYOJUDd5JmEskKwLl5Vg2VSinSD1YyMdtPnQa\n' +
+    'ZWCEbJGXN60tEd7ZjOM4wA0mIrwEkkApFWEiGpMe4aGTD11455rA5IfrZUGPXlcw\n' +
+    'lkmt4wPytKx/xDLBfa8oAu33dFDe/nhRqQqAMTi7DAnttqjUxPg/N8UCgYEAwFNG\n' +
+    'qLG+5+J4sq5xoXgDj0Zggi5hx2IEfN68BmyYHvfL8VSDkQMsiYXNAhTWByCkjW9D\n' +
+    'j/hdouGlDwMCLWq0XPgO/XsSlU7jJExsrRch63kf72PTZP/qapSkOonCe9TViNTQ\n' +
+    'KiRXu/v9OfJYSRPnpKz0/5goFSq7E12mBWZJJ58CgYEAvmmKNLSAobP+t5H68ycU\n' +
+    'Yy7u0J31Nm0ixR7lYoyFp8wniKumdA//OT1VOgOoy/vIAoILl8rPQl+xEvG7I6YC\n' +
+    'qSrBnWJT9bbBVcf5Aih9BCBLgdSATxRJgUNZgI2P2eUy4RXFhyFp+olmTdR1S38o\n' +
+    'M8PLZYG1OTZQmd3NUOYT430CgYBzU7yEPgnPPTPJWefTvobL7JTEm5GQoQs14c54\n' +
+    'P7g8obUO4vH+DBwx3yUfAWWSYpWqJjUqaPGlUY/L3673kwvS0AEVKS7sj6CPTLDC\n' +
+    'XqO9cyWeRIsn/noQLVAJtkAER41AfvTQwHhHxoSDsfoU4DXAvuIvPouSncwOgdKj\n' +
+    'XEGz2wKBgQDQmB/u4oGaPRf5DdasiAcqofYDEoo/OcpdRPeW2t5z7WDZcjeN4ajR\n' +
+    'GDoQssBpy1fpsPnghksMhYZL2l9xiSInkFw87ax5EYBS43Mt5HfJPgwpEnA5yV3W\n' +
+    'WGt3TBp7BgYOKhIID6803lBYfDmtQzdD+xMjlJKSQ9wfZYCuXrYwSg==\n' +
+    '-----END RSA PRIVATE KEY-----';
   return privatePem;
 };
 
