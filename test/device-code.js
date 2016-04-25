@@ -27,12 +27,14 @@
 var assert = require('assert');
 var nock = require('nock');
 var querystring = require('querystring');
+var url = require('url');
 
 var util = require('./util/util');
 var testRequire = util.testRequire;
 var cp = util.commonParameters;
 
 var adal = testRequire('adal');
+var MemoryCache = testRequire('memory-cache');
 var AuthenticationContext = adal.AuthenticationContext;
 
 suite('device-code', function () {
@@ -41,7 +43,7 @@ suite('device-code', function () {
         util.clearStaticCache();
     });
 
-    function setupExpectedTokenRequestResponse(httpCode, returnDoc, authorityEndpoint) {
+    function setupExpectedTokenRequestResponse(httpCode, returnDoc, authorityEndpoint, extraQP) {
         var authEndpoint = util.getNockAuthorityHost(authorityEndpoint);
         
         var queryParameters = {};
@@ -51,7 +53,7 @@ suite('device-code', function () {
         queryParameters['code'] = cp.deviceCode;
         
         var query = querystring.stringify(queryParameters);
-        
+
         var tokenRequest = nock(authEndpoint)
                                 .filteringRequestBody(function (body) {
                                     return util.filterQueryString(query, body);
@@ -63,12 +65,12 @@ suite('device-code', function () {
         
         return tokenRequest;
     }
-    
+
     test('happy-path-successOnFirstRequest', function (done) {
         var response = util.createResponse();
         var tokenRequest = setupExpectedTokenRequestResponse(200, response.wireResponse);
         
-        var userCodeInfo = { device_code: cp.deviceCode, interval: 1, expires_in: 1 };
+        var userCodeInfo = { deviceCode: cp.deviceCode, interval: 1, expiresIn: 1 };
         var context = new AuthenticationContext(cp.authUrl);
         context.acquireTokenWithDeviceCode(cp.resource, cp.clientId, userCodeInfo, function (err, tokenResponse) {
             assert(!err, 'Receive unexpected error');
@@ -107,7 +109,7 @@ suite('device-code', function () {
         var response = util.createResponse();
         var tokenRequest = setupExpectedTokenRequestResponseWithAuthPending(response.wireResponse);
         
-        var userCodeInfo = { device_code: cp.deviceCode, interval: 1, expires_in: 200 };
+        var userCodeInfo = { deviceCode: cp.deviceCode, interval: 1, expiresIn: 200 };
         var context = new AuthenticationContext(cp.authUrl);
         context.acquireTokenWithDeviceCode(cp.resource, cp.clientId, userCodeInfo, function (err, tokenResponse) {
            if (!err) {
@@ -123,7 +125,7 @@ suite('device-code', function () {
         var response = util.createResponse();
         var tokenRequest = setupExpectedTokenRequestResponseWithAuthPending(response.wireResponse);
         
-        var userCodeInfo = { device_code: cp.deviceCode, interval: 1, expires_in: 200 };
+        var userCodeInfo = { deviceCode: cp.deviceCode, interval: 1, expiresIn: 200 };
         var context = new AuthenticationContext(cp.authUrl);
 
         context.acquireTokenWithDeviceCode(cp.resource, cp.clientId, userCodeInfo, function (err, tokenResponse) {
@@ -141,19 +143,19 @@ suite('device-code', function () {
         nock.cleanAll();
         var context = new AuthenticationContext(cp.authUrl);
 
-        var userCodeInfo = { interval: 5, expires_in: 1000};
+        var userCodeInfo = { interval: 5, expiresIn: 1000};
         context.acquireTokenWithDeviceCode(cp.resource, cp.clientId, userCodeInfo, function (err) {
             assert(err, 'Did not receive expected argument error');
             assert(err.message === 'The userCodeInfo is missing device_code');
         });
 
-        userCodeInfo = { device_code: 'test_device_code', expires_in: 1000 };
+        userCodeInfo = { deviceCode: 'test_device_code', expiresIn: 1000 };
         context.acquireTokenWithDeviceCode(cp.resource, cp.clientId, userCodeInfo, function (err) {
             assert(err, 'Did not receive expected argument error');
             assert(err.message === 'The userCodeInfo is missing interval');
         });
 
-        userCodeInfo = { device_code: 'test_device_code', interval: 5 };
+        userCodeInfo = { deviceCode: 'test_device_code', interval: 5 };
         context.acquireTokenWithDeviceCode(cp.resource, cp.clientId, userCodeInfo, function (err) {
             assert(err, 'Did not receive expected argument error');
             assert(err.message === 'The userCodeInfo is missing expires_in');
@@ -165,7 +167,7 @@ suite('device-code', function () {
             assert(err.message === 'The userCodeInfo parameter is required');
         });
 
-        userCodeInfo = { device_code: 'test_device_code', interval: 5, expires_in: 1000 };
+        userCodeInfo = { deviceCode: 'test_device_code', interval: 5, expiresIn: 1000 };
         try {
             context.acquireTokenWithDeviceCode(cp.resource, cp.clientId, userCodeInfo);
         } catch (e) {
@@ -173,7 +175,7 @@ suite('device-code', function () {
             assert(e.message === 'acquireToken requires a function callback parameter.', 'Unexpected error message returned.');
         }
 
-        userCodeInfo = { device_code: 'test_device_code', interval: 0, expires_in: 1000 };
+        userCodeInfo = { deviceCode: 'test_device_code', interval: 0, expiresIn: 1000 };
         context.acquireTokenWithDeviceCode(cp.resource, cp.clientId, userCodeInfo, function (err) {
           assert(err, 'Did not receive expected error.');
           assert(err.message === 'invalid refresh interval');
@@ -185,7 +187,7 @@ suite('device-code', function () {
     test('bad-argument-cancel-request', function (done) {
        var context = new AuthenticationContext(cp.authUrl);
 
-        var userCodeInfo = { interval: 5, expires_in: 1000 };
+        var userCodeInfo = { interval: 5, expiresIn: 1000 };
         context.cancelRequestToGetTokenWithDeviceCode(userCodeInfo, function (err) {
             assert(err, 'Did not receive expected argument error');
             assert(err.message === 'The userCodeInfo is missing device_code');
@@ -197,7 +199,7 @@ suite('device-code', function () {
             assert(err.message === 'The userCodeInfo parameter is required');
         });
 
-        userCodeInfo = { device_code: 'test_device_code', interval: 5, expires_in: 1000 };
+        userCodeInfo = { deviceCode: 'test_device_code', interval: 5, expiresIn: 1000 };
         try {
             context.cancelRequestToGetTokenWithDeviceCode(userCodeInfo);
         } catch (e) {
@@ -205,12 +207,52 @@ suite('device-code', function () {
             assert(e.message === 'acquireToken requires a function callback parameter.', 'Unexpected error message returned.');
         }
 
-        userCodeInfo = { device_code: cp.deviceCode, interval: 1, expires_in: 200 };
+        userCodeInfo = { deviceCode: cp.deviceCode, interval: 1, expiresIn: 200 };
         context.cancelRequestToGetTokenWithDeviceCode(userCodeInfo, function (err) {
             assert(err, 'Did not receive expected error. ');
             assert(err.message === 'No acquireTokenWithDeviceCodeRequest existed to be cancelled', 'Unexpected error message returned.');
         })
         
         done();
+    });
+
+    test('cross-tenant-refresh-token', function (done) {
+        var memCache = new MemoryCache();
+        var response = util.createResponse({mrrt: true});
+        var tokenRequest = setupExpectedTokenRequestResponse(200, response.wireResponse);
+        
+        var userCodeInfo = { deviceCode: cp.deviceCode, interval: 1, expiresIn: 1 };
+        var context = new AuthenticationContext(cp.authUrl, false, memCache);
+        context.acquireTokenWithDeviceCode(cp.resource, cp.clientId, userCodeInfo, function (err, tokenResponse) {
+            assert(!err, 'Receive unexpected error');
+
+            var someOtherAuthority = url.parse(cp.evoEndpoint + '/' + 'anotherTenant');
+            var responseOptions = { refreshedRefresh : true, mrrt: true};
+            var response = util.createResponse(responseOptions);
+            var wireResponse = response.wireResponse;
+            //need to change tokenUrlPath for the different tenant token request, and make sure get it changed back to not affect other tests
+            var tokenUrlPath = cp.tokenUrlPath;
+            cp.tokenUrlPath = someOtherAuthority.pathname + cp.tokenPath + cp.extraQP;
+
+            var refreshRequest = util.setupExpectedRefreshTokenRequestResponse(200, wireResponse, someOtherAuthority, response.resource);
+            cp.tokenUrlPath = tokenUrlPath;
+            var conextForAnotherAuthority = new AuthenticationContext(someOtherAuthority, false, memCache);
+
+            conextForAnotherAuthority.acquireToken(response.resource, tokenResponse.userId, response.clientId, function (error, tokenResponseForAnotherAuthority) {
+                assert(!error, 'Receive unexpected error');
+
+                assert(memCache._entries.length === 2, 'There should two cache entries in the cache');
+                memCache.find({userId: tokenResponse.userId, _clientId: response.clientId, _authority: cp.evoEndpoint + '/' + cp.tenant}, function (err, entry) {
+                    assert(!err, 'Unexpected error received');
+                    assert(entry.length === 1, 'no result returned for given tenant.');
+                });
+
+                memCache.find({userId: tokenResponse.userId, _clientId: response.clientId, _authority: url.format(someOtherAuthority)}, function (err, entry) {
+                    assert(!err, 'unexpected error received');
+                    assert(entry.length === 1, 'no result returned for given tenant.');
+                });
+                done(err);
+            });
+        });        
     });
 });
