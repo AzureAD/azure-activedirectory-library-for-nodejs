@@ -230,6 +230,7 @@ suite('device-code', function () {
             var responseOptions = { refreshedRefresh : true, mrrt: true};
             var response = util.createResponse(responseOptions);
             var wireResponse = response.wireResponse;
+            wireResponse.id_token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC9jY2ViYTE0Yy02YTAwLTQ5YWMtYjgwNi04NGRlNTJiZjFkNDIvIiwiaWF0IjpudWxsLCJleHAiOm51bGwsImF1ZCI6ImU5NThjMDlhLWFjMzctNDkwMC1iNGQ3LWZiM2VlYWY3MzM4ZCIsInN1YiI6IjRnVHY0RXRvWVctRFRvdzBiRG5KZDFBQTRzZkNoQmJqZXJtcXQ2UV9aYTQiLCJ0aWQiOiJkM2I3ODEzZC0zYTAzLTQyZmEtODk2My1iOTBhNzQ1NTIyYTUiLCJvaWQiOiJhNDQzMjA0YS1hYmM5LTRjYjgtYWRjMS1jMGRmYzEyMzAwYWEiLCJ1cG4iOiJycmFuZGFsbEBycmFuZGFsbGFhZDEub25taWNyb3NvZnQuY29tIiwidW5pcXVlX25hbWUiOiJycmFuZGFsbEBycmFuZGFsbGFhZDEub25taWNyb3NvZnQuY29tIiwiZmFtaWx5X25hbWUiOiJSYW5kYWxsIiwiZ2l2ZW5fbmFtZSI6IlJpY2gifQ.r-XHRqqtxI_7IEmwciFTBJpzwetz4wrM2Is_Z8-O7lw";
             //need to change tokenUrlPath for the different tenant token request, and make sure get it changed back to not affect other tests
             var tokenUrlPath = cp.tokenUrlPath;
             cp.tokenUrlPath = someOtherAuthority.pathname + cp.tokenPath + cp.extraQP;
@@ -245,11 +246,13 @@ suite('device-code', function () {
                 memCache.find({userId: tokenResponse.userId, _clientId: response.clientId, _authority: cp.evoEndpoint + '/' + cp.tenant}, function (err, entry) {
                     assert(!err, 'Unexpected error received');
                     assert(entry.length === 1, 'no result returned for given tenant.');
+                    assert(entry[0].tenantId === 'cceba14c-6a00-49ac-b806-84de52bf1d42');
                 });
 
                 memCache.find({userId: tokenResponse.userId, _clientId: response.clientId, _authority: url.format(someOtherAuthority)}, function (err, entry) {
                     assert(!err, 'unexpected error received');
                     assert(entry.length === 1, 'no result returned for given tenant.');
+                    assert(entry[0].tenantId === 'd3b7813d-3a03-42fa-8963-b90a745522a5');
                 });
                 done(err);
             });

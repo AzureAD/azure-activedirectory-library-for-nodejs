@@ -538,6 +538,7 @@ util.setupExpectedRefreshTokenRequestResponse = function(httpCode, returnDoc, au
 
   var queryParameters = {};
   queryParameters['grant_type'] = 'refresh_token';
+  queryParameters['scope'] = 'openid';
   queryParameters['client_id'] = parameters.clientId;
   if (clientSecret) {
     queryParameters['client_secret'] = clientSecret;
