@@ -104,6 +104,33 @@ suite('username-password', function() {
     return tokenRequest;
   }
 
+  function setupExpectedUserNamePasswordClientSecretRequestResponse(httpCode, returnDoc, authorityEndpoint) {
+    var authEndpoint = util.getNockAuthorityHost(authorityEndpoint);
+
+    var queryParameters = {
+      grant_type:    'password',
+      client_id:     cp.clientId,
+      client_secret: cp.clientSecret,
+      resource:      cp.resource,
+      username:      cp.username,
+      password:      cp.password,
+      scope:         'openid'
+    };
+
+    var query = querystring.stringify(queryParameters);
+
+    var tokenRequest = nock(authEndpoint)
+                            .filteringRequestBody(function(body) {
+                              return util.filterQueryString(query, body);
+                            })
+                           .post(cp.tokenUrlPath, query)
+                           .reply(httpCode, returnDoc);
+
+    util.matchStandardRequestHeaders(tokenRequest);
+
+    return tokenRequest;
+  }
+
   test('managed-happy-path', function(done) {
     var preRequests = util.setupExpectedUserRealmResponseCommon(false);
     var response = util.createResponse();
@@ -112,6 +139,23 @@ suite('username-password', function() {
 
     var context = new AuthenticationContext(response.authority);
     context.acquireTokenWithUsernamePassword(response.resource, cp.username, cp.password, cp.clientId, function(err, tokenResponse) {
+      if (!err) {
+        preRequests.done();
+        upRequest.done();
+        assert(util.isMatchTokenResponse(response.cachedResponse, tokenResponse), 'Response did not match expected: ' + JSON.stringify(tokenResponse));
+      }
+      done(err);
+    });
+  });
+
+  test('managed-happy-path-with-client-secret', function(done) {
+    var preRequests = util.setupExpectedUserRealmResponseCommon(false);
+    var response = util.createResponse();
+
+    var upRequest = setupExpectedUserNamePasswordClientSecretRequestResponse(200, response.wireResponse, response.authority);
+
+    var context = new AuthenticationContext(response.authority);
+    context.acquireTokenWithUsernamePassword(response.resource, cp.username, cp.password, cp.clientId, cp.clientSecret, function(err, tokenResponse) {
       if (!err) {
         preRequests.done();
         upRequest.done();
