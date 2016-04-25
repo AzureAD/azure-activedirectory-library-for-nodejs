@@ -70,7 +70,7 @@ suite('Authority', function() {
       200,
       cp.authorityHosts.global,
       {
-        'tenant_discovery_endpoint' : 'http://test'
+        'tenant_discovery_endpoint' : 'http://foobar'
       },
       nonHardCodedAuthorizeEndpoint
     );
@@ -238,7 +238,7 @@ suite('Authority', function() {
       200,
       cp.authorityHosts.global,
       {
-        'tenant_discovery_endpoint' : 'http://test'
+        'tenant_discovery_endpoint' : 'http://foobar'
       },
       nonHardCodedAuthorizeEndpoint
     );

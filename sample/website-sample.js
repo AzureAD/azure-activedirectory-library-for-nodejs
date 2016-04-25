@@ -90,7 +90,7 @@ app.get('/login', function(req, res) {
 
   res.send('\
 <head>\
-  <title>test</title>\
+  <title>FooBar</title>\
 </head>\
 <body>\
   <a href="./auth">Login</a>\

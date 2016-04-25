@@ -75,7 +75,7 @@ suite('self-signed-jwt', function() {
   test('create-jwt-invalid-cert', function(done) {
     var expectedErr;
     try {
-      createJwt('test', cp.certHash);
+      createJwt('foobar', cp.certHash);
     } catch (err) {
       expectedErr = err;
     }
