@@ -41,7 +41,8 @@ var parsedIdToken = {
   'userId' : 'rrandall@rrandallaad1.onmicrosoft.com',
   'givenName' : 'Rich',
   'familyName' : 'Randall',
-  'isUserIdDisplayable' : true
+  'isUserIdDisplayable' : true, 
+  'oid' : 'a443204a-abc9-4cb8-adc1-c0dfc12300aa'
 };
 
 
@@ -94,7 +95,7 @@ parameters.clientSecret = 'clientSecret*&^(?&';
 parameters.resource = '00000002-0000-0000-c000-000000000000';
 parameters.evoEndpoint = 'https://login.windows.net';
 parameters.username = 'rrandall@' + parameters.tenant;
-parameters.password = 'Atestpass!@#$';
+parameters.password = '<password>';
 parameters.authorityHosts = {
   global : 'login.windows.net',
   china : 'login.chinacloudapi.cn',
@@ -142,6 +143,14 @@ parameters.AssertionFile = __dirname + '/../wstrust/common.base64.encoded.assert
 parameters.logContext = { correlationId : 'test-correlation-id-123456789' };
 parameters.callContext = { _logContext : parameters.logContext };
 
+// 
+// a placeholder comment explaining why we have a fake cert here
+// 
+//[SuppressMessage("Microsoft.Security", "CS002:SecretInNextLine")]
+// This is a dummy RSA private cert used for testing purpose.It does not represent valid credential.
+// privatePem variable is a fake certificate in the form of a string.
+// Hence the following message is added to suppress CredScan warning.
+//[SuppressMessage("Microsoft.Security", "CS002:SecretInNextLine")]
 
 util.getSelfSignedCert = function() {
   var privatePem = fs.readFileSync(__dirname + '/self-signed-cert.pem', { encoding : 'utf8'});
@@ -507,6 +516,7 @@ util.setupExpectedRefreshTokenRequestResponse = function(httpCode, returnDoc, au
 
   var queryParameters = {};
   queryParameters['grant_type'] = 'refresh_token';
+  queryParameters['scope'] = 'openid';
   queryParameters['client_id'] = parameters.clientId;
   if (clientSecret) {
     queryParameters['client_secret'] = clientSecret;
