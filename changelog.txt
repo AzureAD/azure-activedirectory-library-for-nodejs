@@ -1,3 +1,15 @@
+Version 0.1.19
+--------------
+Release Date: 26 Apr 2016
+    * Fixed CredScan issue for the checked in pem file
+    * Policheck fixes
+    * Updated node-uuid
+    * Fixed Readme.md
+    * Inline the adal version during compile time
+    * Fix issue #71 - client-credential cert-bad-cert failing
+    * Fix issue #78 - Express dependency in package.json doesn't match syntax used in website-sample.js
+    * Fix issue #80 - Unreachable ADFS server results in misleading error message
+
 Version 0.1.18
 --------------
 Release Date: 5 Feb 2016
