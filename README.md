@@ -32,7 +32,7 @@ See the [website sample](https://github.com/MSOpenTech/azure-activedirectory-lib
 var AuthenticationContext = require('adal-node').AuthenticationContext;
 
 var clientId = 'yourClientIdHere';
-var clientSecret = 'yourAADIssuedClientSecretHere'
+var clientSecret = 'yourAADIssuedClientSecretHere';
 var redirectUri = 'yourRedirectUriHere';
 var authorityHostUrl = 'https://login.windows.net';
 var tenant = 'myTenant';
@@ -99,13 +99,13 @@ app.get('/getAToken', function(req, res) {
 See the [client credentials sample](https://github.com/MSOpenTech/azure-activedirectory-library-for-nodejs/blob/master/sample/client-credentials-sample.js).
 
 ```javascript
-var adal = require('adal-node').AuthenticationContext;
+var AuthenticationContext = require('adal-node').AuthenticationContext;
 
 var authorityHostUrl = 'https://login.windows.net';
 var tenant = 'myTenant';
 var authorityUrl = authorityHostUrl + '/' + tenant;
 var clientId = 'yourClientIdHere';
-var clientSecret = 'yourAADIssuedClientSecretHere'
+var clientSecret = 'yourAADIssuedClientSecretHere';
 var resource = '00000002-0000-0000-c000-000000000000';
 
 var context = new AuthenticationContext(authorityUrl);
