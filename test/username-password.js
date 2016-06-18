@@ -79,9 +79,8 @@ suite('username-password', function() {
     return util.setupExpectedOAuthResponse(queryParameters, cp.tokenUrlPath, 200, response.wireResponse, cp.authority);
   }
 
-  function setupExpectedUserNamePasswordRequestResponse(httpCode, returnDoc, authorityEndpoint) {
+  function setupExpectedUserNamePasswordRequestResponse(httpCode, returnDoc, authorityEndpoint, isAdfs) {
     var authEndpoint = util.getNockAuthorityHost(authorityEndpoint);
-
     var queryParameters = {};
     queryParameters['grant_type'] = 'password';
     queryParameters['client_id'] = cp.clientId;
@@ -91,18 +90,38 @@ suite('username-password', function() {
     queryParameters['scope'] = 'openid';
 
     var query = querystring.stringify(queryParameters);
+    var tokenUrl = cp.tokenUrlPath;
+    if(isAdfs) {
+      tokenUrl = '/adfs' + cp.tokenPath + cp.extraQP;
+    }
 
     var tokenRequest = nock(authEndpoint)
                             .filteringRequestBody(function(body) {
                               return util.filterQueryString(query, body);
                             })
-                           .post(cp.tokenUrlPath, query)
+                           .post(tokenUrl, query)
                            .reply(httpCode, returnDoc);
 
     util.matchStandardRequestHeaders(tokenRequest);
 
     return tokenRequest;
   }
+
+  test('happy-path-adfs-authority', function(done) {
+    var adfsAuthority = "https://contoso.com/adfs";
+    var responseOptions = { authority : adfsAuthority,  mrrt : true };
+    var response = util.createResponse(responseOptions);
+    var upRequest = setupExpectedUserNamePasswordRequestResponse(200, response.wireResponse, adfsAuthority, true);
+
+    var context = new AuthenticationContext(adfsAuthority, false);
+    context.acquireTokenWithUsernamePassword(response.resource, cp.username, cp.password, cp.clientId, function(err, tokenResponse) {
+      if (!err) {
+        upRequest.done();
+        assert(util.isMatchTokenResponse(response.cachedResponse, tokenResponse), 'Response did not match expected: ' + JSON.stringify(tokenResponse));
+      }
+      done(err);
+    });
+  });
 
   test('managed-happy-path', function(done) {
     var preRequests = util.setupExpectedUserRealmResponseCommon(false);

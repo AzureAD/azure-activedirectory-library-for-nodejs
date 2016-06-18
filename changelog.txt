@@ -1,3 +1,8 @@
+Version 0.1.20
+--------------
+Release Date: 17 Jun 2016
+    * Add support for resource owner grant flow for ADFS
+
 Version 0.1.19
 --------------
 Release Date: 26 Apr 2016
