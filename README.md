@@ -33,7 +33,6 @@ var AuthenticationContext = require('adal-node').AuthenticationContext;
 
 var clientId = 'yourClientIdHere';
 var clientSecret = 'yourAADIssuedClientSecretHere'
-var redirectUri = 'yourRedirectUriHere';
 var authorityHostUrl = 'https://login.windows.net';
 var tenant = 'myTenant';
 var authorityUrl = authorityHostUrl + '/' + tenant;
@@ -44,8 +43,8 @@ var templateAuthzUrl = 'https://login.windows.net/' +
                         '/oauth2/authorize?response_type=code&client_id=' +
                         clientId + 
                         '&redirect_uri=' + 
-                        redirectUri + '
-                        &state=<state>&resource=' + 
+                        redirectUri + 
+                        '&state=<state>&resource=' + 
                         resource;
 
 function createAuthorizationUrl(state) {
