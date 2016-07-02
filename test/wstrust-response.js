@@ -143,13 +143,25 @@ suite('WSTrustResponse', function() {
 
   test('happy-path-wstrust2005', function(done) {
     var tokenResponse = fs.readFileSync(__dirname + '/wstrust/RSTR2005.xml', 'utf8');
-        
+
     var wstrustResponse = new WSTrustResponse(cp.callContext, tokenResponse, WSTrustVersion.WSTRUST2005);
-        
+
     wstrustResponse.parse();
     assert(wstrustResponse.tokenType === 'urn:oasis:names:tc:SAML:1.0:assertion', 'TokenType did not match expected value: ' + wstrustResponse.tokenType);
     assert(-1 !== wstrustResponse.token.indexOf('y7TujD6J60uo1eFddnNJ1g=='), 'Did not find expected ImmutableID value in Token property: ' + wstrustResponse.token);
     done();
   });
+
+  test('token-parsing-happy-wstrust13', function(done) {
+    var tokenResponse = fs.readFileSync(__dirname + '/wstrust/RSTR13.xml', 'utf8');
+
+    var wstrustResponse = new WSTrustResponse(cp.callContext, tokenResponse, WSTrustVersion.WSTRUST13);
+
+    wstrustResponse.parse();
+    assert(wstrustResponse.tokenType === 'http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV1.1', 'TokenType did not match expected value: ' + wstrustResponse.tokenType);
+    assert(-1 !== wstrustResponse.token.indexOf('drxWGX7IeU6m2/uJpMztsQ=='), 'Did not find expected ImmutableID value in Token property: ' + wstrustResponse.token);
+    done();
+  });
+ 
 });
 
