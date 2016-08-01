@@ -5,12 +5,7 @@
     "email": "msopentech@microsoft.com",
     "url": "http://msopentech.com/"
   },
-  "licenses": [
-    {
-      "type": "Apache 2.0",
-      "url": "https://github.com/AzureAD/aal/raw/master/License.txt"
-    }
-  ],
+  "license": "Apache-2.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/AzureAD/azure-activedirectory-library-for-nodejs.git"
