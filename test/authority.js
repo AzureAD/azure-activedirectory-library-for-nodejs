@@ -252,6 +252,9 @@ suite('Authority', function() {
       if (err) {
         assert(!err, 'Received unexpected error: ' + err.stack);
       }
+
+      assert(authority.tokenEndpoint === (nonHardCodedAuthority + cp.tokenPath), "oauth2 token endpoint should be after tenant in the url");
+      assert(authority.deviceCodeEndpoint === (nonHardCodedAuthority + cp.deviceCodePath), "oauth2 device endpoint should be after tenant in the url");
       instanceDiscoveryRequest.done();
       done();
     });
