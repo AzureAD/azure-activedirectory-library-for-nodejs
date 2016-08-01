@@ -1,3 +1,8 @@
+Version 0.1.22
+--------------
+Release Date: 1 Aug 2016
+    * Fix Issue #132 - Trim developer provided authority to construct endpoints
+
 Version 0.1.21
 --------------
 Release Date: 23 Jun 2016
