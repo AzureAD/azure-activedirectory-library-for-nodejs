@@ -16,7 +16,7 @@
     "url": "https://github.com/AzureAD/azure-activedirectory-library-for-nodejs.git"
   },
   "version": "0.1.21",
-  "description": "Windows Azure Active Directory Client Library for node",
+  "description": "Azure Active Directory Client Library for node",
   "keywords": [ "node", "azure", "AAD", "adal", "adfs", "oauth" ],
   "main": "./lib/adal.js",
   "engines": { "node": ">= 0.6.15" },
