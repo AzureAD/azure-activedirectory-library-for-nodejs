@@ -107,7 +107,7 @@ var clientId = 'yourClientIdHere';
 var clientSecret = 'yourAADIssuedClientSecretHere'
 var resource = '00000002-0000-0000-c000-000000000000';
 
-var context = new AuthenticationContext(authorityUrl);
+var context = new adal(authorityUrl);
 
 context.acquireTokenWithClientCredentials(resource, clientId, clientSecret, function(err, tokenResponse) {
   if (err) {
