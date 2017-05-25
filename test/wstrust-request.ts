@@ -182,7 +182,7 @@ suite('WSTrustRequest', function () {
 
   test('xml-format-test', function (done) {
     var username = 'test_username';
-    var password = 'test_password&<>\'"';
+    var password = 'test_password&<>\'"$$$';
     var appliesTo = 'test_appliesTo';
 
     var rst = new WSTrustRequest(cp.callContext, wstrustEndpoint, appliesTo, WSTrustVersion.WSTRUST13)._buildRST(username, password);
@@ -191,12 +191,17 @@ suite('WSTrustRequest', function () {
       errorHandler: function () { throw new Error(); }
     };
 
+    var parsed;
     try {
-      new DOMParser(options).parseFromString(rst);
+      parsed = new DOMParser(options).parseFromString(rst);
     }
     catch (e) {
       assert(!e, 'Unexpected error received.');
     }
+
+    var wsseNs = 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd';
+    assert.strictEqual(parsed.getElementsByTagNameNS(wsseNs, 'Username')[0].textContent, username);
+    assert.strictEqual(parsed.getElementsByTagNameNS(wsseNs, 'Password')[0].textContent, password);
 
     done();
   });
