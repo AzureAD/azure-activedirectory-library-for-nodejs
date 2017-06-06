@@ -41,7 +41,7 @@ var parsedIdToken = {
   'userId' : 'rrandall@rrandallaad1.onmicrosoft.com',
   'givenName' : 'Rich',
   'familyName' : 'Randall',
-  'isUserIdDisplayable' : true, 
+  'isUserIdDisplayable' : true,
   'oid' : 'a443204a-abc9-4cb8-adc1-c0dfc12300aa'
 };
 
@@ -69,7 +69,7 @@ var parsedIdTokenUrlSafe = {
   'userId' : 'test@someplaceelse.com',
   'givenName' : 'Ri<?ch',
   'familyName' : 'Randall',
-  'isUserIdDisplayable' : true, 
+  'isUserIdDisplayable' : true,
   'oid' : 'a443204a-abc9-4cb8-adc1-c0dfc12300aa'
 };
 
@@ -251,10 +251,10 @@ function mapFields(inObj, outObj, map) {
 }
 
 /**
- * Create response based on the given options and iteration number. 
- * @options Options is used to flex the reponse creation, i.e authority, resource and isMRRT. 
- * @param iteration Iteraton will be used to create a distinct token for each value of iteration and it will always return that same token 
- *                  for same value of iteration. 
+ * Create response based on the given options and iteration number.
+ * @options Options is used to flex the reponse creation, i.e authority, resource and isMRRT.
+ * @param iteration Iteraton will be used to create a distinct token for each value of iteration and it will always return that same token
+ *                  for same value of iteration.
  */
 util.createResponse = function(options, iteration) {
   options = options || {};
@@ -339,7 +339,7 @@ util.createResponse = function(options, iteration) {
 
 util.createDeviceCodeResponse = function (options, iteration) {
     options = options || {};
-    
+
     var authority = options.authority || parameters.authorityTenant;
     var resource = options.resource || parameters.resource;
 
@@ -354,7 +354,7 @@ util.createDeviceCodeResponse = function (options, iteration) {
     mapFields(wireResponse, decodedResponse, DEVICE_CODE_RESPONSE_MAP);
 
     return {
-       wireResponse : wireResponse, 
+       wireResponse : wireResponse,
        decodedResponse : decodedResponse
     };
 };
@@ -412,6 +412,21 @@ util.setupExpectedClientCredTokenRequestResponse = function(httpCode, returnDoc,
   queryParameters['client_id'] = parameters.clientId;
   queryParameters['client_secret'] = parameters.clientSecret;
   queryParameters['resource'] = parameters.resource;
+
+  return util.setupExpectedOAuthResponse(queryParameters, parameters.tokenUrlPath, httpCode, returnDoc, authEndpoint);
+};
+
+util.setupExpectedOnBehalfOfTokenRequestResponse = function(httpCode, userAccessToken, returnDoc, authorityEndpoint) {
+  var authEndpoint = authorityEndpoint || parameters.authority;
+
+  var queryParameters = {};
+  queryParameters['grant_type'] = 'urn:ietf:params:oauth:grant-type:jwt-bearer';
+  queryParameters['client_id'] = parameters.clientId;
+  queryParameters['client_secret'] = parameters.clientSecret;
+  queryParameters['resource'] = parameters.resource;
+  queryParameters['assertion'] = userAccessToken;
+  queryParameters['requested_token_use'] = 'on_behalf_of';
+  queryParameters['scope'] = 'openid';
 
   return util.setupExpectedOAuthResponse(queryParameters, parameters.tokenUrlPath, httpCode, returnDoc, authEndpoint);
 };
