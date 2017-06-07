@@ -59,7 +59,7 @@ suite('on-behalf-of', function() {
     var tokenRequest = util.setupExpectedOnBehalfOfTokenRequestResponse(200, userAccessToken, response.wireResponse);
 
     var context = new AuthenticationContext(cp.authUrl);
-    context.acquireTokenOnBehalf(response.resource, cp.clientId, cp.clientSecret, userAccessToken, function (err, tokenResponse) {
+    context.acquireTokenOnBehalf(response.resource, cp.clientId, cp.clientSecret, userAccessToken, cp.username, function (err, tokenResponse) {
       if (!err) {
         assert(util.isMatchTokenResponse(response.cachedResponse, tokenResponse), 'The response did not match what was expected');
         tokenRequest.done();
@@ -76,7 +76,7 @@ suite('on-behalf-of', function() {
     var tokenRequest = util.setupExpectedOnBehalfOfTokenRequestResponse(200, userAccessToken, response.wireResponse);
 
     var context = new AuthenticationContext(cp.authUrl);
-    context.acquireTokenOnBehalf(response.resource, cp.clientId, cp.clientSecret, userAccessToken, function (err, tokenResponse) {
+    context.acquireTokenOnBehalf(response.resource, cp.clientId, cp.clientSecret, userAccessToken, cp.username, function (err, tokenResponse) {
       if (err) {
         done(err);
         return;
@@ -85,7 +85,7 @@ suite('on-behalf-of', function() {
       assert(util.isMatchTokenResponse(response.cachedResponse, tokenResponse), 'The response did not match what was expected');
       tokenRequest.done();
 
-      context.acquireTokenOnBehalf(response.resource, cp.clientId, cp.clientSecret, userAccessToken, function (err, tokenResponse) {
+      context.acquireTokenOnBehalf(response.resource, cp.clientId, cp.clientSecret, userAccessToken, cp.username, function (err, tokenResponse) {
         if (!err) {
           assert(util.isMatchTokenResponse(response.cachedResponse, tokenResponse), 'The cached response did not match what was expected');
         }
@@ -102,7 +102,7 @@ suite('on-behalf-of', function() {
     var tokenRequest = util.setupExpectedOnBehalfOfTokenRequestResponse(200, userAccessToken, response.wireResponse);
 
     var context = new AuthenticationContext(cp.authUrl);
-    context.acquireTokenOnBehalf(response.resource, cp.clientId, cp.clientSecret, userAccessToken, function (err, tokenResponse) {
+    context.acquireTokenOnBehalf(response.resource, cp.clientId, cp.clientSecret, userAccessToken, cp.username, function (err, tokenResponse) {
       if (err) {
         done(err);
         return;
@@ -126,7 +126,7 @@ suite('on-behalf-of', function() {
     var context = new AuthenticationContext(cp.authorityTenant);
     var argumentError;
     try {
-      context.acquireTokenOnBehalf(cp.resource, cp.clientId, cp.clientSecret, userAccessToken)
+      context.acquireTokenOnBehalf(cp.resource, cp.clientId, cp.clientSecret, userAccessToken, cp.username)
     } catch(err) {
       argumentError = err;
     }
@@ -139,7 +139,7 @@ suite('on-behalf-of', function() {
 
   test('no-arguments', function(done) {
     var context = new AuthenticationContext(cp.authorityTenant);
-    context.acquireTokenOnBehalf(null, null, null, null, function(err) {
+    context.acquireTokenOnBehalf(null, null, null, null, null, function(err) {
       assert(err, 'Did not receive expected error.');
       assert(err.message.indexOf('parameter') >= 0, 'Error was not specific to a parameter.');
       done();
@@ -148,7 +148,7 @@ suite('on-behalf-of', function() {
 
   test('no-client-secret', function(done) {
     var context = new AuthenticationContext(cp.authorityTenant);
-    context.acquireTokenOnBehalf(cp.resource, cp.clientId, null, userAccessToken, function (err, tokenResponse) {
+    context.acquireTokenOnBehalf(cp.resource, cp.clientId, null, userAccessToken, cp.username, function (err, tokenResponse) {
       assert(err, 'Did not receive expected error.');
       assert(err.message.indexOf('parameter') >= 0, 'Error was not specific to a parameter.');
       done();
@@ -157,7 +157,7 @@ suite('on-behalf-of', function() {
 
   test('no-client-id', function(done) {
     var context = new AuthenticationContext(cp.authorityTenant);
-    context.acquireTokenOnBehalf(cp.resource, null, cp.clientSecret, userAccessToken, function (err, tokenResponse) {
+    context.acquireTokenOnBehalf(cp.resource, null, cp.clientSecret, userAccessToken, cp.username, function (err, tokenResponse) {
       assert(err, 'Did not receive expected error.');
       assert(err.message.indexOf('parameter') >= 0, 'Error was not specific to a parameter.');
       done();
@@ -166,7 +166,7 @@ suite('on-behalf-of', function() {
 
   test('no-resource', function(done) {
     var context = new AuthenticationContext(cp.authorityTenant);
-    context.acquireTokenOnBehalf(null, cp.clientId, cp.clientSecret, userAccessToken, function (err, tokenResponse) {
+    context.acquireTokenOnBehalf(null, cp.clientId, cp.clientSecret, userAccessToken, cp.username, function (err, tokenResponse) {
       assert(err, 'Did not receive expected error.');
       assert(err.message.indexOf('parameter') >= 0, 'Error was not specific to a parameter.');
       done();
@@ -175,7 +175,7 @@ suite('on-behalf-of', function() {
 
   test('no-user-access-token', function(done) {
     var context = new AuthenticationContext(cp.authorityTenant);
-    context.acquireTokenOnBehalf(null, cp.clientId, cp.clientSecret, null, function (err, tokenResponse) {
+    context.acquireTokenOnBehalf(null, cp.clientId, cp.clientSecret, null, cp.username, function (err, tokenResponse) {
       assert(err, 'Did not receive expected error.');
       assert(err.message.indexOf('parameter') >= 0, 'Error was not specific to a parameter.');
       done();
@@ -185,7 +185,7 @@ suite('on-behalf-of', function() {
   test('http-error', function(done) {
     var tokenRequest = util.setupExpectedOnBehalfOfTokenRequestResponse(403, userAccessToken);
     var context = new AuthenticationContext(cp.authUrl);
-    context.acquireTokenOnBehalf(cp.resource, cp.clientId, cp.clientSecret, userAccessToken, function (err, tokenResponse) {
+    context.acquireTokenOnBehalf(cp.resource, cp.clientId, cp.clientSecret, userAccessToken, cp.username, function (err, tokenResponse) {
       assert(err, 'No error was returned when one was expected.');
       assert(!tokenResponse, 'a token response was returned when non was expected.');
       tokenRequest.done();
@@ -203,7 +203,7 @@ suite('on-behalf-of', function() {
     var tokenRequest = util.setupExpectedOnBehalfOfTokenRequestResponse(400, userAccessToken, errorResponse);
 
     var context = new AuthenticationContext(cp.authUrl);
-    context.acquireTokenOnBehalf(cp.resource, cp.clientId, cp.clientSecret, userAccessToken, function (err, tokenResponse) {
+    context.acquireTokenOnBehalf(cp.resource, cp.clientId, cp.clientSecret, userAccessToken, cp.username, function (err, tokenResponse) {
       assert(err, 'No error was returned when one was expected.');
       assert(_.isEqual(errorResponse, tokenResponse), 'The response did not match what was expected');
       tokenRequest.done();
@@ -217,7 +217,7 @@ suite('on-behalf-of', function() {
     var tokenRequest = util.setupExpectedOnBehalfOfTokenRequestResponse(400, userAccessToken, junkResponse);
 
     var context = new AuthenticationContext(cp.authUrl);
-    context.acquireTokenOnBehalf(cp.resource, cp.clientId, cp.clientSecret, userAccessToken, function (err, tokenResponse) {
+    context.acquireTokenOnBehalf(cp.resource, cp.clientId, cp.clientSecret, userAccessToken, cp.username, function (err, tokenResponse) {
       assert(err, 'No error was returned when one was expected.');
       tokenRequest.done();
       done();
@@ -230,7 +230,7 @@ suite('on-behalf-of', function() {
     var tokenRequest = util.setupExpectedOnBehalfOfTokenRequestResponse(200, userAccessToken, junkResponse);
 
     var context = new AuthenticationContext(cp.authUrl);
-    context.acquireTokenOnBehalf(cp.resource, cp.clientId, cp.clientSecret, userAccessToken, function (err, tokenResponse) {
+    context.acquireTokenOnBehalf(cp.resource, cp.clientId, cp.clientSecret, userAccessToken, cp.username, function (err, tokenResponse) {
       assert(err, 'No error was returned when one was expected.');
       tokenRequest.done();
       done();
