@@ -69,7 +69,7 @@ var parsedIdTokenUrlSafe = {
   'userId' : 'test@someplaceelse.com',
   'givenName' : 'Ri<?ch',
   'familyName' : 'Randall',
-  'isUserIdDisplayable' : true,
+  'isUserIdDisplayable' : true, 
   'oid' : 'a443204a-abc9-4cb8-adc1-c0dfc12300aa'
 };
 
