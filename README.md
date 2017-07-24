@@ -109,7 +109,7 @@ var authorityHostUrl = 'https://login.windows.net';
 var tenant = 'myTenant';
 var authorityUrl = authorityHostUrl + '/' + tenant;
 var clientId = 'yourClientIdHere';
-var clientSecret = 'yourAADIssuedClientSecretHere'
+var clientSecret = 'yourAADIssuedClientSecretHere';
 var resource = '00000002-0000-0000-c000-000000000000';
 
 var context = new AuthenticationContext(authorityUrl);
