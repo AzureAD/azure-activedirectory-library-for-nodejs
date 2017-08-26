@@ -106,15 +106,15 @@ See the [client credentials sample](https://github.com/MSOpenTech/azure-activedi
 var adal = require('adal-node').AuthenticationContext;
 
 var authorityHostUrl = 'https://login.windows.net';
-var tenant = 'myTenant';
+var tenant = 'myTenant.onmicrosoft.com'; // AAD Tenant name.
 var authorityUrl = authorityHostUrl + '/' + tenant;
-var clientId = 'yourClientIdHere';
-var clientSecret = 'yourAADIssuedClientSecretHere'
-var resource = '00000002-0000-0000-c000-000000000000';
+var applicationId = 'yourApplicationIdHere'; // Application Id of app registered under AAD.
+var clientSecret = 'yourAADIssuedClientSecretHere'; // Secret generated for app. Read this environment variable.
+var resource = '00000002-0000-0000-c000-000000000000'; // URI that identifies the resource for which the token is valid.
 
 var context = new AuthenticationContext(authorityUrl);
 
-context.acquireTokenWithClientCredentials(resource, clientId, clientSecret, function(err, tokenResponse) {
+context.acquireTokenWithClientCredentials(resource, applicationId, clientSecret, function(err, tokenResponse) {
   if (err) {
     console.log('well that didn\'t work: ' + err.stack);
   } else {
