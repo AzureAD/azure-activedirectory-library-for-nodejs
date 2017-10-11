@@ -130,7 +130,13 @@ suite('Authority', function() {
             return;
           }
           performStaticInstanceDiscovery('login-us.microsoftonline.com', function(err4) {
+            if(err4) {
               done(err4);
+              return;
+            }
+            performStaticInstanceDiscovery('login.microsoftonline.us', function(err5) {  
+              done(err5);
+            })
           });
         });
       });
