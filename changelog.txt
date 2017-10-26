@@ -1,3 +1,12 @@
+Version 0.1.23
+--------------
+Release Date: 26 Oct 2017
+    * Fix Issue #95 - Change npm licenses to license and use spdx syntax 
+    * Fix Issue #122 - Broken link on README file 
+    * Fix Issue #155 - remove need for dynamic access to package.json to obtain lib version (util.js)
+    * Fix Issue #172 - Add login.microsoftonline.us endpoint
+    * Added Windows Graph Sample 
+
 Version 0.1.22
 --------------
 Release Date: 1 Aug 2016
