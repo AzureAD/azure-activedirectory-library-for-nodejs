@@ -2,13 +2,13 @@
 The ADAL for node.js library makes it easy for node.js applications to authenticate to AAD in order to access AAD protected web resources.  It supports 3 authentication modes shown in the quickstart code below.
 
 ## Versions
-Current version - 0.1.22  
+Current version - 0.1.23  
 Minimum recommended version - 0.1.22  
 You can find the changes for each version in the [change log](https://github.com/AzureAD/azure-activedirectory-library-for-nodejs/blob/master/changelog.txt).
 
 ## Samples and Documentation
 
-[We provide a full suite of sample applications and documentation on GitHub](https://github.com/AzureADSamples) to help you get started with learning the Azure Identity system. This includes tutorials for native clients such as Windows, Windows Phone, iOS, OSX, Android, and Linux. We also provide full walkthroughs for authentication flows such as OAuth2, OpenID Connect, Graph API, and other awesome features. 
+[We provide a full suite of sample applications and documentation on GitHub](https://github.com/azure-samples?q=active-directory) to help you get started with learning the Azure Identity system. This includes tutorials for native clients such as Windows, Windows Phone, iOS, OSX, Android, and Linux. We also provide full walkthroughs for authentication flows such as OAuth2, OpenID Connect, Graph API, and other awesome features. 
 
 ## Community Help and Support
 
@@ -106,15 +106,15 @@ See the [client credentials sample](https://github.com/MSOpenTech/azure-activedi
 var adal = require('adal-node').AuthenticationContext;
 
 var authorityHostUrl = 'https://login.windows.net';
-var tenant = 'myTenant';
+var tenant = 'myTenant.onmicrosoft.com'; // AAD Tenant name.
 var authorityUrl = authorityHostUrl + '/' + tenant;
-var clientId = 'yourClientIdHere';
-var clientSecret = 'yourAADIssuedClientSecretHere'
-var resource = '00000002-0000-0000-c000-000000000000';
+var applicationId = 'yourApplicationIdHere'; // Application Id of app registered under AAD.
+var clientSecret = 'yourAADIssuedClientSecretHere'; // Secret generated for app. Read this environment variable.
+var resource = '00000002-0000-0000-c000-000000000000'; // URI that identifies the resource for which the token is valid.
 
 var context = new AuthenticationContext(authorityUrl);
 
-context.acquireTokenWithClientCredentials(resource, clientId, clientSecret, function(err, tokenResponse) {
+context.acquireTokenWithClientCredentials(resource, applicationId, clientSecret, function(err, tokenResponse) {
   if (err) {
     console.log('well that didn\'t work: ' + err.stack);
   } else {

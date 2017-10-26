@@ -100,7 +100,8 @@ parameters.password = '<password>';
 parameters.authorityHosts = {
   global : 'login.windows.net',
   china : 'login.chinacloudapi.cn',
-  gov : 'login-us.microsoftonline.com'
+  gov : 'login-us.microsoftonline.com',
+  us : 'login.microsoftonline.us'
 };
 parameters.language = 'en';
 parameters.deviceCode = 'ABCDE:device_code';
