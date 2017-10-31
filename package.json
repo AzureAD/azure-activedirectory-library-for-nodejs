@@ -10,7 +10,7 @@
     "type": "git",
     "url": "https://github.com/AzureAD/azure-activedirectory-library-for-nodejs.git"
   },
-  "version": "0.1.22",
+  "version": "0.1.23",
   "description": "Windows Azure Active Directory Client Library for node",
   "keywords": [ "node", "azure", "AAD", "adal", "adfs", "oauth" ],
   "main": "./lib/adal.js",
