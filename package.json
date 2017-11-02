@@ -31,11 +31,13 @@
     "jshint": "*",
     "mocha": "*",
     "nock": "*",
-    "sinon": "*"
+    "sinon": "*",
+    "typescript": "^2.6.1"
   },
   "scripts": {
-    "test": "mocha -R spec --ui tdd test",
+    "test": "npm run tsc && mocha -R spec --ui tdd test",
     "cover" : "./test/util/cover",
-    "doc" : "jsdoc lib"
+    "doc" : "jsdoc lib",
+    "tsc" : "tsc index.d.ts"
   }
 }
