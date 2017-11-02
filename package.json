@@ -14,8 +14,10 @@
   "description": "Windows Azure Active Directory Client Library for node",
   "keywords": [ "node", "azure", "AAD", "adal", "adfs", "oauth" ],
   "main": "./lib/adal.js",
+  "types": "./index.d.ts",
   "engines": { "node": ">= 0.6.15" },
   "dependencies": {
+    "@types/node": "^8.0.47",
     "date-utils": "*",
     "jws": "3.x.x",
     "node-uuid": "1.4.7",
