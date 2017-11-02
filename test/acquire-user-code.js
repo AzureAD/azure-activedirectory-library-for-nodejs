@@ -1,4 +1,4 @@
-﻿/*
+/*
  * @copyright
  * Copyright © Microsoft Open Technologies, Inc.
  *
@@ -18,108 +18,88 @@
  * See the Apache License, Version 2.0 for the specific language
  * governing permissions and limitations under the License.
  */
-
 'use strict';
+Object.defineProperty(exports, "__esModule", { value: true });
 /* Directive tells jshint that suite and test are globals defined by mocha */
 /* global suite */
 /* global test */
-
-var assert = require('assert');
-var nock = require('nock');
-var querystring = require('querystring');
-
-var util = require('./util/util');
-var testRequire = util.testRequire;
-var cp = util.commonParameters;
-
-var adal = testRequire('adal');
-var AuthenticationContext = adal.AuthenticationContext;
-
-suite('acquire-user-code', function() {
-   function setupExpectedDeviceCodeRequestResponse(withLanguage, httpCode, returnDoc, authorityEndpoint) {
-      var authEndpoint = util.getNockAuthorityHost(authorityEndpoint);
-
-      var queryParameters = {};
-      queryParameters['client_id'] = cp.clientId;
-      queryParameters['resource'] = cp.resource;
-      if (withLanguage) {
-         queryParameters['mkt'] = cp.language;
-      }
-     
-      var query = querystring.stringify(queryParameters);
-
-      var deviceCodeRequest = nock(authEndpoint)
-                                .filteringRequestBody(function(body) {
-                                   return util.filterQueryString(query, body);
-                                })
-                                .post(cp.deviceCodeUrlPath, query)
-                                .reply(httpCode, returnDoc);
-      
-      util.matchStandardRequestHeaders(deviceCodeRequest);
-      
-      return deviceCodeRequest;  
-   }
-
-   test('happy-path', function (done) {
-      var response = util.createDeviceCodeResponse();
-      var deviceCodeRequest = setupExpectedDeviceCodeRequestResponse(true, 200, response.wireResponse);
-
-      var context = new AuthenticationContext(cp.authUrl);
-      context.acquireUserCode(cp.resource, cp.clientId, cp.language, function (err, deviceCodeResponse) {
-         assert(!err, 'Receive unexpected error. ');
-         assert(util.isMathDeviceCodeResponse(response.decodedResponse, deviceCodeResponse), 'The response did not match what was expected');
-         deviceCodeRequest.done();
-         done();
-      });
-   });
-
-   test('happy-path-without-language', function(done) {
-      var response = util.createDeviceCodeResponse();
-      var deviceCodeRequest = setupExpectedDeviceCodeRequestResponse(false, 200, response.wireResponse);
-        
-      var context = new AuthenticationContext(cp.authUrl);
-      context.acquireUserCode(cp.resource, cp.clientId, null, function (err, deviceCodeResponse) {
-          assert(!err, 'Receive unexpected error. ');
-          assert(util.isMathDeviceCodeResponse(response.decodedResponse, deviceCodeResponse), 'The response did not match what was expected');
-          deviceCodeRequest.done();
-          done();
-      });
-  });
-
-   test('failed-http-request', function(done) {
-      this.timeout(6000);
-      this.slow(4000);
-
-      nock.enableNetConnect();
-      var context = new AuthenticationContext('https://0.0.0.0:11/my.test.tenant.com');
-      context.acquireUserCode(cp.resource, cp.clientId, cp.language, function(err) {
-         assert(err, 'Did not recieve expected error on failed http request.');
-         nock.disableNetConnect();
-         done();
-      });
-   });
-
-   test('bad-argument', function(done) {
-       var context = new AuthenticationContext(cp.authUrl);
-       
-       context.acquireUserCode(null, cp.clientId, cp.language, function(err) {
-          assert(err, 'Did not receive expected argument error');
-          assert(err.message === 'The resource parameter is required.')
-       });
-
-       context.acquireUserCode(cp.resource, null, cp.language, function(err) {
-          assert(err, 'Did not receive expected argument error');
-          assert(err.message === 'The clientId parameter is required.')
-       });
-
-       try{
-          context.acquireUserCode(cp.resource, cp.clientId, cp.language);
-       } catch (e) {
-          assert(e, 'Did not receive expected error. ');
-          assert(e.message === 'acquireToken requires a function callback parameter.', 'Unexpected error message returned.');
-       }
-       
-       done();
-   });
-
+const assert = require("assert");
+const nock = require("nock");
+const querystring = require("querystring");
+const adal = require("../lib/adal");
+const util = require('./util/util');
+const cp = util.commonParameters;
+const AuthenticationContext = adal.AuthenticationContext;
+suite('acquire-user-code', function () {
+    function setupExpectedDeviceCodeRequestResponse(withLanguage, httpCode, returnDoc, authorityEndpoint) {
+        var authEndpoint = util.getNockAuthorityHost(authorityEndpoint);
+        var queryParameters = {};
+        queryParameters['client_id'] = cp.clientId;
+        queryParameters['resource'] = cp.resource;
+        if (withLanguage) {
+            queryParameters['mkt'] = cp.language;
+        }
+        var query = querystring.stringify(queryParameters);
+        var deviceCodeRequest = nock(authEndpoint)
+            .filteringRequestBody(function (body) {
+            return util.filterQueryString(query, body);
+        })
+            .post(cp.deviceCodeUrlPath, query)
+            .reply(httpCode, returnDoc);
+        util.matchStandardRequestHeaders(deviceCodeRequest);
+        return deviceCodeRequest;
+    }
+    test('happy-path', function (done) {
+        var response = util.createDeviceCodeResponse();
+        var deviceCodeRequest = setupExpectedDeviceCodeRequestResponse(true, 200, response.wireResponse);
+        var context = new AuthenticationContext(cp.authUrl);
+        context.acquireUserCode(cp.resource, cp.clientId, cp.language, function (err, deviceCodeResponse) {
+            assert(!err, 'Receive unexpected error. ');
+            assert(util.isMathDeviceCodeResponse(response.decodedResponse, deviceCodeResponse), 'The response did not match what was expected');
+            deviceCodeRequest.done();
+            done();
+        });
+    });
+    test('happy-path-without-language', function (done) {
+        var response = util.createDeviceCodeResponse();
+        var deviceCodeRequest = setupExpectedDeviceCodeRequestResponse(false, 200, response.wireResponse);
+        var context = new AuthenticationContext(cp.authUrl);
+        context.acquireUserCode(cp.resource, cp.clientId, null, function (err, deviceCodeResponse) {
+            assert(!err, 'Receive unexpected error. ');
+            assert(util.isMathDeviceCodeResponse(response.decodedResponse, deviceCodeResponse), 'The response did not match what was expected');
+            deviceCodeRequest.done();
+            done();
+        });
+    });
+    test('failed-http-request', function (done) {
+        this.timeout(6000);
+        this.slow(4000);
+        nock.enableNetConnect();
+        var context = new AuthenticationContext('https://0.0.0.0:11/my.test.tenant.com');
+        context.acquireUserCode(cp.resource, cp.clientId, cp.language, function (err) {
+            assert(err, 'Did not recieve expected error on failed http request.');
+            nock.disableNetConnect();
+            done();
+        });
+    });
+    test('bad-argument', function (done) {
+        var context = new AuthenticationContext(cp.authUrl);
+        context.acquireUserCode(null, cp.clientId, cp.language, function (err) {
+            assert(err, 'Did not receive expected argument error');
+            assert(err.message === 'The resource parameter is required.');
+        });
+        context.acquireUserCode(cp.resource, null, cp.language, function (err) {
+            assert(err, 'Did not receive expected argument error');
+            assert(err.message === 'The clientId parameter is required.');
+        });
+        try {
+            context.acquireUserCode(cp.resource, cp.clientId, cp.language, null);
+        }
+        catch (e) {
+            assert(e, 'Did not receive expected error. ');
+            assert(e.message === 'acquireToken requires a function callback parameter.', 'Unexpected error message returned.');
+        }
+        done();
+    });
 });
+//# sourceMappingURL=acquire-user-code.js.map

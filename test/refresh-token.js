@@ -19,120 +19,102 @@
  * governing permissions and limitations under the License.
  */
 'use strict';
+Object.defineProperty(exports, "__esModule", { value: true });
 /* Directive tells jshint that suite and test are globals defined by mocha */
 /* global suite */
 /* global test */
-
-
 // Run
 //   npm test
 // from root of the repo
-
-var assert = require('assert');
-var util = require('./util/util');
-
-var cp = util.commonParameters;
-var testRequire = util.testRequire;
-
-var adal = testRequire('adal');
-var AuthenticationContext = adal.AuthenticationContext;
-
-
-suite('refresh-token', function() {
-  test('happy-path-no-resource', function(done) {
-    var responseOptions = { refreshedRefresh : true };
-    var response = util.createResponse(responseOptions);
-    var wireResponse = response.wireResponse;
-    var tokenRequest = util.setupExpectedRefreshTokenRequestResponse(200, wireResponse, response.authority);
-
-    var context = new AuthenticationContext(cp.authorityTenant);
-    context.acquireTokenWithRefreshToken(cp.refreshToken, cp.clientId, null, null, function(err, tokenResponse) {
-      if (!err) {
-        tokenRequest.done();
-        assert(util.isMatchTokenResponse(response.decodedResponse, tokenResponse), 'The response did not match what was expected: ' + JSON.stringify(tokenResponse));
-      }
-      done(err);
+const assert = require("assert");
+const util = require('./util/util');
+const cp = util.commonParameters;
+const adal = require("../lib/adal");
+const AuthenticationContext = adal.AuthenticationContext;
+suite('refresh-token', function () {
+    test('happy-path-no-resource', function (done) {
+        var responseOptions = { refreshedRefresh: true };
+        var response = util.createResponse(responseOptions);
+        var wireResponse = response.wireResponse;
+        var tokenRequest = util.setupExpectedRefreshTokenRequestResponse(200, wireResponse, response.authority);
+        var context = new AuthenticationContext(cp.authorityTenant);
+        context.acquireTokenWithRefreshToken(cp.refreshToken, cp.clientId, null, null, function (err, tokenResponse) {
+            if (!err) {
+                tokenRequest.done();
+                assert(util.isMatchTokenResponse(response.decodedResponse, tokenResponse), 'The response did not match what was expected: ' + JSON.stringify(tokenResponse));
+            }
+            done(err);
+        });
     });
-  });
-
-  test('happy-path-with-resource', function(done) {
-    var responseOptions = { refreshedRefresh : true };
-    var response = util.createResponse(responseOptions);
-    var wireResponse = response.wireResponse;
-    var tokenRequest = util.setupExpectedRefreshTokenRequestResponse(200, wireResponse, response.authority, response.resource);
-
-    var context = new AuthenticationContext(cp.authorityTenant);
-    context.acquireTokenWithRefreshToken(cp.refreshToken, cp.clientId, null, cp.resource, function(err, tokenResponse) {
-      if (!err) {
-        tokenRequest.done();
-        assert(util.isMatchTokenResponse(response.decodedResponse, tokenResponse), 'The response did not match what was expected: ' + JSON.stringify(tokenResponse))  ;
-      }
-      done(err);
+    test('happy-path-with-resource', function (done) {
+        var responseOptions = { refreshedRefresh: true };
+        var response = util.createResponse(responseOptions);
+        var wireResponse = response.wireResponse;
+        var tokenRequest = util.setupExpectedRefreshTokenRequestResponse(200, wireResponse, response.authority, response.resource);
+        var context = new AuthenticationContext(cp.authorityTenant);
+        context.acquireTokenWithRefreshToken(cp.refreshToken, cp.clientId, null, cp.resource, function (err, tokenResponse) {
+            if (!err) {
+                tokenRequest.done();
+                assert(util.isMatchTokenResponse(response.decodedResponse, tokenResponse), 'The response did not match what was expected: ' + JSON.stringify(tokenResponse));
+            }
+            done(err);
+        });
     });
-  });
-
-  test('happy-path-no-resource-client-secret', function(done) {
-    var responseOptions = { refreshedRefresh : true };
-    var response = util.createResponse(responseOptions);
-    var wireResponse = response.wireResponse;
-    var tokenRequest = util.setupExpectedRefreshTokenRequestResponse(200, wireResponse, response.authority, null, cp.clientSecret);
-
-    var context = new AuthenticationContext(cp.authorityTenant);
-    context.acquireTokenWithRefreshToken(cp.refreshToken, cp.clientId, cp.clientSecret, null, function(err, tokenResponse) {
-      if (!err) {
-        tokenRequest.done();
-        assert(util.isMatchTokenResponse(response.decodedResponse, tokenResponse), 'The response did not match what was expected: ' + JSON.stringify(tokenResponse));
-      }
-      done(err);
+    test('happy-path-no-resource-client-secret', function (done) {
+        var responseOptions = { refreshedRefresh: true };
+        var response = util.createResponse(responseOptions);
+        var wireResponse = response.wireResponse;
+        var tokenRequest = util.setupExpectedRefreshTokenRequestResponse(200, wireResponse, response.authority, null, cp.clientSecret);
+        var context = new AuthenticationContext(cp.authorityTenant);
+        context.acquireTokenWithRefreshToken(cp.refreshToken, cp.clientId, cp.clientSecret, null, function (err, tokenResponse) {
+            if (!err) {
+                tokenRequest.done();
+                assert(util.isMatchTokenResponse(response.decodedResponse, tokenResponse), 'The response did not match what was expected: ' + JSON.stringify(tokenResponse));
+            }
+            done(err);
+        });
     });
-  });
-
-  test('happy-path-with-resource-client-secret', function(done) {
-    var responseOptions = { refreshedRefresh : true };
-    var response = util.createResponse(responseOptions);
-    var wireResponse = response.wireResponse;
-    var tokenRequest = util.setupExpectedRefreshTokenRequestResponse(200, wireResponse, response.authority, response.resource, cp.clientSecret);
-
-    var context = new AuthenticationContext(cp.authorityTenant);
-    context.acquireTokenWithRefreshToken(cp.refreshToken, cp.clientId, cp.clientSecret, cp.resource, function(err, tokenResponse) {
-      if (!err) {
-        tokenRequest.done();
-        assert(util.isMatchTokenResponse(response.decodedResponse, tokenResponse), 'The response did not match what was expected: ' + JSON.stringify(tokenResponse))  ;
-      }
-      done(err);
+    test('happy-path-with-resource-client-secret', function (done) {
+        var responseOptions = { refreshedRefresh: true };
+        var response = util.createResponse(responseOptions);
+        var wireResponse = response.wireResponse;
+        var tokenRequest = util.setupExpectedRefreshTokenRequestResponse(200, wireResponse, response.authority, response.resource, cp.clientSecret);
+        var context = new AuthenticationContext(cp.authorityTenant);
+        context.acquireTokenWithRefreshToken(cp.refreshToken, cp.clientId, cp.clientSecret, cp.resource, function (err, tokenResponse) {
+            if (!err) {
+                tokenRequest.done();
+                assert(util.isMatchTokenResponse(response.decodedResponse, tokenResponse), 'The response did not match what was expected: ' + JSON.stringify(tokenResponse));
+            }
+            done(err);
+        });
     });
-  });
-
-  test('happy-path-no-resource-legacy', function(done) {
-    var responseOptions = { refreshedRefresh : true };
-    var response = util.createResponse(responseOptions);
-    var wireResponse = response.wireResponse;
-    var tokenRequest = util.setupExpectedRefreshTokenRequestResponse(200, wireResponse, response.authority);
-
-    var context = new AuthenticationContext(cp.authorityTenant);
-    context.acquireTokenWithRefreshToken(cp.refreshToken, cp.clientId, null, function(err, tokenResponse) {
-      if (!err) {
-        tokenRequest.done();
-        assert(util.isMatchTokenResponse(response.decodedResponse, tokenResponse), 'The response did not match what was expected: ' + JSON.stringify(tokenResponse));
-      }
-      done(err);
+    test('happy-path-no-resource-legacy', function (done) {
+        var responseOptions = { refreshedRefresh: true };
+        var response = util.createResponse(responseOptions);
+        var wireResponse = response.wireResponse;
+        var tokenRequest = util.setupExpectedRefreshTokenRequestResponse(200, wireResponse, response.authority);
+        var context = new AuthenticationContext(cp.authorityTenant);
+        context.acquireTokenWithRefreshToken(cp.refreshToken, cp.clientId, null, function (err, tokenResponse) {
+            if (!err) {
+                tokenRequest.done();
+                assert(util.isMatchTokenResponse(response.decodedResponse, tokenResponse), 'The response did not match what was expected: ' + JSON.stringify(tokenResponse));
+            }
+            done(err);
+        });
     });
-  });
-
-  test('happy-path-with-resource-legacy', function(done) {
-    var responseOptions = { refreshedRefresh : true };
-    var response = util.createResponse(responseOptions);
-    var wireResponse = response.wireResponse;
-    var tokenRequest = util.setupExpectedRefreshTokenRequestResponse(200, wireResponse, response.authority, response.resource);
-
-    var context = new AuthenticationContext(cp.authorityTenant);
-    context.acquireTokenWithRefreshToken(cp.refreshToken, cp.clientId, cp.resource, function(err, tokenResponse) {
-      if (!err) {
-        tokenRequest.done();
-        assert(util.isMatchTokenResponse(response.decodedResponse, tokenResponse), 'The response did not match what was expected: ' + JSON.stringify(tokenResponse))  ;
-      }
-      done(err);
+    test('happy-path-with-resource-legacy', function (done) {
+        var responseOptions = { refreshedRefresh: true };
+        var response = util.createResponse(responseOptions);
+        var wireResponse = response.wireResponse;
+        var tokenRequest = util.setupExpectedRefreshTokenRequestResponse(200, wireResponse, response.authority, response.resource);
+        var context = new AuthenticationContext(cp.authorityTenant);
+        context.acquireTokenWithRefreshToken(cp.refreshToken, cp.clientId, cp.resource, function (err, tokenResponse) {
+            if (!err) {
+                tokenRequest.done();
+                assert(util.isMatchTokenResponse(response.decodedResponse, tokenResponse), 'The response did not match what was expected: ' + JSON.stringify(tokenResponse));
+            }
+            done(err);
+        });
     });
-  });
-
 });
+//# sourceMappingURL=refresh-token.js.map

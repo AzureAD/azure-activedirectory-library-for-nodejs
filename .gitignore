@@ -28,3 +28,5 @@ Thumbs.db
 # WebStorm #
 .idea/
 
+# TS #
+*.js.map

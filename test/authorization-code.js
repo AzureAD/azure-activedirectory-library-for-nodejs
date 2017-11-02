@@ -18,87 +18,72 @@
  * See the Apache License, Version 2.0 for the specific language
  * governing permissions and limitations under the License.
  */
-
 'use strict';
+Object.defineProperty(exports, "__esModule", { value: true });
 /* Directive tells jshint that suite and test are globals defined by mocha */
 /* global suite */
 /* global test */
-
-var assert = require('assert');
-var nock = require('nock');
-var querystring = require('querystring');
-
-var util = require('./util/util');
-var testRequire = util.testRequire;
-var cp = util.commonParameters;
-
-var adal = testRequire('adal');
+const assert = require("assert");
+const nock = require("nock");
+const querystring = require("querystring");
+const adal = require("../lib/adal");
+const util = require('./util/util');
+const cp = util.commonParameters;
 var AuthenticationContext = adal.AuthenticationContext;
-
 /**
  * Tests AuthenticationContext.acquireTokenWithAuthorizationCode
  */
-suite('authorization-code', function() {
-  var authorizationCode = '1234870909';
-  var redirectUri = 'app_bundle:test.bar.baz';
-
-  function setupExpectedAuthCodeTokenRequestResponse(httpCode, returnDoc, authorityEndpoint) {
-    var authEndpoint = util.getNockAuthorityHost(authorityEndpoint);
-
-    var queryParameters = {};
-    queryParameters['grant_type'] = 'authorization_code';
-    queryParameters['code'] = authorizationCode;
-    queryParameters['client_id'] = cp.clientId;
-    queryParameters['client_secret'] = cp.clientSecret;
-    queryParameters['resource'] = cp.resource;
-    queryParameters['redirect_uri'] = redirectUri;
-
-    var query = querystring.stringify(queryParameters);
-
-    var tokenRequest = nock(authEndpoint)
-                            .filteringRequestBody(function(body) {
-                              return util.filterQueryString(query, body);
-                            })
-                           .post(cp.tokenUrlPath, query)
-                           .reply(httpCode, returnDoc);
-
-    util.matchStandardRequestHeaders(tokenRequest);
-
-    return tokenRequest;
-  }
-
-  test('happy-path', function(done) {
-    var response = util.createResponse();
-    var tokenRequest = setupExpectedAuthCodeTokenRequestResponse(200, response.wireResponse);
-
-    var context = new AuthenticationContext(cp.authUrl);
-    context.acquireTokenWithAuthorizationCode(authorizationCode, redirectUri, response.resource, cp.clientId, cp.clientSecret, function (err, tokenResponse) {
-      if (!err) {
-        assert(util.isMatchTokenResponse(response.decodedResponse, tokenResponse), 'The response did not match what was expected');
-        tokenRequest.done();
-      }
-      done(err);
+suite('authorization-code', function () {
+    var authorizationCode = '1234870909';
+    var redirectUri = 'app_bundle:test.bar.baz';
+    function setupExpectedAuthCodeTokenRequestResponse(httpCode, returnDoc, authorityEndpoint) {
+        var authEndpoint = util.getNockAuthorityHost(authorityEndpoint);
+        var queryParameters = {};
+        queryParameters['grant_type'] = 'authorization_code';
+        queryParameters['code'] = authorizationCode;
+        queryParameters['client_id'] = cp.clientId;
+        queryParameters['client_secret'] = cp.clientSecret;
+        queryParameters['resource'] = cp.resource;
+        queryParameters['redirect_uri'] = redirectUri;
+        var query = querystring.stringify(queryParameters);
+        var tokenRequest = nock(authEndpoint)
+            .filteringRequestBody(function (body) {
+            return util.filterQueryString(query, body);
+        })
+            .post(cp.tokenUrlPath, query)
+            .reply(httpCode, returnDoc);
+        util.matchStandardRequestHeaders(tokenRequest);
+        return tokenRequest;
+    }
+    test('happy-path', function (done) {
+        var response = util.createResponse();
+        var tokenRequest = setupExpectedAuthCodeTokenRequestResponse(200, response.wireResponse);
+        var context = new AuthenticationContext(cp.authUrl);
+        context.acquireTokenWithAuthorizationCode(authorizationCode, redirectUri, response.resource, cp.clientId, cp.clientSecret, function (err, tokenResponse) {
+            if (!err) {
+                assert(util.isMatchTokenResponse(response.decodedResponse, tokenResponse), 'The response did not match what was expected');
+                tokenRequest.done();
+            }
+            done(err);
+        });
     });
-  });
-
-  test('failed-http-request', function(done) {
-    this.timeout(6000);
-    this.slow(4000);  // This test takes longer than I would like to fail.  It probably needs a better way of producing this error.
-
-    nock.enableNetConnect();
-    var context = new AuthenticationContext('https://0.1.1.1:12/my.tenant.com');
-    context.acquireTokenWithAuthorizationCode(authorizationCode, redirectUri, cp.resource, cp.clientId, cp.clientSecret, function (err) {
-      assert(err, 'Did not receive expected error on failed http request.');
-      nock.disableNetConnect();
-      done();
+    test('failed-http-request', function (done) {
+        this.timeout(6000);
+        this.slow(4000); // This test takes longer than I would like to fail.  It probably needs a better way of producing this error.
+        nock.enableNetConnect();
+        var context = new AuthenticationContext('https://0.1.1.1:12/my.tenant.com');
+        context.acquireTokenWithAuthorizationCode(authorizationCode, redirectUri, cp.resource, cp.clientId, cp.clientSecret, function (err) {
+            assert(err, 'Did not receive expected error on failed http request.');
+            nock.disableNetConnect();
+            done();
+        });
     });
-  });
-
-  test('bad-argument', function(done) {
-    var context = new AuthenticationContext(cp.authUrl);
-    context.acquireTokenWithAuthorizationCode(authorizationCode, redirectUri, null, cp.clientId, cp.clientSecret, function (err) {
-      assert(err, 'Did not receive expected argument error.');
-      done();
+    test('bad-argument', function (done) {
+        var context = new AuthenticationContext(cp.authUrl);
+        context.acquireTokenWithAuthorizationCode(authorizationCode, redirectUri, null, cp.clientId, cp.clientSecret, function (err) {
+            assert(err, 'Did not receive expected argument error.');
+            done();
+        });
     });
-  });
 });
+//# sourceMappingURL=authorization-code.js.map

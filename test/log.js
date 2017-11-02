@@ -18,53 +18,42 @@
  * See the Apache License, Version 2.0 for the specific language
  * governing permissions and limitations under the License.
  */
-
 'use strict';
+Object.defineProperty(exports, "__esModule", { value: true });
 /* Directive tells jshint that suite and test are globals defined by mocha */
 /* global suite */
 /* global test */
-
-var _ = require('underscore');
-var assert = require('assert');
-
-var util = require('./util/util');
-var testRequire = util.testRequire;
-
-var adal = testRequire('adal');
-
-suite('log', function() {
-  test('settings-none', function(done) {
-    var currentOptions = adal.Logging.getLoggingOptions();
-    adal.Logging.setLoggingOptions();
-    var options = adal.Logging.getLoggingOptions();
-
-    var noOptionsSet = (!options ||
-                        null === options ||
-                        {} === options ||
-                        0 === options.level);
-
-    // Set the looging options back to what they were before this test so that
-    // future tests are logged as they should be.
-    adal.Logging.setLoggingOptions(currentOptions);
-
-    assert(noOptionsSet, 'Did not expect to find any logging options set: ' + JSON.stringify(options));
-    done();
-  });
-
-  test('console-settings', function(done) {
-    var currentOptions = adal.Logging.getLoggingOptions();
-    util.turnOnLogging();
-    var options = adal.Logging.getLoggingOptions();
-    var level = options.level;
-    var logFunc = options.log;
-
-    // Set the looging options back to what they were before this test so that
-    // future tests are logged as they should be.
-    adal.Logging.setLoggingOptions(currentOptions);
-
-    assert(level === 3, 'Logging level was not the expected value of 3: ', options.level);
-    assert(_.isFunction(logFunc), 'Unexpected logging function: ' + logFunc);
-    done();
-  });
+const _ = require("underscore");
+const assert = require("assert");
+const util = require('./util/util');
+const adal = require("../lib/adal");
+suite('log', function () {
+    test('settings-none', function (done) {
+        var currentOptions = adal.Logging.getLoggingOptions();
+        adal.Logging.setLoggingOptions(currentOptions);
+        var options = adal.Logging.getLoggingOptions();
+        var noOptionsSet = (!options ||
+            null === options ||
+            {} === options ||
+            0 === options.level);
+        // Set the looging options back to what they were before this test so that
+        // future tests are logged as they should be.
+        adal.Logging.setLoggingOptions(currentOptions);
+        assert(noOptionsSet, 'Did not expect to find any logging options set: ' + JSON.stringify(options));
+        done();
+    });
+    test('console-settings', function (done) {
+        var currentOptions = adal.Logging.getLoggingOptions();
+        util.turnOnLogging();
+        var options = adal.Logging.getLoggingOptions();
+        var level = options.level;
+        var logFunc = options.log;
+        // Set the looging options back to what they were before this test so that
+        // future tests are logged as they should be.
+        adal.Logging.setLoggingOptions(currentOptions);
+        assert(level === 3, `Logging level was not the expected value of 3: ${options.level}`);
+        assert(_.isFunction(logFunc), 'Unexpected logging function: ' + logFunc);
+        done();
+    });
 });
-
+//# sourceMappingURL=log.js.map
