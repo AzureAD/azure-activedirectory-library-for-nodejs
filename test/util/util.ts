@@ -1,26 +1,28 @@
 'use strict';
 
-var _ = require('underscore');
+import * as _ from 'underscore';
+import * as fs from "fs";
+import * as nock from "nock";
+import * as querystring from "querystring";
+import * as url from "url";
 require('date-utils');
-var fs = require('fs');
-var nock = require('nock');
-var querystring = require('querystring');
-var url = require('url');
 
 var adaldir = process.env.ADAL_COV ? '../../lib-cov/' : '../../lib/';
 
-function testRequire(file) {
+function testRequire(file: any) {
   return require(adaldir + file);
 }
 
 nock.disableNetConnect();
 
 var adal = testRequire('adal');
+//import * as adal from "../../lib/adal";
+
 var log = testRequire('log');
 
-var util = {};
+var util: any = {};
 
-var successResponse = {
+var successResponse: any = {
   'access_token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Ik5HVEZ2ZEstZnl0aEV1THdqcHdBSk9NOW4tQSJ9.eyJhdWQiOiIwMDAwMDAwMi0wMDAwLTAwMDAtYzAwMC0wMDAwMDAwMDAwMDAiLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC82MmYwMzQ3MS02N2MxLTRjNTAtYjlkMS0xMzQ1MDc5ZDk3NzQvIiwiaWF0IjoxMzc4NjAxMTY4LCJuYmYiOjEzNzg2MDExNjgsImV4cCI6MTM3ODYyOTk2OCwidmVyIjoiMS4wIiwidGlkIjoiNjJmMDM0NzEtNjdjMS00YzUwLWI5ZDEtMTM0NTA3OWQ5Nzc0Iiwib2lkIjoiZjEzMDkzNDEtZDcyMy00YTc1LTk2YzktNGIyMTMzMzk0Mjg3Iiwic3ViIjoiZjEzMDkzNDEtZDcyMy00YTc1LTk2YzktNGIyMTMzMzk0Mjg3IiwiYXBwaWQiOiI1YzI1ZDFiZi1iMjMyLTQwMzUtYjZiOS0yYjdlN2U4MzQ2ZDYiLCJhcHBpZGFjciI6IjEifQ.qXM7f9TTiLApxVMwaSrISQQ6UAnfKvKhoIlN9rB0Eff2VXvIWKGRsclPkMQ5x42BQz2N6pSXEsN-LsNCZlQ76Rc3rVRONzeCYh7q_NXcCJG_d6SJTtV5GBfgqFlgT8UF5rblabbMdOiOrddvJm048hWt2Nm3qD3QjQdPBlD7Ksn-lUR1jEJPIqDaBjGom8RawrZTW6X1cy1Kr8mEYFkxcbU91k_RZUumONep9FTR8gfPkboeD8zyvOy64UeysEtcuaNCfhHSBFcwC8MwjUr5r_T7au7ywAcYDOVgoa7oF_dN1JNweiDoNNZ9tyUS-RY3sa3-gXk77gRxpA4CkpittQ',
   'token_type': 'Bearer',
   'expires_in': 28800,
@@ -28,21 +30,21 @@ var successResponse = {
 };
 
 var refreshToken = 'AwABAAAAvPM1KaPlrEqdFSBzjqfTGCDeE7YHWD9jkU2WWYKLjxu928QAbkoFyWpgJLFcp65DcbBqOSYVq5Ty_60YICIdFw61SG4-eT1nWHNOPdzsL2ZzloUsp2DpqlIr1s5Z3953oQBi7dOqiHk37NXQqmNEJ7MfmDp6w3EOa29EPARvjGIHFgtICW1-Y82npw1v1g8Ittb02pksNU2XzH2X0E3l3TuSZWsX5lpl-kfPOc8zppU6bwvT-VOPHZVVLQedDIQZyOiFst9HLUjbiIvBgV7tNwbB4H5yF56QQscz49Nrb3g0ibuNDo7efFawLzNoVHzoTrOTcCGSG1pt8Z-npByrEe7vg1o4nNFjspuxlyMGdnYRAnaZfvgzqROP_m7ZqSd6IAA';
-var successResponseWithRefresh = _.clone(successResponse);
+var successResponseWithRefresh: any = _.clone(successResponse);
 _.extend(successResponseWithRefresh, {
-  'scope' : '62e90394-69f5-4237-9190-012177145e10',
-  'refresh_token' : refreshToken
+  'scope': '62e90394-69f5-4237-9190-012177145e10',
+  'refresh_token': refreshToken
 });
 
 var encodedIdToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJhdWQiOiJlOTU4YzA5YS1hYzM3LTQ5MDAtYjRkNy1mYjNlZWFmNzMzOGQiLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC9jY2ViYTE0Yy02YTAwLTQ5YWMtYjgwNi04NGRlNTJiZjFkNDIvIiwiaWF0IjoxMzkxNjQ1NDU4LCJuYmYiOjEzOTE2NDU0NTgsImV4cCI6MTM5MTY0OTM1OCwidmVyIjoiMS4wIiwidGlkIjoiY2NlYmExNGMtNmEwMC00OWFjLWI4MDYtODRkZTUyYmYxZDQyIiwib2lkIjoiYTQ0MzIwNGEtYWJjOS00Y2I4LWFkYzEtYzBkZmMxMjMwMGFhIiwidXBuIjoicnJhbmRhbGxAcnJhbmRhbGxhYWQxLm9ubWljcm9zb2Z0LmNvbSIsInVuaXF1ZV9uYW1lIjoicnJhbmRhbGxAcnJhbmRhbGxhYWQxLm9ubWljcm9zb2Z0LmNvbSIsInN1YiI6IjRnVHY0RXRvWVctRFRvdzBiRG5KZDFBQTRzZkNoQmJqZXJtcXQ2UV9aYTQiLCJmYW1pbHlfbmFtZSI6IlJhbmRhbGwiLCJnaXZlbl9uYW1lIjoiUmljaCJ9.';
 
 var parsedIdToken = {
-  'tenantId' : 'cceba14c-6a00-49ac-b806-84de52bf1d42',
-  'userId' : 'rrandall@rrandallaad1.onmicrosoft.com',
-  'givenName' : 'Rich',
-  'familyName' : 'Randall',
-  'isUserIdDisplayable' : true, 
-  'oid' : 'a443204a-abc9-4cb8-adc1-c0dfc12300aa'
+  'tenantId': 'cceba14c-6a00-49ac-b806-84de52bf1d42',
+  'userId': 'rrandall@rrandallaad1.onmicrosoft.com',
+  'givenName': 'Rich',
+  'familyName': 'Randall',
+  'isUserIdDisplayable': true,
+  'oid': 'a443204a-abc9-4cb8-adc1-c0dfc12300aa'
 };
 
 
@@ -65,15 +67,15 @@ var decodedIdToken = {
 var encodedIdTokenUrlSafe = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJhdWQiOiJlOTU4YzA5YS1hYzM3LTQ5MDAtYjRkNy1mYjNlZWFmNzMzOGQiLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC9jY2ViYTE0Yy02YTAwLTQ5YWMtYjgwNi04NGRlNTJiZjFkNDIvIiwiaWF0IjoxMzkxNjQ1NDU4LCJuYmYiOjEzOTE2NDU0NTgsImV4cCI6MTM5MTY0OTM1OCwidmVyIjoiMS4wIiwidGlkIjoiY2NlYmExNGMtNmEwMC00OWFjLWI4MDYtODRkZTUyYmYxZDQyIiwib2lkIjoiYTQ0MzIwNGEtYWJjOS00Y2I4LWFkYzEtYzBkZmMxMjMwMGFhIiwidXBuIjoiZm9vYmFyQHNvbWVwbGFjZWVsc2UuY29tIiwidW5pcXVlX25hbWUiOiJycmFuZGFsbEBycmFuZGFsbGFhZDEub25taWNyb3NvZnQuY29tIiwic3ViIjoiNGdUdjRFdG9ZVy1EVG93MGJEbkpkMUFBNHNmQ2hCYmplcm1xdDZRX1phNCIsImZhbWlseV9uYW1lIjoiUmFuZGFsbCIsImdpdmVuX25hbWUiOiJSaTw_Y2gifQ==.';
 
 var parsedIdTokenUrlSafe = {
-  'tenantId' : 'cceba14c-6a00-49ac-b806-84de52bf1d42',
-  'userId' : 'test@someplaceelse.com',
-  'givenName' : 'Ri<?ch',
-  'familyName' : 'Randall',
-  'isUserIdDisplayable' : true, 
-  'oid' : 'a443204a-abc9-4cb8-adc1-c0dfc12300aa'
+  'tenantId': 'cceba14c-6a00-49ac-b806-84de52bf1d42',
+  'userId': 'test@someplaceelse.com',
+  'givenName': 'Ri<?ch',
+  'familyName': 'Randall',
+  'isUserIdDisplayable': true,
+  'oid': 'a443204a-abc9-4cb8-adc1-c0dfc12300aa'
 };
 
-var decodedTokenUrlSafeTest = {
+var decodedTokenUrlSafeTest: any = {
   aud: 'e958c09a-ac37-4900-b4d7-fb3eeaf7338d',
   iss: 'https://sts.windows.net/cceba14c-6a00-49ac-b806-84de52bf1d42/',
   iat: 1391645458,
@@ -89,7 +91,7 @@ var decodedTokenUrlSafeTest = {
   'given_name': 'Ri<?ch'
 };
 
-var parameters = {};
+var parameters: any = {};
 parameters.tenant = 'rrandallaad1.onmicrosoft.com';
 parameters.clientId = 'clien&&???tId';
 parameters.clientSecret = 'clientSecret*&^(?&';
@@ -98,10 +100,10 @@ parameters.evoEndpoint = 'https://login.windows.net';
 parameters.username = 'rrandall@' + parameters.tenant;
 parameters.password = '<password>';
 parameters.authorityHosts = {
-  global : 'login.windows.net',
-  china : 'login.chinacloudapi.cn',
-  gov : 'login-us.microsoftonline.com',
-  us : 'login.microsoftonline.us'
+  global: 'login.windows.net',
+  china: 'login.chinacloudapi.cn',
+  gov: 'login-us.microsoftonline.com',
+  us: 'login.microsoftonline.us'
 };
 parameters.language = 'en';
 parameters.deviceCode = 'ABCDE:device_code';
@@ -131,7 +133,7 @@ parameters.authorizePath = '/oauth/authorize';
 parameters.authorizeUrlPath = parameters.authUrl.pathname + parameters.authorizePath;
 parameters.authorizeUrl = parameters.authUrl.href + parameters.authorizePath;
 parameters.instanceDiscoverySuccessResponse = {
-  'tenant_discovery_endpoint' : parameters.authority
+  'tenant_discovery_endpoint': parameters.authority
 };
 parameters.userRealmPathTemplate = '/common/UserRealm/<user>';
 
@@ -142,8 +144,8 @@ parameters.MexFile = __dirname + '/../mex/common.mex.xml';
 // These two files go together.  Editing one without changing the other will break the test.
 parameters.RSTRFile = __dirname + '/../wstrust/common.rstr.xml';
 parameters.AssertionFile = __dirname + '/../wstrust/common.base64.encoded.assertion.txt';
-parameters.logContext = { correlationId : 'test-correlation-id-123456789' };
-parameters.callContext = { _logContext : parameters.logContext };
+parameters.logContext = { correlationId: 'test-correlation-id-123456789' };
+parameters.callContext = { _logContext: parameters.logContext };
 
 
 // This is a dummy RSA private cert used for testing purpose.It does not represent valid credential.
@@ -151,7 +153,7 @@ parameters.callContext = { _logContext : parameters.logContext };
 // Hence the following message is added to suppress CredScan warning.
 //[SuppressMessage("Microsoft.Security", "CS002:SecretInNextLine")]
 
-util.getSelfSignedCert = function() {
+util.getSelfSignedCert = function () {
   var privatePem = '-----BEGIN RSA PRIVATE KEY-----\n' +
     'MIIEpAIBAAKCAQEAoMGZTZi0vU/ICYVgV4vcTwzvZCNXdJ9EgGBBFu1E0/j4FF0Y\n' +
     'Fd2sP7IwmWVZLlWJ5VbwAtdMiRdrogX/QnWPfsNfsPzDdRRJD+Erh9tmBzJm08h7\n' +
@@ -186,7 +188,7 @@ parameters.certHash = 'C1:5D:EA:86:56:AD:DF:67:BE:80:31:D8:5E:BD:DC:5A:D6:C4:36:
 parameters.nowDate = new Date(1418433646179);
 parameters.jwtId = '09841beb-a2c2-4777-a347-34ef055238a8';
 parameters.expectedJwt = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IndWM3FobGF0MzJlLWdESFlYcjNjV3RiRU51RSJ9.eyJhdWQiOiJodHRwczovL2xvZ2luLndpbmRvd3MubmV0L3JyYW5kYWxsYWFkMS5vbm1pY3Jvc29mdC5jb20vb2F1dGgyL3Rva2VuIiwiaXNzIjoiY2xpZW4mJj8_P3RJZCIsInN1YiI6ImNsaWVuJiY_Pz90SWQiLCJuYmYiOjE0MTg0MzM2NDYsImV4cCI6MTQxODQzNDI0NiwianRpIjoiMDk4NDFiZWItYTJjMi00Nzc3LWEzNDctMzRlZjA1NTIzOGE4In0.dgF0TRlcASgTMp_1dlm8vd7tudr6n40VeuOQGFnz566s3n76WR_jJDBBBKlYeqc9gwCPFOzrLVAJehVYZ3N7YPzVdulf47rLoQdAp8R_p4Q4hdBZuIzfgDWwXjnP9x_NlfzezEYE4r8KTS2g5BBzPmx538AfIdNM93hWIxQySZGWY5UAhTkT1qE1ce1Yjo1M2HqzEJhTg5TTyfrnDtNxFxmzYhSyA9B41lB5kBuJTXUWXPrr-6eG8cEUOS-iiH7YB1Tf4J7_9JQloevTiOrfv4pSp6xLLXm2ntNBg3gaKsGKdYd-3tsCG0mHn7BzL0b-QCLalkUr8KtgtLqkxuAiLQ';
-parameters.cert = util.getSelfSignedCert();
+parameters.cert = (util as any).getSelfSignedCert();
 
 
 util.commonParameters = parameters;
@@ -195,12 +197,13 @@ util.testRequire = testRequire;
 
 var correlationIdRegex = /[^\s]+/;
 util.testCorrelationId = correlationIdRegex;
-util.setCorrelationId = function(correlationId) {
+util.setCorrelationId = function (correlationId: any) {
   util.testCorrelationId = correlationId || correlationIdRegex;
 };
 
-util.turnOnLogging = function(level, logFunc) {
-  var consoleLog = function(level, message, error) {
+util.turnOnLogging = function (level: any, logFunc: any) {
+  var consoleLog = function (level: any, message: any, error: any) {
+    level;
     console.log(message);
     if (error) {
       console.log(error);
@@ -211,18 +214,18 @@ util.turnOnLogging = function(level, logFunc) {
   var loggingFunction = logFunc || consoleLog;
   var loggingLevel = level || log.LOGGING_LEVEL.VERBOSE;
   log.setLoggingOptions(
-  {
-    level : loggingLevel,
-    log : loggingFunction
-  });
+    {
+      level: loggingLevel,
+      log: loggingFunction
+    });
 };
 
-util.resetLogging = function() {
+util.resetLogging = function () {
   var log = adal.Logging;
   log.setLoggingOptions();
 };
 
-var TOKEN_RESPONSE_MAP = {};
+var TOKEN_RESPONSE_MAP: any = {};
 TOKEN_RESPONSE_MAP['token_type'] = 'tokenType';
 TOKEN_RESPONSE_MAP['access_token'] = 'accessToken';
 TOKEN_RESPONSE_MAP['refresh_token'] = 'refreshToken';
@@ -233,7 +236,7 @@ TOKEN_RESPONSE_MAP['error'] = 'error';
 TOKEN_RESPONSE_MAP['error_description'] = 'errorDescription';
 TOKEN_RESPONSE_MAP['resource'] = 'resource';
 
-var DEVICE_CODE_RESPONSE_MAP = {};
+var DEVICE_CODE_RESPONSE_MAP: any = {};
 DEVICE_CODE_RESPONSE_MAP['device_code'] = 'deviceCode';
 DEVICE_CODE_RESPONSE_MAP['user_code'] = 'userCode';
 DEVICE_CODE_RESPONSE_MAP['verification_url'] = 'verificationUrl';
@@ -242,7 +245,7 @@ DEVICE_CODE_RESPONSE_MAP['expires_in'] = 'expiresIn';
 DEVICE_CODE_RESPONSE_MAP['error'] = 'error';
 DEVICE_CODE_RESPONSE_MAP['error_description'] = 'errorDescription';
 
-function mapFields(inObj, outObj, map) {
+function mapFields(inObj: any, outObj: any, map: any) {
   for (var key in inObj) {
     if (map[key]) {
       var mappedKey = map[key];
@@ -257,20 +260,20 @@ function mapFields(inObj, outObj, map) {
  * @param iteration Iteraton will be used to create a distinct token for each value of iteration and it will always return that same token 
  *                  for same value of iteration. 
  */
-util.createResponse = function(options, iteration) {
+util.createResponse = function (options: any, iteration: any) {
   options = options || {};
 
   var authority = options.authority || parameters.authorityTenant;
 
-  var baseResponse = {
-    'token_type' : 'Bearer',
+  var baseResponse :any = {
+    'token_type': 'Bearer',
     'expires_in': 28800
   };
 
   var resource = options.resource || parameters.resource;
-  var iterated = {
+  var iterated: any = {
     'access_token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Ik5HVEZ2ZEstZnl0aEV1THdqcHdBSk9NOW4tQSJ9.eyJhdWQiOiIwMDAwMDAwMi0wMDAwLTAwMDAtYzAwMC0wMDAwMDAwMDAwMDAiLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC82MmYwMzQ3MS02N2MxLTRjNTAtYjlkMS0xMzQ1MDc5ZDk3NzQvIiwiaWF0IjoxMzc4NjAxMTY4LCJuYmYiOjEzNzg2MDExNjgsImV4cCI6MTM3ODYyOTk2OCwidmVyIjoiMS4wIiwidGlkIjoiNjJmMDM0NzEtNjdjMS00YzUwLWI5ZDEtMTM0NTA3OWQ5Nzc0Iiwib2lkIjoiZjEzMDkzNDEtZDcyMy00YTc1LTk2YzktNGIyMTMzMzk0Mjg3Iiwic3ViIjoiZjEzMDkzNDEtZDcyMy00YTc1LTk2YzktNGIyMTMzMzk0Mjg3IiwiYXBwaWQiOiI1YzI1ZDFiZi1iMjMyLTQwMzUtYjZiOS0yYjdlN2U4MzQ2ZDYiLCJhcHBpZGFjciI6IjEifQ.qXM7f9TTiLApxVMwaSrISQQ6UAnfKvKhoIlN9rB0Eff2VXvIWKGRsclPkMQ5x42BQz2N6pSXEsN-LsNCZlQ76Rc3rVRONzeCYh7q_NXcCJG_d6SJTtV5GBfgqFlgT8UF5rblabbMdOiOrddvJm048hWt2Nm3qD3QjQdPBlD7Ksn-lUR1jEJPIqDaBjGom8RawrZTW6X1cy1Kr8mEYFkxcbU91k_RZUumONep9FTR8gfPkboeD8zyvOy64UeysEtcuaNCfhHSBFcwC8MwjUr5r_T7au7ywAcYDOVgoa7oF_dN1JNweiDoNNZ9tyUS-RY3sa3-gXk77gRxpA4CkpittQ',
-    'resource' : resource
+    'resource': resource
   };
 
   if (!options.noRefresh) {
@@ -296,10 +299,10 @@ util.createResponse = function(options, iteration) {
   }
 
   var dateNow = new Date();
-  var wireResponse = _.clone(baseResponse);
+  var wireResponse: any = _.clone(baseResponse);
   wireResponse['created_on'] = dateNow.getTime();
 
-  var decodedResponse = {};
+  var decodedResponse: any = {};
   mapFields(wireResponse, decodedResponse, TOKEN_RESPONSE_MAP);
   decodedResponse['createdOn'] = dateNow;
 
@@ -311,9 +314,9 @@ util.createResponse = function(options, iteration) {
 
   var expiresOnDate;
   if (options.expired) {
-    expiresOnDate = Date.yesterday();
+    expiresOnDate = (Date as any).yesterday();
   } else {
-    expiresOnDate = (new Date()).addSeconds(decodedResponse['expiresIn']);
+    expiresOnDate = ((new Date()) as any).addSeconds(decodedResponse['expiresIn']);
   }
   decodedResponse['expiresOn'] = expiresOnDate;
 
@@ -327,88 +330,89 @@ util.createResponse = function(options, iteration) {
   }
 
   return {
-    wireResponse : wireResponse,
-    decodedResponse : decodedResponse,
-    cachedResponse : cachedResponse,
-    decodedIdToken : decodedIdToken,
-    resource : iterated['resource'],
-    refreshToken : iterated['refresh_token'],
-    clientId : cachedResponse['_clientId'],
-    authority : authority
+    wireResponse: wireResponse,
+    decodedResponse: decodedResponse,
+    cachedResponse: cachedResponse,
+    decodedIdToken: decodedIdToken,
+    resource: iterated['resource'],
+    refreshToken: iterated['refresh_token'],
+    clientId: cachedResponse['_clientId'],
+    authority: authority
   };
 };
 
-util.createDeviceCodeResponse = function (options, iteration) {
-    options = options || {};
-    
-    var authority = options.authority || parameters.authorityTenant;
-    var resource = options.resource || parameters.resource;
+util.createDeviceCodeResponse = function (options: any, iteration: any) {
+  iteration;
+  options = options || {};
 
-    var wireResponse = {};
-    wireResponse['expires_in'] = 28800;
-    wireResponse['device_code'] = 'device_code:12345';
-    wireResponse['user_code'] = 'user_code:12345';
-    wireResponse['verification_url'] = 'go:to:verify';
-    wireResponse['interval'] = 5;
+  var authority: any = options.authority || parameters.authorityTenant;
+  var resource: any = options.resource || parameters.resource;
+  authority; resource;
+  var wireResponse: any = {};
+  wireResponse['expires_in'] = 28800;
+  wireResponse['device_code'] = 'device_code:12345';
+  wireResponse['user_code'] = 'user_code:12345';
+  wireResponse['verification_url'] = 'go:to:verify';
+  wireResponse['interval'] = 5;
 
-    var decodedResponse = {};
-    mapFields(wireResponse, decodedResponse, DEVICE_CODE_RESPONSE_MAP);
+  var decodedResponse = {};
+  mapFields(wireResponse, decodedResponse, DEVICE_CODE_RESPONSE_MAP);
 
-    return {
-       wireResponse : wireResponse, 
-       decodedResponse : decodedResponse
-    };
+  return {
+    wireResponse: wireResponse,
+    decodedResponse: decodedResponse
+  };
 };
 
-util.compareQueryStrings = function(left, right) {
+util.compareQueryStrings = function (left: any, right: any) {
   var leftParameters = querystring.parse(left);
   var rightParameters = querystring.parse(right);
   return _.isEqual(leftParameters, rightParameters);
 };
 
-util.filterQueryString = function(expected, received) {
+util.filterQueryString = function (expected: any, received: any) {
   return util.compareQueryStrings(expected, received) ? expected : received;
 };
 
-util.removeQueryStringIfMatching = function(path, query) {
+util.removeQueryStringIfMatching = function (path: any, query: any) {
   var pathUrl = url.parse(path);
   return util.compareQueryStrings(pathUrl.query, query) ? pathUrl.pathname : path;
 };
 
-function valExists(val) {
+function valExists(val: any) {
   return val;
 }
 
-util.matchStandardRequestHeaders = function(nockRequest) {
+util.matchStandardRequestHeaders = function (nockRequest: any) {
   nockRequest.matchHeader('x-client-SKU', 'Node')
-             .matchHeader('x-client-Ver', function(ver) {
-              return (ver && ver.indexOf('0.') === 0);
-             })
-             .matchHeader('x-client-OS', valExists)
-             .matchHeader('x-client-CPU', valExists)
-             .matchHeader('client-request-id', util.testCorrelationId);
+    .matchHeader('x-client-Ver', function (ver: any) {
+      return (ver && ver.indexOf('0.') === 0);
+    })
+    .matchHeader('x-client-OS', valExists)
+    .matchHeader('x-client-CPU', valExists)
+    .matchHeader('client-request-id', util.testCorrelationId);
 };
 
-util.setupExpectedOAuthResponse = function(queryParameters, tokenPath, httpCode, returnDoc, authorityEndpoint) {
+util.setupExpectedOAuthResponse = function (queryParameters: any, tokenPath: any, httpCode: any, returnDoc: any, authorityEndpoint: any) {
   var query = querystring.stringify(queryParameters);
-
+  decodedTokenUrlSafeTest;
   var authEndpoint = this.getNockAuthorityHost(authorityEndpoint);
   var tokenRequest = nock(authEndpoint)
-                         .filteringRequestBody(function(body) {
-                            return util.filterQueryString(query, body);
-                          })
-                         .post(tokenPath, query)
-                         .reply(httpCode, returnDoc, { 'client-request-id' : util.testCorrelationId });
+    .filteringRequestBody(function (body) {
+      return util.filterQueryString(query, body);
+    })
+    .post(tokenPath, query)
+    .reply(httpCode, returnDoc, { 'client-request-id': util.testCorrelationId });
 
   util.matchStandardRequestHeaders(tokenRequest);
 
   return tokenRequest;
 };
 
-util.setupExpectedClientCredTokenRequestResponse = function(httpCode, returnDoc, authorityEndpoint) {
+util.setupExpectedClientCredTokenRequestResponse = function (httpCode: any, returnDoc: any, authorityEndpoint: any) {
   var authEndpoint = authorityEndpoint || parameters.authority;
 
-  var queryParameters = {};
+  var queryParameters: any = {};
   queryParameters['grant_type'] = 'client_credentials';
   queryParameters['client_id'] = parameters.clientId;
   queryParameters['client_secret'] = parameters.clientSecret;
@@ -417,8 +421,8 @@ util.setupExpectedClientCredTokenRequestResponse = function(httpCode, returnDoc,
   return util.setupExpectedOAuthResponse(queryParameters, parameters.tokenUrlPath, httpCode, returnDoc, authEndpoint);
 };
 
-util.setupExpectedInstanceDiscoveryRequest = function(httpCode, discoveryHost, returnDoc, authority) {
-  var instanceDiscoveryUrl = {};
+util.setupExpectedInstanceDiscoveryRequest = function (httpCode: any, discoveryHost: any, returnDoc: any, authority: any) {
+  var instanceDiscoveryUrl: any = {};
   instanceDiscoveryUrl.protocol = 'https:';
   instanceDiscoveryUrl.host = discoveryHost;
   instanceDiscoveryUrl.pathname = '/common/discovery/instance';
@@ -431,15 +435,15 @@ util.setupExpectedInstanceDiscoveryRequest = function(httpCode, discoveryHost, r
   var instanceDiscoveryEndpoint = this.trimPathFromUrl(instanceDiscoveryUrl);
 
   var discoveryRequest = nock(instanceDiscoveryEndpoint)
-                         .get(instanceDiscoveryUrl.path)
-                         .reply(httpCode, returnDoc);
+    .get(instanceDiscoveryUrl.path)
+    .reply(httpCode, returnDoc);
 
   util.matchStandardRequestHeaders(discoveryRequest);
 
   return discoveryRequest;
 };
 
-util.setupExpectedInstanceDiscoveryRequestCommon = function() {
+util.setupExpectedInstanceDiscoveryRequestCommon = function () {
   return util.setupExpectedInstanceDiscoveryRequest(
     200,
     parameters.authority,
@@ -447,7 +451,8 @@ util.setupExpectedInstanceDiscoveryRequestCommon = function() {
     parameters.authority);
 };
 
-util.setupExpectedUserRealmResponse = function(httpCode, returnDoc, authority) {
+util.setupExpectedUserRealmResponse = function (httpCode: any, returnDoc: any, authority: any) {
+  httpCode;
   var userRealmAuthority = authority || parameters.authority;
   userRealmAuthority = this.trimPathFromUrl(userRealmAuthority);
 
@@ -455,11 +460,11 @@ util.setupExpectedUserRealmResponse = function(httpCode, returnDoc, authority) {
   var query = 'api-version=1.0';
 
   var userRealmRequest = nock(userRealmAuthority)
-                         .filteringPath(function(path) {
-                            return util.removeQueryStringIfMatching(path, query);
-                          })
-                          .get(userRealmPath)
-                          .reply(200, returnDoc);
+    .filteringPath(function (path) {
+      return util.removeQueryStringIfMatching(path, query);
+    })
+    .get(userRealmPath)
+    .reply(200, returnDoc);
 
   util.matchStandardRequestHeaders(userRealmRequest);
 
@@ -471,7 +476,7 @@ util.setupExpectedUserRealmResponse = function(httpCode, returnDoc, authority) {
  * @param  {bool} federated Indicates whether the response should indicate a federated or managed tenant.
  * @return {nock}
  */
-util.setupExpectedUserRealmResponseCommon = function(federated) {
+util.setupExpectedUserRealmResponseCommon = function (federated: any) {
   var responseDoc;
 
   if (federated) {
@@ -483,19 +488,19 @@ util.setupExpectedUserRealmResponseCommon = function(federated) {
   return util.setupExpectedUserRealmResponse(200, responseDoc, parameters.authority);
 };
 
-util.setupExpectedInstanceDiscoveryAndUserRealmRequest = function(federated) {
+util.setupExpectedInstanceDiscoveryAndUserRealmRequest = function (federated: any) {
   var instanceDiscovery = util.setupExpectedInstanceDiscoveryRequestCommon();
   var userRealm = util.setupExpectedUserRealmResponseCommon(federated);
 
   return {
-    done : function() {
+    done: function () {
       instanceDiscovery.done();
       userRealm.done();
     }
   };
 };
 
-util.setupExpectedFailedMexCommon = function() {
+util.setupExpectedFailedMexCommon = function () {
   var mexRequest = nock(parameters.adfsUrlNoPath).get(parameters.adfsMexPath).reply(500);
 
   util.matchStandardRequestHeaders(mexRequest);
@@ -503,43 +508,43 @@ util.setupExpectedFailedMexCommon = function() {
   return mexRequest;
 };
 
-util.setupExpectedMexCommon = function() {
+util.setupExpectedMexCommon = function () {
   var mexDoc = fs.readFileSync(parameters.MexFile, 'utf8');
-  var mexRequest = nock(parameters.adfsUrlNoPath).get(parameters.adfsMexPath).reply('200', mexDoc);
+  var mexRequest = nock(parameters.adfsUrlNoPath).get(parameters.adfsMexPath).reply(200, mexDoc);
 
   util.matchStandardRequestHeaders(mexRequest);
 
   return mexRequest;
 };
 
-util.setupExpectedWSTrustRequestCommon = function() {
+util.setupExpectedWSTrustRequestCommon = function () {
   var RSTRDoc = fs.readFileSync(parameters.RSTRFile, 'utf8');
   var wstrustRequest = nock(parameters.adfsUrlNoPath)
-                       .filteringRequestBody(function() {return '*';})
-                       .post(parameters.adfsWsTrustPath, '*')
-                       .reply(200, RSTRDoc);
+    .filteringRequestBody(function () { return '*'; })
+    .post(parameters.adfsWsTrustPath, '*')
+    .reply(200, RSTRDoc);
 
   util.matchStandardRequestHeaders(wstrustRequest);
 
   return wstrustRequest;
 };
 
-util.setupExpectedMexWSTrustRequestCommon = function() {
+util.setupExpectedMexWSTrustRequestCommon = function () {
   var expectedMex = util.setupExpectedMexCommon();
   var expectedWsTrust = util.setupExpectedWSTrustRequestCommon();
 
-  var doneFunc = function() {
+  var doneFunc = function () {
     expectedMex.done();
     expectedWsTrust.done();
   };
 
-  return { done : doneFunc };
+  return { done: doneFunc };
 };
 
-util.setupExpectedRefreshTokenRequestResponse = function(httpCode, returnDoc, authorityEndpoint, resource, clientSecret) {
+util.setupExpectedRefreshTokenRequestResponse = function (httpCode: any, returnDoc: any, authorityEndpoint: any, resource: any, clientSecret: any) {
   var authEndpoint = authorityEndpoint || parameters.authority;
 
-  var queryParameters = {};
+  var queryParameters: any = {};
   queryParameters['grant_type'] = 'refresh_token';
   queryParameters['scope'] = 'openid';
   queryParameters['client_id'] = parameters.clientId;
@@ -554,10 +559,10 @@ util.setupExpectedRefreshTokenRequestResponse = function(httpCode, returnDoc, au
   return util.setupExpectedOAuthResponse(queryParameters, parameters.tokenUrlPath, httpCode, returnDoc, authEndpoint);
 };
 
-util.setupExpectedClientAssertionTokenRequestResponse = function(httpCode, returnDoc, authorityEndpoint) {
+util.setupExpectedClientAssertionTokenRequestResponse = function (httpCode: any, returnDoc: any, authorityEndpoint: any) {
   var authEndpoint = authorityEndpoint || parameters.authority;
 
-  var queryParameters = {};
+  var queryParameters: any = {};
   queryParameters['grant_type'] = 'client_credentials';
   queryParameters['client_assertion_type'] = 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer';
   queryParameters['client_assertion'] = parameters.expectedJwt;
@@ -567,7 +572,7 @@ util.setupExpectedClientAssertionTokenRequestResponse = function(httpCode, retur
   return util.setupExpectedOAuthResponse(queryParameters, parameters.tokenUrlPath, httpCode, returnDoc, authEndpoint);
 };
 
-function isDateWithinTolerance(date, expectedDate) {
+function isDateWithinTolerance(date: any, expectedDate?: any) {
   var expected = expectedDate || new Date();
   var fiveBefore = expected.clone();
   fiveBefore.addSeconds(-5);
@@ -580,19 +585,19 @@ function isDateWithinTolerance(date, expectedDate) {
   return false;
 }
 
-function isExpiresWithinTolerance(expiresOn, expired){
+function isExpiresWithinTolerance(expiresOn: any, expired?: any) {
   if (!expiresOn) {
     console.log('no expires_on');
     return false;
   }
 
   // Add the expected expires_in latency.
-  var expectedExpires = expired ? new Date() : Date.yesterday();
+  var expectedExpires = expired ? new Date() : (Date as any).yesterday();
   expectedExpires = expiresOn.addSeconds(28800);
   return isDateWithinTolerance(expiresOn, expectedExpires);
 }
 
-util.isMatchTokenResponse = function(expected, received, print) {
+util.isMatchTokenResponse = function (expected: any, received: any, print: any) {
   var expiresOn = received['expiresOn'];
   var createdOn = received['createdOn'];
 
@@ -629,56 +634,56 @@ util.isMatchTokenResponse = function(expected, received, print) {
   return isEqual;
 };
 
-util.isMathDeviceCodeResponse = function(expected, received, print) {
-   if (print) {
-      console.log('DIFFS');
-      util.findDiffs(expected, received);
-      console.log('EXPECTED');
-      console.log(expected);
-      console.log('RECEIVED');
-      console.log(received);
-   }
+util.isMathDeviceCodeResponse = function (expected: any, received: any, print: any) {
+  if (print) {
+    console.log('DIFFS');
+    util.findDiffs(expected, received);
+    console.log('EXPECTED');
+    console.log(expected);
+    console.log('RECEIVED');
+    console.log(received);
+  }
 
-   var receivedClone = _.clone(received);
-   var expectedClone = _.clone(expected);
+  var receivedClone = _.clone(received);
+  var expectedClone = _.clone(expected);
 
-   var isEqual = _.isEqual(expectedClone, receivedClone);
+  var isEqual = _.isEqual(expectedClone, receivedClone);
 
-   return isEqual;
+  return isEqual;
 };
 
-util.createTokenResponseWithIdToken = function(response) {
+util.createTokenResponseWithIdToken = function (response: any) {
   response = response || _.clone(parameters.successResponseWithRefresh);
   _.extend(response, parsedIdToken);
   return response;
 };
 
-util.isMatchIdTokenResponse = function(expected, received) {
+util.isMatchIdTokenResponse = function (expected: any, received: any) {
   expected = _.clone(expected);
   _.extend(expected, parsedIdToken);
   return util.isMatchTokenResponse(expected, received);
 };
 
-util.createIdTokenServerResponse = function(baseResponse) {
+util.createIdTokenServerResponse = function (baseResponse: any) {
   var sourceResponse = baseResponse || _.clone(parameters.successResponseWithRefresh);
   sourceResponse = _.clone(sourceResponse);
   sourceResponse['id_token'] = encodedIdToken;
   return sourceResponse;
 };
 
-util.createEmptyADALObject = function() {
+util.createEmptyADALObject = function () {
   var context = log.createLogContext();
   var component = 'TEST';
   var logger = new log.Logger(component, context);
-  var callContext = { _logContext : context };
+  var callContext = { _logContext: context };
   var adalObject = {
-    _log : logger,
-    _callContext : callContext
+    _log: logger,
+    _callContext: callContext
   };
   return adalObject;
 };
 
-util.findDiffs = function(leftObj, rightObj) {
+util.findDiffs = function (leftObj: any, rightObj: any) {
   var keys = _.keys(leftObj);
   var rightKeys = _.keys(rightObj);
   if (keys.length !== rightKeys.length) {
@@ -688,12 +693,12 @@ util.findDiffs = function(leftObj, rightObj) {
   for (var i = 0; i < keys.length; i++) {
     var key = keys[i];
     if (leftObj[key] !== rightObj[key]) {
-      console.log(key +': ' + leftObj[key] + ' | ' + rightObj[key]);
+      console.log(key + ': ' + leftObj[key] + ' | ' + rightObj[key]);
     }
   }
 };
 
-util.clearStaticCache = function() {
+util.clearStaticCache = function () {
   var context = new adal.AuthenticationContext(parameters.authorityTenant);
   var cacheArray = context.cache._entries;
 
@@ -703,14 +708,14 @@ util.clearStaticCache = function() {
   } while (entry);
 };
 
-util.trimPathFromUrl = function(stringUrl) {
-  var u = url.parse(stringUrl);
+util.trimPathFromUrl = function (stringUrl: string) {
+  var u: any = url.parse(stringUrl);
   return url.resolve(u, '/');
 };
 
-util.getNockAuthorityHost = function(authority) {
-    var authEndpoint = authority || this.commonParameters.evoEndpoint;
-    return this.trimPathFromUrl(authEndpoint);
+util.getNockAuthorityHost = function (authority: any) {
+  var authEndpoint = authority || this.commonParameters.evoEndpoint;
+  return this.trimPathFromUrl(authEndpoint);
 };
 
 module.exports = util;

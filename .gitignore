@@ -29,4 +29,5 @@ Thumbs.db
 .idea/
 
 # TS #
+test/**/*.js
 *.js.map

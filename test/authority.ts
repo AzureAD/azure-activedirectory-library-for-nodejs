@@ -25,11 +25,11 @@
 /* global setup */
 /* global teardown */
 
-var assert = require('assert');
+import * as assert from "assert";
 
-var util = require('./util/util');
-var cp = util.commonParameters;
-var testRequire = util.testRequire;
+const util = require('./util/util');
+const cp = util.commonParameters;
+const testRequire = util.testRequire;
 
 var adal = testRequire('adal');
 var AuthenticationContext = adal.AuthenticationContext;
@@ -55,10 +55,10 @@ suite('Authority', function() {
   var nonHardCodedAuthorizeEndpoint = nonHardCodedAuthority + '/oauth2/authorize';
 
 
-  function setupExpectedInstanceDiscoveryRequestRetries(requestParametersList, authority) {
-    var nocks = [];
+  function setupExpectedInstanceDiscoveryRequestRetries(requestParametersList: any, authority: any) {
+    var nocks: any[] = [];
 
-    requestParametersList.forEach(function(request) {
+    requestParametersList.forEach(function(request: any) {
       nocks.push(util.setupExpectedInstanceDiscoveryRequest(request.httpCode, request.authority, request.returnDoc, authority));
     });
 
@@ -83,7 +83,7 @@ suite('Authority', function() {
     var tokenRequest = util.setupExpectedClientCredTokenRequestResponse(200, wireResponse, nonHardCodedAuthority);
 
     var context = new AuthenticationContext(nonHardCodedAuthority);
-    context.acquireTokenWithClientCredentials(response.resource, cp.clientId, cp.clientSecret, function (err, tokenResponse) {
+    context.acquireTokenWithClientCredentials(response.resource, cp.clientId, cp.clientSecret, function (err: any, tokenResponse: any) {
       if (!err) {
         assert(util.isMatchTokenResponse(response.cachedResponse, tokenResponse), 'The response does not match what was expected.: ' + JSON.stringify(tokenResponse));
         instanceDiscoveryRequest.done();
@@ -93,7 +93,7 @@ suite('Authority', function() {
     });
   });
 
-  function performStaticInstanceDiscovery(authorityHost, callback) {
+  function performStaticInstanceDiscovery(authorityHost: string, callback: Function) {
     var hardCodedAuthority = 'https://' + authorityHost + '/' + cp.tenant;
 
     var responseOptions = {
@@ -104,7 +104,7 @@ suite('Authority', function() {
     var tokenRequest = util.setupExpectedClientCredTokenRequestResponse(200, wireResponse, hardCodedAuthority);
 
     var context = new AuthenticationContext(hardCodedAuthority);
-    context.acquireTokenWithClientCredentials(response.resource, cp.clientId, cp.clientSecret, function (err, tokenResponse) {
+    context.acquireTokenWithClientCredentials(response.resource, cp.clientId, cp.clientSecret, function (err: any, tokenResponse: any) {
       if (!err) {
         assert(util.isMatchTokenResponse(response.cachedResponse, tokenResponse), 'The response does not match what was expected.: ' + JSON.stringify(tokenResponse));
         tokenRequest.done();
@@ -114,27 +114,27 @@ suite('Authority', function() {
   }
 
   test('success-static-instance-discovery', function(done) {
-    performStaticInstanceDiscovery('login.windows.net', function(err) {
+    performStaticInstanceDiscovery('login.windows.net', function(err: any) {
       if(err) {
         done(err);
         return;
       }
-      performStaticInstanceDiscovery('login.microsoftonline.com', function(err2) {
+      performStaticInstanceDiscovery('login.microsoftonline.com', function(err2: any) {
         if(err2) {
           done(err2);
           return;
         }
-        performStaticInstanceDiscovery('login.chinacloudapi.cn', function(err3) {
+        performStaticInstanceDiscovery('login.chinacloudapi.cn', function(err3: any) {
           if(err3) {
             done(err3);
             return;
           }
-          performStaticInstanceDiscovery('login-us.microsoftonline.com', function(err4) {
+          performStaticInstanceDiscovery('login-us.microsoftonline.com', function(err4: any) {
             if(err4) {
               done(err4);
               return;
             }
-            performStaticInstanceDiscovery('login.microsoftonline.us', function(err5) {  
+            performStaticInstanceDiscovery('login.microsoftonline.us', function(err5: any) {  
               done(err5);
             })
           });
@@ -155,7 +155,7 @@ suite('Authority', function() {
     var instanceDiscoveryRequests = setupExpectedInstanceDiscoveryRequestRetries(expectedInstanceDiscoveryRequests, nonHardCodedAuthorizeEndpoint);
 
     var context = new AuthenticationContext(nonHardCodedAuthority);
-    context.acquireTokenWithClientCredentials(cp.resource, cp.clientId, cp.clientSecret, function (err) {
+    context.acquireTokenWithClientCredentials(cp.resource, cp.clientId, cp.clientSecret, function (err: any) {
       assert(err, 'No error was returned when one was expected.');
       assert(err.message.indexOf('500') !== -1, 'The http error was not returned');
       instanceDiscoveryRequests.forEach(function(request){
@@ -178,7 +178,7 @@ suite('Authority', function() {
     var instanceDiscoveryRequests = setupExpectedInstanceDiscoveryRequestRetries(expectedInstanceDiscoveryRequests, nonHardCodedAuthorizeEndpoint);
 
     var context = new AuthenticationContext(nonHardCodedAuthority);
-    context.acquireTokenWithClientCredentials(cp.resource, cp.clientId, cp.clientSecret, function (err) {
+    context.acquireTokenWithClientCredentials(cp.resource, cp.clientId, cp.clientSecret, function (err: any) {
       assert(err, 'No error was returned when one was expected.');
       assert(err.message.indexOf('invalid_instance') !== -1, 'The server error was not returned');
       assert(err.message.indexOf('instance was invalid') !== -1, 'The server error message was not returned');
@@ -196,7 +196,7 @@ suite('Authority', function() {
     var tokenRequest = util.setupExpectedClientCredTokenRequestResponse(200, wireResponse, response.authority);
 
     var context = new AuthenticationContext(cp.authorityTenant, false);
-    context.acquireTokenWithClientCredentials(response.resource, cp.clientId, cp.clientSecret, function (err, tokenResponse) {
+    context.acquireTokenWithClientCredentials(response.resource, cp.clientId, cp.clientSecret, function (err: any, tokenResponse: any) {
       if (!err) {
         assert(util.isMatchTokenResponse(response.cachedResponse, tokenResponse), 'The response does not match what was expected.');
         tokenRequest.done();
@@ -207,15 +207,11 @@ suite('Authority', function() {
 
   test('bad-url-not-https', function(done) {
     var errorThrown;
-    var context;
     try {
-      context = new AuthenticationContext('http://this.is.not.https.com/mytenant.com');
+      new AuthenticationContext('http://this.is.not.https.com/mytenant.com');
     } catch(err) {
       errorThrown = err;
     }
-
-    // This makes jshint happy that we haven't assigned a variable that is never uesd.
-    context = null;
 
     assert(errorThrown, 'AuthenticationContext succeeded when it should have failed.');
     assert(errorThrown.message.indexOf('https') >= 0, 'Error message does not mention the need for https: ' + errorThrown.message);
@@ -223,16 +219,12 @@ suite('Authority', function() {
   });
 
   test('bad-url-has-query', function(done) {
-    var errorThrown;
-    var context;
+    var errorThrown: any;
     try {
-      context = new AuthenticationContext(cp.authorityTenant + '?this=should&not=be&here=foo');
+      new AuthenticationContext(cp.authorityTenant + '?this=should&not=be&here=foo');
     } catch(err) {
       errorThrown = err;
     }
-
-    // This makes jshint happy that we haven't assigned a variable that is never uesd.
-    context = null;
 
     assert(errorThrown, 'AuthenticationContext succeeded when it should have failed.');
     assert(errorThrown.message.indexOf('query') >= 0, 'Error message does not mention the offending query string: ' + errorThrown.message);
@@ -254,7 +246,7 @@ suite('Authority', function() {
     var authorityUrl = nonHardCodedAuthority + '/extra/path';
     var authority = new Authority(authorityUrl, true);
     var obj = util.createEmptyADALObject();
-    authority.validate(obj._callContext, function(err) {
+    authority.validate(obj._callContext, function(err: any) {
       if (err) {
         assert(!err, 'Received unexpected error: ' + err.stack);
       }
