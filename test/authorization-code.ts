@@ -24,28 +24,26 @@
 /* global suite */
 /* global test */
 
-var assert = require('assert');
-var nock = require('nock');
-var querystring = require('querystring');
+import * as assert from "assert";
+import * as nock from "nock";
+import * as querystring from "querystring";
 
-var util = require('./util/util');
-var testRequire = util.testRequire;
-var cp = util.commonParameters;
-
-var adal = testRequire('adal');
+import * as adal from "../lib/adal";
+const util = require('./util/util');
+const cp: any = util.commonParameters;
 var AuthenticationContext = adal.AuthenticationContext;
 
 /**
  * Tests AuthenticationContext.acquireTokenWithAuthorizationCode
  */
-suite('authorization-code', function() {
+suite('authorization-code', function () {
   var authorizationCode = '1234870909';
   var redirectUri = 'app_bundle:test.bar.baz';
 
-  function setupExpectedAuthCodeTokenRequestResponse(httpCode, returnDoc, authorityEndpoint) {
+  function setupExpectedAuthCodeTokenRequestResponse(httpCode: number, returnDoc: object, authorityEndpoint?: string) {
     var authEndpoint = util.getNockAuthorityHost(authorityEndpoint);
 
-    var queryParameters = {};
+    var queryParameters: any = {};
     queryParameters['grant_type'] = 'authorization_code';
     queryParameters['code'] = authorizationCode;
     queryParameters['client_id'] = cp.clientId;
@@ -56,18 +54,18 @@ suite('authorization-code', function() {
     var query = querystring.stringify(queryParameters);
 
     var tokenRequest = nock(authEndpoint)
-                            .filteringRequestBody(function(body) {
-                              return util.filterQueryString(query, body);
-                            })
-                           .post(cp.tokenUrlPath, query)
-                           .reply(httpCode, returnDoc);
+      .filteringRequestBody(function (body) {
+        return util.filterQueryString(query, body);
+      })
+      .post(cp.tokenUrlPath, query)
+      .reply(httpCode, returnDoc);
 
     util.matchStandardRequestHeaders(tokenRequest);
 
     return tokenRequest;
   }
 
-  test('happy-path', function(done) {
+  test('happy-path', function (done) {
     var response = util.createResponse();
     var tokenRequest = setupExpectedAuthCodeTokenRequestResponse(200, response.wireResponse);
 
@@ -81,7 +79,7 @@ suite('authorization-code', function() {
     });
   });
 
-  test('failed-http-request', function(done) {
+  test('failed-http-request', function (done) {
     this.timeout(6000);
     this.slow(4000);  // This test takes longer than I would like to fail.  It probably needs a better way of producing this error.
 
@@ -94,9 +92,9 @@ suite('authorization-code', function() {
     });
   });
 
-  test('bad-argument', function(done) {
+  test('bad-argument', function (done) {
     var context = new AuthenticationContext(cp.authUrl);
-    context.acquireTokenWithAuthorizationCode(authorizationCode, redirectUri, null, cp.clientId, cp.clientSecret, function (err) {
+    context.acquireTokenWithAuthorizationCode(authorizationCode, redirectUri, null as any, cp.clientId, cp.clientSecret, function (err) {
       assert(err, 'Did not receive expected argument error.');
       done();
     });

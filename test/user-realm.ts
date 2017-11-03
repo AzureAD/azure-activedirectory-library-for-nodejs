@@ -23,15 +23,14 @@
 /* Directive tells jshint that suite and test are globals defined by mocha */
 /* global suite */
 /* global test */
+import * as assert from "assert";
+import * as nock from "nock";
 
-var assert = require('assert');
-var nock = require('nock');
+const util = require('./util/util');
+const cp = util.commonParameters;
+const testRequire = util.testRequire;
 
-var util = require('./util/util');
-var cp = util.commonParameters;
-var testRequire = util.testRequire;
-
-var UserRealm = testRequire('user-realm');
+const UserRealm = testRequire('user-realm');
 
 /**
  * Tests the UserRealm class and user realm discovery.
@@ -40,7 +39,7 @@ suite('UserRealm', function() {
   var authority = 'https://login.windows.net/';
   var user = 'test@federatedtenant-com';
 
-  function setupExpectedResponse(doc) {
+  function setupExpectedResponse(doc: any) {
     var userRealmPath = cp.userRealmPathTemplate.replace('<user>', encodeURIComponent(user));
     var query = 'api-version=1.0';
 
@@ -56,11 +55,11 @@ suite('UserRealm', function() {
     return userRealmRequest;
   }
 
-  function negativeTest(response, done) {
+  function negativeTest(response: any, done: Function) {
     var userRealmRequest = setupExpectedResponse(response);
 
     var userRealm = new UserRealm(cp.callContext, user, authority);
-    userRealm.discover(function(err) {
+    userRealm.discover(function(err: Error) {
       userRealmRequest.done();
       assert(err, 'Did not receive expected error');
       done();
@@ -72,7 +71,7 @@ suite('UserRealm', function() {
     var userRealmRequest = setupExpectedResponse(userRealmResponse);
 
     var userRealm = new UserRealm(cp.callContext, user, authority);
-    userRealm.discover(function(err) {
+    userRealm.discover(function(err: Error) {
       userRealmRequest.done();
       if (!err) {
         assert(userRealm.federationMetadataUrl === 'https://adfs.federatedtenant.com/adfs/services/trust/mex',

@@ -26,28 +26,28 @@
 /* global setup */
 /* global teardown */
 
-var _ = require('underscore');
+import * as fs from "fs";
+import * as assert from "assert";
+import * as nock from "nock";
+import * as querystring from "querystring";
+import * as _ from "underscore";
+const sinon = require('sinon');
 require('date-utils');
-var fs = require('fs');
-var assert = require('assert');
-var nock = require('nock');
-var querystring = require('querystring');
-var sinon = require('sinon');
 
-var util = require('./util/util');
-var testRequire = util.testRequire;
-var cp = util.commonParameters;
+const util = require('./util/util');
+const testRequire = util.testRequire;
+const cp = util.commonParameters;
 
-var adal = testRequire('adal');
-var AuthenticationContext = adal.AuthenticationContext;
+import * as adal from "../lib/adal";
+const AuthenticationContext = adal.AuthenticationContext;
+const MemoryCache = adal.MemoryCache;
 
-var MemoryCache = testRequire('memory-cache');
-var Mex = testRequire('mex');
-var OAuth2Client = testRequire('oauth2client');
-var TokenRequest = testRequire('token-request');
-var UserRealm = testRequire('user-realm');
-var WSTrustRequest = testRequire('wstrust-request');
-var WSTrustResponse = testRequire('wstrust-response');
+const Mex = testRequire('mex');
+const OAuth2Client = testRequire('oauth2client');
+const TokenRequest = testRequire('token-request');
+const UserRealm = testRequire('user-realm');
+const WSTrustRequest = testRequire('wstrust-request');
+const WSTrustResponse = testRequire('wstrust-response');
 
 /**
  * Tests AuthenticationContext.acquireTokenWithUsernamePassword
@@ -65,11 +65,11 @@ suite('username-password', function() {
     util.clearStaticCache();
   });
 
-  function setupExpectedOAuthAssertionRequest(response) {
+  function setupExpectedOAuthAssertionRequest(response: any) {
 
     var assertion = fs.readFileSync(cp.AssertionFile, 'utf8');
 
-    var queryParameters = {};
+    var queryParameters: any = {};
     queryParameters['grant_type'] = 'urn:ietf:params:oauth:grant-type:saml1_1-bearer';
     queryParameters['client_id'] = response.clientId;
     queryParameters['resource'] = response.resource;
@@ -79,9 +79,9 @@ suite('username-password', function() {
     return util.setupExpectedOAuthResponse(queryParameters, cp.tokenUrlPath, 200, response.wireResponse, cp.authority);
   }
 
-  function setupExpectedUserNamePasswordRequestResponse(httpCode, returnDoc, authorityEndpoint, isAdfs) {
+  function setupExpectedUserNamePasswordRequestResponse(httpCode: number, returnDoc: object, authorityEndpoint?: string, isAdfs?: boolean) {
     var authEndpoint = util.getNockAuthorityHost(authorityEndpoint);
-    var queryParameters = {};
+    var queryParameters: any = {};
     queryParameters['grant_type'] = 'password';
     queryParameters['client_id'] = cp.clientId;
     queryParameters['resource'] = cp.resource;
@@ -251,6 +251,7 @@ suite('username-password', function() {
               assert(util.isMatchTokenResponse(refreshResponse.cachedResponse, secondTokenResponse), 'Response did not match expected: ' + JSON.stringify(tokenResponse));
               // Check that the pre-existing cache entry was not changed at all.
               memCache.find(alternateUserResponse.cachedResponse, function(err3, results) {
+                if (err3) done(err3);
                 var alternateUserEntry = results[0];
                 assert(_.isEqual(alternateUserEntry, alternateUserResponse.cachedResponse), 'The pre-existing alternate user cache entry was ' +
                   'inappropriately altered.');
@@ -284,11 +285,11 @@ suite('username-password', function() {
         upRequest.done();
         assert(util.isMatchTokenResponse(response.cachedResponse, tokenResponse), 'Response did not match expected: ' + JSON.stringify(tokenResponse));
 
-        var numCacheEntries = memCache._entries.length;
+        var numCacheEntries = (memCache as any)._entries.length;
         assert(numCacheEntries === 1, 'Incorrect number of entries in the cache: ' + numCacheEntries);
 
         // make the single cache entry expired.
-        memCache._entries[0]['expiresOn'] = Date.yesterday();
+        (memCache as any)._entries[0]['expiresOn'] = (Date as any).yesterday();
 
         // Call again to make sure we get a cached entry and refresh it.
         context.acquireTokenWithUsernamePassword(refreshResponse.resource, cp.username, cp.password, cp.clientId, function(err, secondTokenResponse) {
@@ -317,16 +318,17 @@ suite('username-password', function() {
     var assertion = setupExpectedOAuthAssertionRequest(response);
 
     var logFunctionCalled = false;
-    var foundServerReturnedCorrelationId;
-    var testCorrelationIdLog = function(level, message) {
+    var foundServerReturnedCorrelationId: boolean;
+    var testCorrelationIdLog = function(level: any, message: string) {
       logFunctionCalled = true;
+      level;
       assert(message.indexOf(correlationId) >= 0, 'Did not see expected correlationId in this message: ' + message);
       if (message.indexOf('correlationId: ' + correlationId) >= 0) {
         foundServerReturnedCorrelationId = true;
       }
     };
-    var logOptions = {
-      level : 3,
+    var logOptions: adal.LoggingOptions = {
+      level: 3,
       log : testCorrelationIdLog
     };
 
@@ -377,14 +379,14 @@ suite('username-password', function() {
     });
   });
 
-  function createMexStub(usernamePasswordUrl, err) {
+  function createMexStub(usernamePasswordUrl: any, err?: Error) {
     var mex = new Mex(cp.callContext, '');
     sinon.stub(mex, 'discover').callsArgWith(0, err);
     mex._usernamePasswordPolicy = {url: usernamePasswordUrl};
     return mex;
   }
 
-  function createUserRealmStub(protocol, accountType, mexUrl, wstrustUrl, err) {
+  function createUserRealmStub(protocol: any, accountType: any, mexUrl: any, wstrustUrl: any, err?: Error) {
     var userRealm = new UserRealm(cp.callContext, '', '');
     sinon.stub(userRealm, 'discover').callsArgWith(0, err);
     userRealm._federationProtocol = protocol;
@@ -394,7 +396,7 @@ suite('username-password', function() {
     return userRealm;
   }
 
-  function createWSTrustRequestStub(err, tokenType, noToken) {
+  function createWSTrustRequestStub(err: Error | null, tokenType: string, noToken?: boolean) {
     var wstrustResponse = new WSTrustResponse(cp.callContext,'', '');
     sinon.stub(wstrustResponse, 'parse');
     if (!noToken) {
@@ -408,19 +410,19 @@ suite('username-password', function() {
     return wstrustRequest;
   }
 
-  function createAuthenticationContextStub(authority) {
+  function createAuthenticationContextStub(authority :string) {
     var context = new AuthenticationContext(authority, false);
-    context._authority._tokenEndpoint = authority + cp.tokenPath;
+    (context as any)._authority._tokenEndpoint = authority + cp.tokenPath;
     return context;
   }
 
-  function createOAuth2ClientStub(authority, tokenResponse, err) {
+  function createOAuth2ClientStub(authority: string, tokenResponse: adal.TokenResponse, err?: Error) {
     var client = new OAuth2Client(cp.callContext, authority);
     sinon.stub(client, 'getToken').callsArgWith(1, err, tokenResponse);
     return client;
   }
 
-  function stubOutTokenRequestDependencies(tokenRequest, userRealm, mex, wstrustRequest, oauthClient) {
+  function stubOutTokenRequestDependencies(tokenRequest: any, userRealm: any, mex: any, wstrustRequest?: any, oauthClient?: any) {
     sinon.stub(tokenRequest, '_createUserRealmRequest').returns(userRealm);
     sinon.stub(tokenRequest, '_createMex').returns(mex);
     sinon.stub(tokenRequest, '_createWSTrustRequest').returns(wstrustRequest);
@@ -434,12 +436,12 @@ suite('username-password', function() {
     var wstrustRequest = createWSTrustRequestStub(null, 'urn:oasis:names:tc:SAML:1.0:assertion');
 
     var response = util.createResponse();
-    var oauthClient = createOAuth2ClientStub(cp.authority, response.decodedResponse, null);
+    var oauthClient = createOAuth2ClientStub(cp.authority, response.decodedResponse, undefined);
 
     var tokenRequest = new TokenRequest(cp.callContext, context, response.clientId, response.resource);
     stubOutTokenRequestDependencies(tokenRequest, userRealm, mex, wstrustRequest, oauthClient);
 
-    tokenRequest.getTokenWithUsernamePassword('username', 'password', function(err, tokenResponse) {
+    tokenRequest.getTokenWithUsernamePassword('username', 'password', function(err: Error, tokenResponse: adal.TokenResponse) {
       if (!err) {
         assert(util.isMatchTokenResponse(response.cachedResponse, tokenResponse), 'The response did not match what was expected');
       }
@@ -454,13 +456,13 @@ suite('username-password', function() {
     var wstrustRequest = createWSTrustRequestStub(null, 'urn:oasis:names:tc:SAML:1.0:assertion');
 
     var response = util.createResponse();
-    var oauthClient = createOAuth2ClientStub(cp.authority, response.decodedResponse, null);
+    var oauthClient = createOAuth2ClientStub(cp.authority, response.decodedResponse, undefined);
 
     //util.turnOnLogging();
     var tokenRequest = new TokenRequest(cp.callContext, context, response.clientId, response.resource);
     stubOutTokenRequestDependencies(tokenRequest, userRealm, mex, wstrustRequest, oauthClient);
 
-    tokenRequest.getTokenWithUsernamePassword('username', 'password', function(err, tokenResponse) {
+    tokenRequest.getTokenWithUsernamePassword('username', 'password', function(err: Error, tokenResponse: adal.TokenResponse) {
       if (!err) {
         assert(util.isMatchTokenResponse(response.cachedResponse, tokenResponse), 'The response did not match what was expected');
       }
@@ -475,13 +477,13 @@ suite('username-password', function() {
      var wstrustRequest = createWSTrustRequestStub(null, 'urn:oasis:names:tc:SAML:1.0:assertion');
 
      var response = util.createResponse();
-     var oauthClient = createOAuth2ClientStub(cp.authority, response.decodedResponse, null);
+     var oauthClient = createOAuth2ClientStub(cp.authority, response.decodedResponse, undefined);
 
      //util.turnOnLogging();
      var tokenRequest = new TokenRequest(cp.callContext, context, response.clientId, response.resource);
      stubOutTokenRequestDependencies(tokenRequest, userRealm, mex, wstrustRequest, oauthClient);
 
-     tokenRequest.getTokenWithUsernamePassword('username', 'password', function (err, tokenResponse) {
+     tokenRequest.getTokenWithUsernamePassword('username', 'password', function (err: Error, tokenResponse: adal.TokenResponse) {
        if (!err) {
          assert(util.isMatchTokenResponse(response.cachedResponse, tokenResponse), 'The response did not match what was expected');
        }
@@ -497,7 +499,7 @@ suite('username-password', function() {
     var tokenRequest = new TokenRequest(cp.callContext, context, cp.clientId, cp.resource);
     stubOutTokenRequestDependencies(tokenRequest, userRealm, mex);
 
-    tokenRequest.getTokenWithUsernamePassword('username', 'password', function(err) {
+    tokenRequest.getTokenWithUsernamePassword('username', 'password', function(err :Error) {
       assert(err, 'Did not receive expected err.');
       assert(-1 !== err.message.indexOf('unknown AccountType'), 'Did not receive expected error message.');
       done();
@@ -511,13 +513,13 @@ suite('username-password', function() {
     var wstrustRequest = createWSTrustRequestStub(null, 'urn:oasis:names:tc:SAML:2.0:assertion');
 
     var response = util.createResponse();
-    var oauthClient = createOAuth2ClientStub(cp.authority, response.decodedResponse, null);
+    var oauthClient = createOAuth2ClientStub(cp.authority, response.decodedResponse, undefined);
 
     //util.turnOnLogging();
     var tokenRequest = new TokenRequest(cp.callContext, context, response.clientId, response.resource);
     stubOutTokenRequestDependencies(tokenRequest, userRealm, mex, wstrustRequest, oauthClient);
 
-    tokenRequest.getTokenWithUsernamePassword('username', 'password', function(err, tokenResponse) {
+    tokenRequest.getTokenWithUsernamePassword('username', 'password', function(err: Error, tokenResponse: adal.TokenResponse) {
       if (!err) {
         assert(util.isMatchTokenResponse(response.cachedResponse, tokenResponse), 'The response did not match what was expected');
       }
@@ -532,13 +534,13 @@ suite('username-password', function() {
     var wstrustRequest = createWSTrustRequestStub(null, 'urn:oasis:names:tc:SAML:100.0:assertion');
 
     var response = util.createResponse();
-    var oauthClient = createOAuth2ClientStub(cp.authority, response.decodedResponse, null);
+    var oauthClient = createOAuth2ClientStub(cp.authority, response.decodedResponse, undefined);
 
     //util.turnOnLogging();
     var tokenRequest = new TokenRequest(cp.callContext, context, response.clientId, response.resource);
     stubOutTokenRequestDependencies(tokenRequest, userRealm, mex, wstrustRequest, oauthClient);
 
-    tokenRequest.getTokenWithUsernamePassword('username', 'password', function(err) {
+    tokenRequest.getTokenWithUsernamePassword('username', 'password', function(err: Error) {
       assert(err, 'Did not receive expected error.');
       assert(-1 !== err.message.indexOf('token type'), 'Error message did not contain \'token type\'.');
       done();
@@ -552,13 +554,13 @@ suite('username-password', function() {
     var wstrustRequest = createWSTrustRequestStub(new Error('Network not available'), 'urn:oasis:names:tc:SAML:1.0:assertion');
 
     var response = util.createResponse();
-    var oauthClient = createOAuth2ClientStub(cp.authority, response.decodedResponse, null);
+    var oauthClient = createOAuth2ClientStub(cp.authority, response.decodedResponse, undefined);
 
     //util.turnOnLogging();
     var tokenRequest = new TokenRequest(cp.callContext, context, response.clientId, response.resource);
     stubOutTokenRequestDependencies(tokenRequest, userRealm, mex, wstrustRequest, oauthClient);
 
-    tokenRequest.getTokenWithUsernamePassword('username', 'password', function(err) {
+    tokenRequest.getTokenWithUsernamePassword('username', 'password', function(err: Error) {
       assert(err, 'Did not receive expected error');
       done();
     });
@@ -571,13 +573,13 @@ suite('username-password', function() {
     var wstrustRequest = createWSTrustRequestStub(null, 'urn:oasis:names:tc:SAML:2.0:assertion', true);
 
     var response = util.createResponse();
-    var oauthClient = createOAuth2ClientStub(cp.authority, response.decodedResponse, null);
+    var oauthClient = createOAuth2ClientStub(cp.authority, response.decodedResponse, undefined);
 
     //util.turnOnLogging();
     var tokenRequest = new TokenRequest(cp.callContext, context, response.clientId, response.resource);
     stubOutTokenRequestDependencies(tokenRequest, userRealm, mex, wstrustRequest, oauthClient);
 
-    tokenRequest.getTokenWithUsernamePassword('username', 'password', function(err) {
+    tokenRequest.getTokenWithUsernamePassword('username', 'password', function(err: Error) {
       assert(err, 'Did not receive expected error');
       done();
     });
@@ -590,13 +592,13 @@ suite('username-password', function() {
     var wstrustRequest = createWSTrustRequestStub(null, 'urn:oasis:names:tc:SAML:100.0:assertion', true);
 
     var response = util.createResponse();
-    var oauthClient = createOAuth2ClientStub(cp.authority, response.decodedResponse, null);
+    var oauthClient = createOAuth2ClientStub(cp.authority, response.decodedResponse, undefined);
 
     //util.turnOnLogging();
     var tokenRequest = new TokenRequest(cp.callContext, context, response.clientId, response.resource);
     stubOutTokenRequestDependencies(tokenRequest, userRealm, mex, wstrustRequest, oauthClient);
 
-    tokenRequest.getTokenWithUsernamePassword('username', 'password', function(err) {
+    tokenRequest.getTokenWithUsernamePassword('username', 'password', function(err: Error) {
       assert(err, 'Did not receive expected error');
       done();
     });
@@ -721,7 +723,8 @@ suite('username-password', function() {
     var preRequests = util.setupExpectedUserRealmResponseCommon(false);
     var response = util.createResponse();
 
-    function findIdTokenWarning(level, message) {
+    function findIdTokenWarning(level: any, message: string) {
+      level;
       if (message.indexOf('decoded') >= 0) {
         foundWarning = true;
       }

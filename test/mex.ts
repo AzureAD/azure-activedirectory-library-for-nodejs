@@ -23,15 +23,15 @@
 /* global suite */
 /* global test */
 
-var assert = require('assert');
-var fs = require('fs');
-var nock = require('nock');
+import * as assert from "assert";
+import * as nock from "nock";
+import * as fs from "fs";
 
-var util = require('./util/util');
-var cp = util.commonParameters;
-var testRequire = util.testRequire;
+const util = require('./util/util');
+const cp = util.commonParameters;
+const testRequire = util.testRequire;
 
-var Mex = testRequire('mex');
+const Mex = testRequire('mex');
 
 /**
  * Tests the Mex class which does Mex retrieval and parsing.
@@ -40,20 +40,20 @@ suite('MEX', function() {
   this.slow(200);  // Tell mocha not to consider any of these tests
                    // slow until after 200ms.  XML parsing takes time! :(
 
-  function setupExpectedMexResponse(filename) {
+  function setupExpectedMexResponse(filename: string) {
     var mexDoc = fs.readFileSync(__dirname + '/mex/' + filename, 'utf8');
-    var mexRequest = nock(cp.adfsUrlNoPath).get(cp.adfsMexPath).reply('200', mexDoc);
+    var mexRequest = nock(cp.adfsUrlNoPath).get(cp.adfsMexPath).reply(200, mexDoc);
 
     util.matchStandardRequestHeaders(mexRequest);
 
     return mexRequest;
   }
 
-  function happyPathTest(testFile, expectedUrl, done) {
+  function happyPathTest(testFile: any, expectedUrl :string, done: Function) {
     var mexRequest = setupExpectedMexResponse(testFile);
 
     var mex = new Mex(cp.callContext, cp.adfsMex);
-    mex.discover(function(err) {
+    mex.discover(function(err: Error) {
       if (!err) {
         assert(mex.usernamePasswordPolicy.url === expectedUrl,
           'returned url did not match: ' + expectedUrl + ': ' + mex.usernamePasswordPolicy.url);
@@ -79,11 +79,11 @@ suite('MEX', function() {
     happyPathTest('usystech.mex.xml', 'https://sts.usystech.net/adfs/services/trust/2005/usernamemixed', done);
   });
 
-  function badMexDocTest(testFile, done) {
+  function badMexDocTest(testFile: any, done: Function) {
     var mexRequest = setupExpectedMexResponse(testFile);
 
     var mex = new Mex(cp.callContext, cp.adfsMex);
-    mex.discover(function(err) {
+    mex.discover(function(err: any) {
       mexRequest.done();
       assert(err, 'badMexDocTest expected parsing error');
       done();
@@ -130,7 +130,7 @@ suite('MEX', function() {
     var mexRequest = util.setupExpectedFailedMexCommon();
 
     var mex = new Mex(cp.callContext, cp.adfsMex);
-    mex.discover(function(err) {
+    mex.discover(function(err: any) {
       assert(err, 'Did not receive error as expected');
       mexRequest.done();
       done();

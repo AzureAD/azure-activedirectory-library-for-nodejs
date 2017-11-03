@@ -26,16 +26,16 @@
 /* global setup */
 /* global teardown */
 
-var _ = require('underscore');
-var assert = require('assert');
+import * as _ from "underscore";
+import * as assert from "assert";
 
-var util = require('./util/util');
-var testRequire = util.testRequire;
-var cp = util.commonParameters;
+const util = require('./util/util');
+const cp = util.commonParameters;
+const testRequire = util.testRequire;
 
-var adal = testRequire('adal');
-var AuthenticationContext = adal.AuthenticationContext;
-var SelfSignedJwt = testRequire('self-signed-jwt');
+import * as adal from "../lib/adal";
+const AuthenticationContext = adal.AuthenticationContext;
+const SelfSignedJwt = testRequire('self-signed-jwt');
 
 /**
  * Tests AuthenticationContext.acquireTokenWithClientCredentials
@@ -112,7 +112,7 @@ suite('client-credential', function() {
 
       var nullUser = null;
       var context2 = new AuthenticationContext(cp.authUrl);
-      context2.acquireToken(response.resource, nullUser, cp.clientId, function (err, tokenResponse) {
+      context2.acquireToken(response.resource, nullUser as any, cp.clientId, function (err, tokenResponse) {
         if (!err) {
           assert(util.isMatchTokenResponse(response.cachedResponse, tokenResponse), 'The cached response did not match what was expected');
         }
@@ -125,7 +125,7 @@ suite('client-credential', function() {
     var context = new AuthenticationContext(cp.authorityTenant);
     var argumentError;
     try {
-      context.acquireTokenWithClientCredentials(cp.resource, cp.clientId, cp.clientSecret);
+      context.acquireTokenWithClientCredentials(cp.resource, cp.clientId, cp.clientSecret, null as any);
     } catch(err) {
       argumentError = err;
     }
@@ -138,7 +138,7 @@ suite('client-credential', function() {
 
   test('no-arguments', function(done) {
     var context = new AuthenticationContext(cp.authorityTenant);
-    context.acquireTokenWithClientCredentials(null, null, null, function(err) {
+    context.acquireTokenWithClientCredentials(null as any, null as any, null as any, function(err) {
       assert(err, 'Did not receive expected error.');
       assert(err.message.indexOf('parameter') >= 0, 'Error was not specific to a parameter.');
       done();
@@ -147,7 +147,7 @@ suite('client-credential', function() {
 
   test('no-client-secret', function(done) {
     var context = new AuthenticationContext(cp.authorityTenant);
-    context.acquireTokenWithClientCredentials(cp.resource, cp.clientId, null, function(err) {
+    context.acquireTokenWithClientCredentials(cp.resource, cp.clientId, null as any, function(err) {
       assert(err, 'Did not receive expected error.');
       assert(err.message.indexOf('parameter') >= 0, 'Error was not specific to a parameter.');
       done();
@@ -156,7 +156,7 @@ suite('client-credential', function() {
 
   test('no-client-id', function(done) {
     var context = new AuthenticationContext(cp.authorityTenant);
-    context.acquireTokenWithClientCredentials(cp.resource, null, cp.clientSecret, function(err) {
+    context.acquireTokenWithClientCredentials(cp.resource, null as any, cp.clientSecret, function(err) {
       assert(err, 'Did not receive expected error.');
       assert(err.message.indexOf('parameter') >= 0, 'Error was not specific to a parameter.');
       done();
@@ -165,7 +165,7 @@ suite('client-credential', function() {
 
   test('no-resource', function(done) {
     var context = new AuthenticationContext(cp.authorityTenant);
-    context.acquireTokenWithClientCredentials(null, cp.clientId, cp.clientSecret, function(err) {
+    context.acquireTokenWithClientCredentials(null as any, cp.clientId, cp.clientSecret, function(err) {
       assert(err, 'Did not receive expected error.');
       assert(err.message.indexOf('parameter') >= 0, 'Error was not specific to a parameter.');
       done();
@@ -237,7 +237,7 @@ suite('client-credential', function() {
   });
 
   function updateSelfSignedJwtStubs() {
-    var savedProto = {};
+    var savedProto: any = {};
     savedProto._getDateNow = SelfSignedJwt.prototype._getDateNow;
     savedProto._getNewJwtId = SelfSignedJwt.prototype._getNewJwtId;
 
@@ -247,7 +247,7 @@ suite('client-credential', function() {
     return savedProto;
   }
 
-  function resetSelfSignedJwtStubs(saveProto) {
+  function resetSelfSignedJwtStubs(saveProto: any) {
     _.extend(SelfSignedJwt.prototype, saveProto);
   }
 

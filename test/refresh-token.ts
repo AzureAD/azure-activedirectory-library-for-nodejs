@@ -27,16 +27,13 @@
 // Run
 //   npm test
 // from root of the repo
+import * as assert from "assert";
 
-var assert = require('assert');
-var util = require('./util/util');
+const util = require('./util/util');
+const cp = util.commonParameters;
 
-var cp = util.commonParameters;
-var testRequire = util.testRequire;
-
-var adal = testRequire('adal');
-var AuthenticationContext = adal.AuthenticationContext;
-
+import * as adal from "../lib/adal";
+const AuthenticationContext = adal.AuthenticationContext;
 
 suite('refresh-token', function() {
   test('happy-path-no-resource', function(done) {
@@ -46,7 +43,7 @@ suite('refresh-token', function() {
     var tokenRequest = util.setupExpectedRefreshTokenRequestResponse(200, wireResponse, response.authority);
 
     var context = new AuthenticationContext(cp.authorityTenant);
-    context.acquireTokenWithRefreshToken(cp.refreshToken, cp.clientId, null, null, function(err, tokenResponse) {
+    context.acquireTokenWithRefreshToken(cp.refreshToken, cp.clientId, null as any, null as any, function(err, tokenResponse) {
       if (!err) {
         tokenRequest.done();
         assert(util.isMatchTokenResponse(response.decodedResponse, tokenResponse), 'The response did not match what was expected: ' + JSON.stringify(tokenResponse));
@@ -62,7 +59,7 @@ suite('refresh-token', function() {
     var tokenRequest = util.setupExpectedRefreshTokenRequestResponse(200, wireResponse, response.authority, response.resource);
 
     var context = new AuthenticationContext(cp.authorityTenant);
-    context.acquireTokenWithRefreshToken(cp.refreshToken, cp.clientId, null, cp.resource, function(err, tokenResponse) {
+    context.acquireTokenWithRefreshToken(cp.refreshToken, cp.clientId, null as any, cp.resource, function(err, tokenResponse) {
       if (!err) {
         tokenRequest.done();
         assert(util.isMatchTokenResponse(response.decodedResponse, tokenResponse), 'The response did not match what was expected: ' + JSON.stringify(tokenResponse))  ;
@@ -78,7 +75,7 @@ suite('refresh-token', function() {
     var tokenRequest = util.setupExpectedRefreshTokenRequestResponse(200, wireResponse, response.authority, null, cp.clientSecret);
 
     var context = new AuthenticationContext(cp.authorityTenant);
-    context.acquireTokenWithRefreshToken(cp.refreshToken, cp.clientId, cp.clientSecret, null, function(err, tokenResponse) {
+    context.acquireTokenWithRefreshToken(cp.refreshToken, cp.clientId, cp.clientSecret, null as any, function(err, tokenResponse) {
       if (!err) {
         tokenRequest.done();
         assert(util.isMatchTokenResponse(response.decodedResponse, tokenResponse), 'The response did not match what was expected: ' + JSON.stringify(tokenResponse));
@@ -110,7 +107,7 @@ suite('refresh-token', function() {
     var tokenRequest = util.setupExpectedRefreshTokenRequestResponse(200, wireResponse, response.authority);
 
     var context = new AuthenticationContext(cp.authorityTenant);
-    context.acquireTokenWithRefreshToken(cp.refreshToken, cp.clientId, null, function(err, tokenResponse) {
+    context.acquireTokenWithRefreshToken(cp.refreshToken, cp.clientId, null as any, function(err, tokenResponse) {
       if (!err) {
         tokenRequest.done();
         assert(util.isMatchTokenResponse(response.decodedResponse, tokenResponse), 'The response did not match what was expected: ' + JSON.stringify(tokenResponse));
