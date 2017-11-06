@@ -1,3 +1,8 @@
+Version 0.1.25
+--------------
+Release Date: 06 November 2017
+* Fixed typing: acquireUserCode returns UserCodeInfo in the callback
+
 Version 0.1.24
 --------------
 Release Date: 06 November 2017
