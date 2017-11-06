@@ -152,6 +152,14 @@ export interface ErrorResponse {
 export type AcquireTokenCallback = (error: Error, response: TokenResponse | ErrorResponse) => void;
 
 /**
+ * This is the callback that is passed to all acquireUserCode method below.
+ * @callback AcquireTokenCallback
+ * @param {Error}  [error]           If the request fails this parameter will contain an Error object.
+ * @param {UserCodeInfo} [response]   On a succesful request returns a {@link UserCodeInfo}.
+ */
+export type AcquireUserCodeCallback = (error: Error, response: UserCodeInfo) => void;
+
+/**
  * This is an interface that can be implemented to provide custom token cache persistence.
  * @public
  * @interface TokenCache
@@ -325,9 +333,9 @@ export class AuthenticationContext {
    * @param  {string}   resource                            A URI that identifies the resource for which the device_code and user_code is valid for.
    * @param  {string}   clientId                            The OAuth client id of the calling application.
    * @param  {string}   language                            The language code specifying how the message should be localized to. 
-   * @param  {AcquireTokenCallback}   callback              The callback function.
+   * @param  {AcquireUserCodeCallback}   callback              The callback function.
    */
-  public acquireUserCode(resource: string, clientId: string, language: string, callback: AcquireTokenCallback): void;
+  public acquireUserCode(resource: string, clientId: string, language: string, callback: AcquireUserCodeCallback): void;
 
   /**
    * Gets a new access token using via a certificate credential.
