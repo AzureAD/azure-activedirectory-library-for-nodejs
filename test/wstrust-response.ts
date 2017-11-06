@@ -24,15 +24,15 @@
 /* global suite */
 /* global test */
 
-var assert = require('assert');
-var fs = require('fs');
+import * as assert from "assert";
+import * as fs from "fs";
 
-var util = require('./util/util');
-var cp = util.commonParameters;
-var testRequire = util.testRequire;
+const util = require('./util/util');
+const cp = util.commonParameters;
+const testRequire = util.testRequire;
 
-var WSTrustResponse = testRequire('wstrust-response');
-var WSTrustVersion = testRequire('constants').WSTrustVersion;
+const WSTrustResponse = testRequire('wstrust-response');
+const WSTrustVersion = testRequire('constants').WSTrustVersion;
 
 /**
  * Tests the WSTrustResponse class which parses a ws-trust RSTR.

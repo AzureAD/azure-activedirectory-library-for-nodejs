@@ -24,19 +24,17 @@
 /* global suite */
 /* global test */
 
-var assert = require('assert');
-var nock = require('nock');
-var url = require('url');
+import * as assert from "assert";
+import * as nock from "nock";
+import * as url from "url";
 
-var util = require('./util/util');
-var cp = util.commonParameters;
-var testRequire = util.testRequire;
+import * as adal from "../lib/adal";
+const util = require('./util/util');
+const cp: any = util.commonParameters;
 
-var adal = testRequire('adal');
-
-suite('authentication-parameters', function() {
-  function runTestCases(testData, testFunc) {
-    for(var i = 0; i < testData.length; i++) {
+suite('authentication-parameters', function () {
+  function runTestCases(testData: any[], testFunc: Function) {
+    for (var i = 0; i < testData.length; i++) {
       var parameters;
       var error = null;
       var testCase = testData[i];
@@ -45,7 +43,7 @@ suite('authentication-parameters', function() {
 
       try {
         parameters = testFunc(testInput);
-      } catch(err) {
+      } catch (err) {
         error = err;
       }
 
@@ -61,34 +59,34 @@ suite('authentication-parameters', function() {
     }
   }
 
-  test('create-from-header', function(done) {
+  test('create-from-header', function (done) {
     var testData = [
       [
         'Bearer authorization_uri="test,lkfj,;l,", fruitcake="f",resource="clark, &^()- q32,shark" , f="test"',
         {
-          'authorizationUri' : 'test,lkfj,;l,',
-          'resource' : 'clark, &^()- q32,shark',
+          'authorizationUri': 'test,lkfj,;l,',
+          'resource': 'clark, &^()- q32,shark',
         }
       ],
       [
         'Bearer  resource="clark, &^()- q32,shark", authorization_uri="test,lkfj,;l,"',
         {
-          'authorizationUri' : 'test,lkfj,;l,',
-          'resource' : 'clark, &^()- q32,shark',
+          'authorizationUri': 'test,lkfj,;l,',
+          'resource': 'clark, &^()- q32,shark',
         }
       ],
       [
         'Bearer authorization_uri="' + cp.authorityTenant + '", resource="' + cp.resource + '"',
         {
-          'authorizationUri' : cp.authorityTenant,
-          'resource' : cp.resource,
+          'authorizationUri': cp.authorityTenant,
+          'resource': cp.resource,
         }
       ],
       [
         'Bearer authorization_uri="' + cp.authorizeUrl + '", resource="' + cp.resource + '"',
         {
-          'authorizationUri' : cp.authorizeUrl,
-          'resource' : cp.resource,
+          'authorizationUri': cp.authorizeUrl,
+          'resource': cp.resource,
         }
       ],
       // Add second = sign on first pair.
@@ -155,7 +153,7 @@ suite('authentication-parameters', function() {
       [
         'Bearer authorization_uri="test,lkfj,;l,"',
         {
-          'authorizationUri' : 'test,lkfj,;l,'
+          'authorizationUri': 'test,lkfj,;l,'
         }
       ],
       // Missing authoritzation uri.
@@ -178,55 +176,55 @@ suite('authentication-parameters', function() {
     done();
   });
 
-  test('create-from-response', function(done) {
+  test('create-from-response', function (done) {
     var testData = [
       [
         {
-          statusCode : 401,
-          headers : { 'www-authenticate' : 'Bearer authorization_uri="test,lkfj,;l,", fruitcake="f",resource="clark, &^()- q32,shark" , f="test"' }
+          statusCode: 401,
+          headers: { 'www-authenticate': 'Bearer authorization_uri="test,lkfj,;l,", fruitcake="f",resource="clark, &^()- q32,shark" , f="test"' }
         },
         {
-          'authorizationUri' : 'test,lkfj,;l,',
-          'resource' : 'clark, &^()- q32,shark',
+          'authorizationUri': 'test,lkfj,;l,',
+          'resource': 'clark, &^()- q32,shark',
         }
       ],
       [
         {
-          statusCode : 200,
-          headers : { 'www-authenticate' : 'Bearer authorization_uri="test,lkfj,;l,", fruitcake="f",resource="clark, &^()- q32,shark" , f="test"' }
+          statusCode: 200,
+          headers: { 'www-authenticate': 'Bearer authorization_uri="test,lkfj,;l,", fruitcake="f",resource="clark, &^()- q32,shark" , f="test"' }
         },
         null
       ],
       [
         {
-          statusCode : 401
+          statusCode: 401
         },
         null
       ],
       [
         {
-          statusCode : 401,
-          headers : { 'test' : 'this is not the www-authenticate header' }
+          statusCode: 401,
+          headers: { 'test': 'this is not the www-authenticate header' }
         },
         null
       ],
       [
         {
-          statusCode : 401,
-          headers : { 'www-authenticate' : 'Berer authorization_uri=test,lkfj,;l,", resource="clark, &^()- q32,shark",fruitcake="f" , f="test"' }
+          statusCode: 401,
+          headers: { 'www-authenticate': 'Berer authorization_uri=test,lkfj,;l,", resource="clark, &^()- q32,shark",fruitcake="f" , f="test"' }
         },
         null
       ],
       [
         {
-          statusCode : 401,
-          headers : { 'www-authenticate' : null }
+          statusCode: 401,
+          headers: { 'www-authenticate': null }
         },
         null
       ],
       [
         {
-          headers : { 'www-authenticate' : null }
+          headers: { 'www-authenticate': null }
         },
         null
       ],
@@ -245,23 +243,23 @@ suite('authentication-parameters', function() {
   var testQuery = 'a=query&string=really';
   var testUrl = testHost + testPath + '?' + testQuery;
 
-  test('create-from-url-happy-path-string-url', function(done) {
+  test('create-from-url-happy-path-string-url', function (done) {
     var getResource = nock(testHost)
-                       .filteringPath(function(path) {
-                          return util.removeQueryStringIfMatching(path, testQuery);
-                        })
-                       .get(testPath)
-                       .reply(401, 'test',
-                         { 'www-authenticate' : 'Bearer authorization_uri="test,lkfj,;l,", fruitcake="f",resource="clark, &^()- q32,shark" , f="test"' }
-                       );
+      .filteringPath(function (path) {
+        return util.removeQueryStringIfMatching(path, testQuery);
+      })
+      .get(testPath)
+      .reply(401, 'test',
+      { 'www-authenticate': 'Bearer authorization_uri="test,lkfj,;l,", fruitcake="f",resource="clark, &^()- q32,shark" , f="test"' }
+      );
 
     util.matchStandardRequestHeaders(getResource);
 
-    adal.createAuthenticationParametersFromUrl(testUrl, function(err, parameters) {
+    adal.createAuthenticationParametersFromUrl(testUrl, function (err, parameters) {
       if (!err) {
         var testParameters = {
-          'authorizationUri' : 'test,lkfj,;l,',
-          'resource' : 'clark, &^()- q32,shark',
+          'authorizationUri': 'test,lkfj,;l,',
+          'resource': 'clark, &^()- q32,shark',
         };
         assert(parameters.authorizationUri === testParameters.authorizationUri, 'Parsed authorizationUri did not match expected value.: ' + parameters.authorizationUri);
         assert(parameters.resource === testParameters.resource, 'Parsed resource  did not match expected value.: ' + parameters.resource);
@@ -271,25 +269,25 @@ suite('authentication-parameters', function() {
     });
   });
 
-  test('create-from-url-happy-path-url-object', function(done) {
+  test('create-from-url-happy-path-url-object', function (done) {
     var getResource = nock(testHost)
-                       .filteringPath(function(path) {
-                          return util.removeQueryStringIfMatching(path, testQuery);
-                        })
-                       .get(testPath)
-                       .reply(401, 'test',
-                         { 'www-authenticate' : 'Bearer authorization_uri="test,lkfj,;l,", fruitcake="f",resource="clark, &^()- q32,shark" , f="test"' }
-                       );
+      .filteringPath(function (path) {
+        return util.removeQueryStringIfMatching(path, testQuery);
+      })
+      .get(testPath)
+      .reply(401, 'test',
+      { 'www-authenticate': 'Bearer authorization_uri="test,lkfj,;l,", fruitcake="f",resource="clark, &^()- q32,shark" , f="test"' }
+      );
 
     util.matchStandardRequestHeaders(getResource);
 
     var urlObj = url.parse(testUrl);
-    adal.createAuthenticationParametersFromUrl(urlObj, function(err, parameters) {
+    adal.createAuthenticationParametersFromUrl(urlObj as any, function (err, parameters) {
       getResource.done();
       if (!err) {
         var testParameters = {
-          'authorizationUri' : 'test,lkfj,;l,',
-          'resource' : 'clark, &^()- q32,shark',
+          'authorizationUri': 'test,lkfj,;l,',
+          'resource': 'clark, &^()- q32,shark',
         };
         assert(parameters.authorizationUri === testParameters.authorizationUri, 'Parsed authorizationUri did not match expected value.: ' + parameters.authorizationUri);
         assert(parameters.resource === testParameters.resource, 'Parsed resource  did not match expected value.: ' + parameters.resource);
@@ -298,31 +296,31 @@ suite('authentication-parameters', function() {
     });
   });
 
-  test('create-from-url-bad-object', function(done) {
-    adal.createAuthenticationParametersFromUrl({}, function(err) {
+  test('create-from-url-bad-object', function (done) {
+    adal.createAuthenticationParametersFromUrl({} as any, function (err) {
       assert(err, 'Did not receive expected error');
       done();
     });
   });
 
-  test('create-from-url-not-passed', function(done) {
-    adal.createAuthenticationParametersFromUrl(null, function(err) {
+  test('create-from-url-not-passed', function (done) {
+    adal.createAuthenticationParametersFromUrl(null as any, function (err) {
       assert(err, 'Did not receive expected error');
       done();
     });
   });
 
-  test('create-from-url-no-header', function(done) {
+  test('create-from-url-no-header', function (done) {
     var getResource = nock(testHost)
-                       .filteringPath(function(path) {
-                          return util.removeQueryStringIfMatching(path, testQuery);
-                        })
-                       .get(testPath)
-                       .reply(401, 'test');
+      .filteringPath(function (path) {
+        return util.removeQueryStringIfMatching(path, testQuery);
+      })
+      .get(testPath)
+      .reply(401, 'test');
 
     util.matchStandardRequestHeaders(getResource);
 
-    adal.createAuthenticationParametersFromUrl(testUrl, function(err) {
+    adal.createAuthenticationParametersFromUrl(testUrl, function (err) {
       getResource.done();
       assert(err, 'Did not receive expected error');
       assert(err.message.indexOf('header') >= 0, 'Error did not include message about missing header');
@@ -333,9 +331,9 @@ suite('authentication-parameters', function() {
   // This tests enables actual network connections but then attempts a connection to
   // a completely invalid address.  This causes a the node request to fail with
   // an error rather than returning an HTTP error of some sort.
-  test('create-from-url-network-error', function(done) {
+  test('create-from-url-network-error', function (done) {
     nock.enableNetConnect();
-    adal.createAuthenticationParametersFromUrl('https://0.0.0.0/test', function(err) {
+    adal.createAuthenticationParametersFromUrl('https://0.0.0.0/test', function (err) {
       assert(err, 'Did not receive expected error');
       nock.disableNetConnect();
       done();

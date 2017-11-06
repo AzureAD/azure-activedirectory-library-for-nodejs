@@ -24,18 +24,17 @@
 /* global suite */
 /* global test */
 
-var _ = require('underscore');
-var assert = require('assert');
+import * as _ from "underscore";
+import * as assert from "assert";
 
-var util = require('./util/util');
-var testRequire = util.testRequire;
+const util = require('./util/util');
 
-var adal = testRequire('adal');
+import * as adal from "../lib/adal";
 
 suite('log', function() {
   test('settings-none', function(done) {
     var currentOptions = adal.Logging.getLoggingOptions();
-    adal.Logging.setLoggingOptions();
+    adal.Logging.setLoggingOptions(currentOptions);
     var options = adal.Logging.getLoggingOptions();
 
     var noOptionsSet = (!options ||
@@ -62,7 +61,7 @@ suite('log', function() {
     // future tests are logged as they should be.
     adal.Logging.setLoggingOptions(currentOptions);
 
-    assert(level === 3, 'Logging level was not the expected value of 3: ', options.level);
+    assert(level === 3, `Logging level was not the expected value of 3: ${options.level}`);
     assert(_.isFunction(logFunc), 'Unexpected logging function: ' + logFunc);
     done();
   });
