@@ -1,0 +1,15 @@
+node_modules/
+test/
+tests/
+.git**
+.vscode/
+tsconfig.json
+RELEASES.md
+sample/
+tools/
+tasks/
+scripts/
+.nuget/
+packages/
+packages.config
+.ntvs_analysis.*
