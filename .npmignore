@@ -3,7 +3,6 @@ test/
 tests/
 .git**
 .vscode/
-tsconfig.json
 RELEASES.md
 sample/
 tools/
