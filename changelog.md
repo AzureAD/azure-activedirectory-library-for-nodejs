@@ -1,3 +1,8 @@
+Version 0.1.26
+--------------
+Release Date: 05 December 2017
+* Added .npmignore to avoid publishing unnecessary files
+
 Version 0.1.25
 --------------
 Release Date: 06 November 2017
