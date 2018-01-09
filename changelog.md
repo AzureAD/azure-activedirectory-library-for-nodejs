@@ -1,3 +1,8 @@
+Version 0.1.27
+--------------
+Release Date: 08 January 2018
+* Fix Issue #185 Dependency "xpath.js" version does not have an OSI-approved license
+
 Version 0.1.26
 --------------
 Release Date: 05 December 2017
