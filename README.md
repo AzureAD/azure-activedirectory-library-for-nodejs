@@ -103,7 +103,7 @@ app.get('/getAToken', function(req, res) {
 See the [client credentials sample](https://github.com/MSOpenTech/azure-activedirectory-library-for-nodejs/blob/master/sample/client-credentials-sample.js).
 
 ```javascript
-var adal = require('adal-node').AuthenticationContext;
+var AuthenticationContext = require('adal-node').AuthenticationContext;
 
 var authorityHostUrl = 'https://login.windows.net';
 var tenant = 'myTenant.onmicrosoft.com'; // AAD Tenant name.
