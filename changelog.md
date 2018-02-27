@@ -1,3 +1,8 @@
+Version 0.1.28
+--------------
+Release Date: 26 Feburary 2018
+* Added GDPR support per Microsoft policy.
+
 Version 0.1.27
 --------------
 Release Date: 08 January 2018

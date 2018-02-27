@@ -2,7 +2,7 @@
 The ADAL for node.js library makes it easy for node.js applications to authenticate to AAD in order to access AAD protected web resources.  It supports 3 authentication modes shown in the quickstart code below.
 
 ## Versions
-Current version - 0.1.27  
+Current version - 0.1.28  
 Minimum recommended version - 0.1.22  
 You can find the changes for each version in the [change log](https://github.com/AzureAD/azure-activedirectory-library-for-nodejs/blob/master/changelog.txt).
 
@@ -28,6 +28,20 @@ All code is licensed under the Apache 2.0 license and we triage actively on GitH
 ### Installation
 
 ``` $ npm install adal-node ```
+
+### Configure the logging
+
+```javascript
+var logging = require('adal-node').Logging;
+
+logging.setLoggingOptions({
+  log: function(level, message, error) {
+    // provide your own implementation of the log function
+  },
+  level: logging.LOGGING_LEVEL.VERBOSE, // provide the logging level
+  loggingWithPII: false  // Determine if you want to log personal identitification information. The default value is false.
+});
+```
 
 ### Authorization Code
 
@@ -103,7 +117,7 @@ app.get('/getAToken', function(req, res) {
 See the [client credentials sample](https://github.com/MSOpenTech/azure-activedirectory-library-for-nodejs/blob/master/sample/client-credentials-sample.js).
 
 ```javascript
-var adal = require('adal-node').AuthenticationContext;
+var AuthenticationContext = require('adal-node').AuthenticationContext;
 
 var authorityHostUrl = 'https://login.windows.net';
 var tenant = 'myTenant.onmicrosoft.com'; // AAD Tenant name.
