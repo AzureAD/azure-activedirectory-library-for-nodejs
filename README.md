@@ -31,15 +31,29 @@ All code is licensed under the Apache 2.0 license and we triage actively on GitH
 
 ### Configure the logging
 
+#### Personal Identifiable Information (PII) & Organizational Identifiable Information (OII)
+
+By default, ADAL logging does not capture or log any PII or OII. The library allows app developers to turn this on by configuring the `loggingWithPII` flag in the logging options. By turning on PII or OII, the app takes responsibility for safely handling highly-sensitive data and complying with any regulatory requirements.
+
 ```javascript
 var logging = require('adal-node').Logging;
 
+//PII or OII logging disabled. Default Logger does not capture any PII or OII.
 logging.setLoggingOptions({
   log: function(level, message, error) {
     // provide your own implementation of the log function
   },
   level: logging.LOGGING_LEVEL.VERBOSE, // provide the logging level
   loggingWithPII: false  // Determine if you want to log personal identitification information. The default value is false.
+});
+
+//PII or OII logging enabled.
+logging.setLoggingOptions({
+  log: function(level, message, error) {
+    // provide your own implementation of the log function
+  },
+  level: logging.LOGGING_LEVEL.VERBOSE,
+  loggingWithPII: true
 });
 ```
 
