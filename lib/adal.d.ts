@@ -151,7 +151,7 @@ export interface ErrorResponse {
  * @param {Error}  [error]           If the request fails this parameter will contain an Error object.
  * @param {TokenResponse|ErrorResponse} [response]   On a succesful request returns a {@link TokenResposne}.
  */
-export type AcquireTokenCallback = (error: Error, response: TokenResponse | ErrorResponse) => void;
+export type AcquireTokenCallback = (error: Error, response: TokenResponse) => void;
 
 /**
  * This is the callback that is passed to all acquireUserCode method below.
