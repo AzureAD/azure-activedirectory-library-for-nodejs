@@ -2,7 +2,7 @@
 The ADAL for node.js library makes it easy for node.js applications to authenticate to AAD in order to access AAD protected web resources.  It supports 3 authentication modes shown in the quickstart code below.
 
 ## Versions
-Current version - 0.1.26  
+Current version - 0.1.28  
 Minimum recommended version - 0.1.22  
 You can find the changes for each version in the [change log](https://github.com/AzureAD/azure-activedirectory-library-for-nodejs/blob/master/changelog.txt).
 
@@ -28,6 +28,34 @@ All code is licensed under the Apache 2.0 license and we triage actively on GitH
 ### Installation
 
 ``` $ npm install adal-node ```
+
+### Configure the logging
+
+#### Personal Identifiable Information (PII) & Organizational Identifiable Information (OII)
+
+By default, ADAL logging does not capture or log any PII or OII. The library allows app developers to turn this on by configuring the `loggingWithPII` flag in the logging options. By turning on PII or OII, the app takes responsibility for safely handling highly-sensitive data and complying with any regulatory requirements.
+
+```javascript
+var logging = require('adal-node').Logging;
+
+//PII or OII logging disabled. Default Logger does not capture any PII or OII.
+logging.setLoggingOptions({
+  log: function(level, message, error) {
+    // provide your own implementation of the log function
+  },
+  level: logging.LOGGING_LEVEL.VERBOSE, // provide the logging level
+  loggingWithPII: false  // Determine if you want to log personal identitification information. The default value is false.
+});
+
+//PII or OII logging enabled.
+logging.setLoggingOptions({
+  log: function(level, message, error) {
+    // provide your own implementation of the log function
+  },
+  level: logging.LOGGING_LEVEL.VERBOSE,
+  loggingWithPII: true
+});
+```
 
 ### Authorization Code
 
@@ -103,7 +131,7 @@ app.get('/getAToken', function(req, res) {
 See the [client credentials sample](https://github.com/MSOpenTech/azure-activedirectory-library-for-nodejs/blob/master/sample/client-credentials-sample.js).
 
 ```javascript
-var adal = require('adal-node').AuthenticationContext;
+var AuthenticationContext = require('adal-node').AuthenticationContext;
 
 var authorityHostUrl = 'https://login.windows.net';
 var tenant = 'myTenant.onmicrosoft.com'; // AAD Tenant name.

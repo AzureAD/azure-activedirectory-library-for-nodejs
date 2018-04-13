@@ -329,7 +329,8 @@ suite('username-password', function() {
     };
     var logOptions: adal.LoggingOptions = {
       level: 3,
-      log : testCorrelationIdLog
+      log : testCorrelationIdLog,
+      loggingWithPII: true
     };
 
     var oldOptions = adal.Logging.getLoggingOptions();

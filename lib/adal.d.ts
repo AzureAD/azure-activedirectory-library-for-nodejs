@@ -25,10 +25,12 @@ type LoggingCallback = (level: LoggingLevel, message: string, error?: Error) => 
  * @memberOf Logging
  * @property {LoggingCallback} [log] The function to call when ADAL generates a log entry.
  * @property {LoggingLevel} [level] The maximum level of log entries to generate.
+ * @property {boolean} [loggingWithPII] This value indicts if personal identity related information such as token and claims should be logged. The default value is false.
  */
 interface LoggingOptions {
   log?: LoggingCallback;
   level?: LoggingLevel;
+  loggingWithPII?: boolean;
 }
 
 export class Logging {
