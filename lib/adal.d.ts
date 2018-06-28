@@ -293,9 +293,13 @@ export class AuthenticationContext {
    * @param {string}   username                            The username of the user on behalf this application is authenticating.
    * @param {string}   password                            The password of the user named in the username parameter.
    * @param {string}   clientId                            The OAuth client id of the calling application.
+   * @param {string}   [clientSecret]                      The OAuth client secret of the calling application. (Note: this parameter is a late addition.
+   *                                                        This parameter may be ommitted entirely so that applications built before this change will continue
+   *                                                        to work unchanged.)
    * @param {AcquireTokenCallback}   callback              The callback function.
    */
   public acquireTokenWithUsernamePassword(resource: string, username: string, password: string, clientId: string, callback: AcquireTokenCallback): void;
+  public acquireTokenWithUsernamePassword(resource: string, username: string, password: string, clientId: string, clientSecret: string, callback: AcquireTokenCallback): void;
 
   /**
    * Gets a token for a given resource.
