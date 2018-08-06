@@ -149,7 +149,7 @@ export interface ErrorResponse {
  * This is the callback that is passed to all acquireToken variants below.
  * @callback AcquireTokenCallback
  * @param {Error}  [error]           If the request fails this parameter will contain an Error object.
- * @param {TokenResponse|ErrorResponse} [response]   On a succesful request returns a {@link TokenResposne}.
+ * @param {TokenResponse|ErrorResponse} [response]   On a succesful request returns a {@link TokenResponse}.
  */
 export type AcquireTokenCallback = (error: Error, response: TokenResponse | ErrorResponse) => void;
 
