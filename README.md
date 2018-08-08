@@ -44,7 +44,7 @@ logging.setLoggingOptions({
     // provide your own implementation of the log function
   },
   level: logging.LOGGING_LEVEL.VERBOSE, // provide the logging level
-  loggingWithPII: false  // Determine if you want to log personal identitification information. The default value is false.
+  loggingWithPII: false  // Determine if you want to log personal identification information. The default value is false.
 });
 
 //PII or OII logging enabled.
