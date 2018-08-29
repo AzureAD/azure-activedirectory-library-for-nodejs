@@ -1,6 +1,5 @@
 import * as http from "http";
 
-
 /**
  * Describes the available logging levels.
  * ERROR: 0,
@@ -9,7 +8,12 @@ import * as http from "http";
  * VERBOSE: 3
  * @type {number}
  */
-export type LoggingLevel = 0 | 1 | 2 | 3;
+export enum LoggingLevel {
+  ERROR = 0,
+  WARN = 1,
+  INFO = 2,
+  VERBOSE = 3
+}
 
 /**
  * @callback LoggingCallback
