@@ -23,7 +23,7 @@
   "main": "./lib/adal.js",
   "types": "./lib/adal.d.ts",
   "engines": {
-    "node": ">= 0.6.15"
+    "node": ">= 6"
   },
   "dependencies": {
     "@types/node": "^8.0.47",
