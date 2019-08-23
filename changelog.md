@@ -1,3 +1,8 @@
+Version 0.2.0
+------------------
+Release Date: 23 August 2019
+* Add support for user provided api version
+
 Version 0.1.28
 --------------
 Release Date: 26 Feburary 2018
