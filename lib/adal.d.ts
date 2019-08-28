@@ -276,7 +276,7 @@ export class AuthenticationContext {
    *                                       construction of other AuthenticationContexts.
    *
    */
-  constructor(authority: string, validateAuthority?: boolean, cache?: TokenCache);
+  constructor(authority: string, validateAuthority?: boolean, cache?: TokenCache, aadApiVersion?: string);
 
   /**
    * Gets a token for a given resource.
