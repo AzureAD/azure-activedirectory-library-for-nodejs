@@ -26,7 +26,6 @@
     "node": ">= 0.6.15"
   },
   "dependencies": {
-    "@types/node": "^8.0.47",
     "async": "^2.6.3",
     "date-utils": "*",
     "jws": "3.x.x",
@@ -37,6 +36,7 @@
     "xpath.js": "~1.1.0"
   },
   "devDependencies": {
+    "@types/node": "^8.0.47",
     "@types/mocha": "^2.2.44",
     "@types/nock": "^8.2.1",
     "@types/sinon": "^2.3.7",
