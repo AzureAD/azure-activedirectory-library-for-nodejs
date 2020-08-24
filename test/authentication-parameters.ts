@@ -332,6 +332,7 @@ suite('authentication-parameters', function () {
   // a completely invalid address.  This causes a the node request to fail with
   // an error rather than returning an HTTP error of some sort.
   test('create-from-url-network-error', function (done) {
+    this.timeout(5000);
     nock.enableNetConnect();
     adal.createAuthenticationParametersFromUrl('https://0.0.0.0/test', function (err) {
       assert(err, 'Did not receive expected error');
