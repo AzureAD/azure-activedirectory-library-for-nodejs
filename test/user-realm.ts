@@ -71,7 +71,7 @@ suite('UserRealm', function() {
     var userRealmRequest = setupExpectedResponse(userRealmResponse);
 
     var userRealm = new UserRealm(cp.callContext, user, authority);
-    userRealm.discover(function(err: Error) {
+    userRealm.discover(function (err: Error) {
       userRealmRequest.done();
       if (!err) {
         assert(userRealm.federationMetadataUrl === 'https://adfs.federatedtenant.com/adfs/services/trust/mex',

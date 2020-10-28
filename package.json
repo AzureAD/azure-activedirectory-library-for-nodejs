@@ -45,7 +45,8 @@
     "mocha": "*",
     "nock": "^10.0.6",
     "sinon": "^7.3.2",
-    "typescript": "^2.6.1"
+    "typescript": "^2.6.1",
+    "axios": "^0.19.2"
   },
   "scripts": {
     "test": "npm run tsc && mocha -R spec --ui tdd test",
