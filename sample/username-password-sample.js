@@ -90,9 +90,9 @@ var resource = '00000002-0000-0000-c000-000000000000';
 // is trusted by node and mozilla by default, plus a perm file for the
 // private CA that the test adfs server fs.naturalcauses.com uses.  Add your
 // own CA PEM file as an entry to this file if necessary.
-var casjson = fs.readFileSync('./cas.json');
-var cas = JSON.parse(casjson);
-https.globalAgent.options.ca = cas;
+// var casjson = fs.readFileSync('./cas.json');
+// var cas = JSON.parse(casjson);
+// https.globalAgent.options.ca = cas;
 
 
 var context = new AuthenticationContext(authorityUrl);

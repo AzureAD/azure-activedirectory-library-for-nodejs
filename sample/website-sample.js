@@ -73,7 +73,7 @@ if (!parametersFile) {
 }
 
 var authorityUrl = sampleParameters.authorityHostUrl + '/' + sampleParameters.tenant;
-var redirectUri = 'http://localhost:3000/getAToken';
+var redirectUri = 'http://localhost:3000/redirect';
 var resource = '00000002-0000-0000-c000-000000000000';
 
 var templateAuthzUrl = 'https://login.windows.net/' + sampleParameters.tenant + '/oauth2/authorize?response_type=code&client_id=<client_id>&redirect_uri=<redirect_uri>&state=<state>&resource=<resource>';
@@ -123,7 +123,7 @@ app.get('/auth', function(req, res) {
 // After consent is granted AAD redirects here.  The ADAL library is invoked via the
 // AuthenticationContext and retrieves an access token that can be used to access the
 // user owned resource.
-app.get('/getAToken', function(req, res) {
+app.get('/redirect', function(req, res) {
   if (req.cookies.authstate !== req.query.state) {
     res.send('error: state does not match');
   }
