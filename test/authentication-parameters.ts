@@ -180,7 +180,7 @@ suite('authentication-parameters', function () {
     var testData = [
       [
         {
-          statusCode: 401,
+          status: 401,
           headers: { 'www-authenticate': 'Bearer authorization_uri="test,lkfj,;l,", fruitcake="f",resource="clark, &^()- q32,shark" , f="test"' }
         },
         {
@@ -190,34 +190,34 @@ suite('authentication-parameters', function () {
       ],
       [
         {
-          statusCode: 200,
+          status: 200,
           headers: { 'www-authenticate': 'Bearer authorization_uri="test,lkfj,;l,", fruitcake="f",resource="clark, &^()- q32,shark" , f="test"' }
         },
         null
       ],
       [
         {
-          statusCode: 401
+          status: 401
         },
         null
       ],
       [
         {
-          statusCode: 401,
+          status: 401,
           headers: { 'test': 'this is not the www-authenticate header' }
         },
         null
       ],
       [
         {
-          statusCode: 401,
+          status: 401,
           headers: { 'www-authenticate': 'Berer authorization_uri=test,lkfj,;l,", resource="clark, &^()- q32,shark",fruitcake="f" , f="test"' }
         },
         null
       ],
       [
         {
-          statusCode: 401,
+          status: 401,
           headers: { 'www-authenticate': null }
         },
         null
