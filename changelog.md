@@ -1,3 +1,8 @@
+Version 0.2.2-beta
+------------------
+Release Date: 1 February 2020
+* Replace 'request` with `axios`
+
 Version 0.2.0
 ------------------
 Release Date: 23 August 2019
