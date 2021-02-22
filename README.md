@@ -1,3 +1,25 @@
+---
+
+This library, ADAL for Node.js, will no longer receive new feature improvements. Instead, use the new library
+[MSAL for Node.js](https://github.com/AzureAD/microsoft-authentication-library-for-js/tree/dev/lib/msal-node).
+
+* If you are starting a new project, you can get started with the
+  [MSAL for Node.js docs](https://github.com/AzureAD/microsoft-authentication-library-for-js/tree/dev/lib/msal-node)
+  for details about the scenarios, usage, and relevant concepts.
+* If your application is using the previous ADAL for Node.js library, you can follow this
+  [migration guide for Node.js apps](https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-node/docs/migration.md).
+* Existing applications relying on ADAL for Node.js will continue to work.
+
+---
+
+## Update to MSAL for Node.js now!
+
+[MSAL for Node.js](https://github.com/AzureAD/microsoft-authentication-library-for-js/tree/dev/lib/msal-node) is the new authentication library to be used with the Microsoft identity platform
+
+Building on top of ADAL, MSAL works with the new and Open ID Connect certified Azure AD V2 endpoint and the new social identity solution from Microsoft, Azure AD B2C.
+
+ADAL for Node.js is in maintenance mode and no new features will be added to the ADAL library anymore. All our ongoing efforts will be focused on improving the new [MSAL for Node.js](https://github.com/AzureAD/microsoft-authentication-library-for-js/tree/dev/lib/msal-node). MSAL’s documentation also contains a [migration guide](https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-node/docs/migration.md) which simplifies upgrading from ADAL for Node.js.
+
 # Windows Azure Active Directory Authentication Library (ADAL) for Node.js
 The ADAL for node.js library makes it easy for node.js applications to authenticate to AAD in order to access AAD protected web resources.  It supports 3 authentication modes shown in the quickstart code below.
 
