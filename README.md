@@ -12,6 +12,9 @@ This library, ADAL for Node.js, will no longer receive new feature improvements.
 
 ---
 
+| [Feedback](https://forms.office.com/r/er9wCuPXsv) |
+|---|
+
 ## Update to MSAL for Node.js now!
 
 [MSAL for Node.js](https://github.com/AzureAD/microsoft-authentication-library-for-js/tree/dev/lib/msal-node) is the new authentication library to be used with the Microsoft identity platform
@@ -37,6 +40,9 @@ You can find the changes for each version in the [change log](https://github.com
 We leverage [Stack Overflow](http://stackoverflow.com/) to work with the community on supporting Azure Active Directory and its SDKs, including this one! We highly recommend you ask your questions on Stack Overflow (we're all on there!) Also browse existing issues to see if someone has had your question before. 
 
 We recommend you use the "adal" tag so we can see it! Here is the latest Q&A on Stack Overflow for ADAL: [http://stackoverflow.com/questions/tagged/adal](http://stackoverflow.com/questions/tagged/adal)
+
+## Submit Feedback
+We'd like your thoughts on this library. Please complete [this short survey.](https://forms.office.com/r/er9wCuPXsv)
 
 ## Security Reporting
 
