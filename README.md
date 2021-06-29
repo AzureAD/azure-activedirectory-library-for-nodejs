@@ -29,7 +29,7 @@ The ADAL for node.js library makes it easy for node.js applications to authentic
 ## Versions
 Current version - 0.2.2  
 Minimum recommended version - 0.2.2  
-You can find the changes for each version in the [change log](https://github.com/AzureAD/azure-activedirectory-library-for-nodejs/blob/master/changelog.txt).
+You can find the changes for each version in the [change log](https://github.com/AzureAD/azure-activedirectory-library-for-nodejs/blob/dev/changelog.md).
 
 ## Samples and Documentation
 
